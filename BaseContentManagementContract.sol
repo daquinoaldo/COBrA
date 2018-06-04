@@ -11,8 +11,16 @@ contract BaseContentManagementContract {
     */
 
     /* VARIABLES */
+
+    // Constants
+    address CATALOG_ADDRESS; //TODO
+
+    // Messages
+    string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
+
+    // Runtime
     address private author;
-    string fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
+    byte[] private content;
 
 
     /* EVENTS */
@@ -40,13 +48,28 @@ contract BaseContentManagementContract {
     }
 
     /** Suicide function, can be called only by the owner */
-    function suicide() public onlyOwner {
+    function _suicide() public onlyOwner {
         // If there is some wei send it to the author
-        this.selfdestruct(author);
+        selfdestruct(author);
     }
 
     /** Used to know who is the creator of this content.
       * @return the content creator address.
       */
-    function getAuthor() public constant returns(address) { return author; }
+    function getAuthor() public view returns(address) { return author; }
+
+    /** Used by the author to set the content.
+      */
+    function setContent(byte[] c) public onlyOwner {
+        if (content.length != 0) revert("The content cannot be overwritten. Use the suicide function to delete this content and create a new one.");
+        content = c;
+    }
+
+    /** Used by the customers to consume this content after requesting the access.
+      * @return the content.
+      */
+    function consumeContent() public view returns(byte[]) {
+        //require
+        return content;
+    }
 }
