@@ -52,7 +52,7 @@ contract CatalogContract {
     }
 
     /** Suicide function, can be called only by the owner */
-    function suicide() public onlyOwner {
+    function _suicide() public onlyOwner {
         // If there is some wei send it to the owner
         this.selfdestruct(owner);
     }
@@ -60,22 +60,22 @@ contract CatalogContract {
     /** Returns the cost per hour of a premium subscription.
      * @return uint the cost per hour in wei.
      */
-    function getPremiumCostPerHour() public returns(uint) { return premiumCostPerHour; }
+    function getPremiumCostPerHour() public view returns(uint) { return premiumCostPerHour; }
 
     /** Returns the number of views for each content.
      * @return .
      */
-    function getStatistics() public {}
+    function getStatistics() public view {}
 
     /** Returns the list of contents without the number of views.
      * @return .
      */
-    function getContentList() public {}
+    function getContentList() public view {}
 
     /** Returns the list of x newest contents.
      * @return .
      */
-    function getNewContentsList() public {
+    function getNewContentsList() public view {
         // x = newContentListLength
     }
 
@@ -83,31 +83,31 @@ contract CatalogContract {
      * @param g the genre of which you want to get the latest contents.
      * @return .
      */
-    function getLatestByGenre(genre g) public {}
+    function getLatestByGenre(string g) public view {}
 
     /** Returns the content with genre x, which has received the maximum number of views
      * @param g the genre of which you want to get the most popular contents.
      * @return .
      */
-    function getMostPopularByGenre(genre g) public {}
+    function getMostPopularByGenre(string g) public view {}
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
      * @return .
      */
-    function getLatestByAuthor(address a) public {}
+    function getLatestByAuthor(address a) public view {}
 
     /** Get the chart of the author a.
      * @param a the author of whom you want to get the most popular contents.
      * @return .
      */
-    function getMostPopularByAuthor(address a) public {}
+    function getMostPopularByAuthor(address a) public view {}
 
     /** Checks if a user u has an active premium subscription.
      * @param u the user to whom you want to check the premium subscription.
      * @return bool true if the user hold a still valid premium account, false otherwise.
      */
-    function isPremium(address u) public returns(bool) {
+    function isPremium(address u) public view returns(bool) {
         return premiumUsers[u] > now;
     }
 
