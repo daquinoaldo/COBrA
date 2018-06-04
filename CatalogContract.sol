@@ -12,19 +12,20 @@ contract CatalogContract {
 
     /* VARIABLES */
     // Constants
-    uint private premiumCostPerHour = 1000;  // in wei
+    uint private premiumCost = 1000;    // in wei
+    uint private premiumTime = 5760;    // more or less a day
+
     uint private newContentListLength = 10;
 
     // Messages
-    string private fallbackFunctionMessage = "Unexpected call: function does not exist. " +
-    "The fallback function has reverted the state.";
+    string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
 
     // Runtime
     address private owner;
 
     // Structs
-    mapping (address => uint) private premiumUsers;             // map a user to its subscription expiration time
-    mapping (address => address[]) private accessibleContent;   // map a user to its accessible contents
+    mapping (address => uint) private premiumUsers; // map a user to its subscription expiration time
+    mapping (address => mapping (address => bool)) private accessibleContent;   // map a user to its accessible contents
 
 
     /* EVENTS */
@@ -54,13 +55,15 @@ contract CatalogContract {
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
         // If there is some wei send it to the owner
-        this.selfdestruct(owner);
+        selfdestruct(owner);
     }
+
+    // REQUIRED FUNCTIONS
 
     /** Returns the cost per hour of a premium subscription.
      * @return uint the cost per hour in wei.
      */
-    function getPremiumCostPerHour() public view returns(uint) { return premiumCostPerHour; }
+    function getPremiumCost() public view returns(uint) { return premiumCost; }
 
     /** Returns the number of views for each content.
      * @return .
@@ -104,17 +107,17 @@ contract CatalogContract {
     function getMostPopularByAuthor(address a) public view {}
 
     /** Checks if a user u has an active premium subscription.
-     * @param u the user to whom you want to check the premium subscription.
+     * @param u the user of whom you want to check the premium subscription.
      * @return bool true if the user hold a still valid premium account, false otherwise.
      */
     function isPremium(address u) public view returns(bool) {
-        return premiumUsers[u] > now;
+        return premiumUsers[u] >= block.number;
     }
 
     /** Pays for access to content x.
      * @param x the address of the block of the ContentManagementContract.
      */
-    function getContent(address x) public {}
+    function getContent(address x) public payable {}
 
     /** Requests access to content x without paying, premium accounts only.
      * @param x the address of the block of the ContentManagementContract.
@@ -125,19 +128,30 @@ contract CatalogContract {
      * @param x the address of the block of the ContentManagementContract.
      * @param u the user to whom you want to gift the content.
      */
-    function giftContent(address x, address u) public {}
+    function giftContent(address x, address u) public payable {}
 
     /** Pays for granting a Premium Account to the user u.
      * @param u the user to whom you want to gift the subscription.
      */
-    function giftPremium(address u) public {
+    function giftPremium(address u) public payable {
         setPremium(u, msg.value);
     }
 
     /** Starts a new premium subscription.
      */
-    function buyPremium() public {
+    function buyPremium() public payable {
         setPremium(msg.sender, msg.value);
+    }
+
+    // ADDITIONAL FUNCTIONS
+
+    /** Checks if a user u has access to a content x.
+     * @param u the user of whom you want to check the access right.
+     * @param x the content of which you want to check the access right.
+     * @return bool true if the user has the access right, false otherwise.
+     */
+    function hasAccess(address u, address x) public view returns(bool) {
+        return accessibleContent[u][x];
     }
 
 
@@ -148,16 +162,23 @@ contract CatalogContract {
      * @param v the value.
      */
     function setPremium(address u, uint v) private {
+        require (v == premiumCost);
+        // If the user has never bought premium or the premium subscription is expired reset the expiration time to now
+        if (!isPremium(u)) premiumUsers[u] = block.number;
+        // Increment the user expiration time (if he is already premium will be premium longer)
+        premiumUsers[u] += premiumTime;
+    }
+    /*function setPremium(address u, uint v) private {
         // Calculate the hours that the use can buy with this amount
-        uint hoursToBuy = v / premiumCostPerHour;
+        uint hoursToBuy = v / premiumCost;
         require (hoursToBuy > 0);
         // If the user has never bought premium or the premium subscription is expired reset the expiration time to now
         if (!isPremium(u)) premiumUsers[u] = now;
-        // Increment the use expiration time
+        // Increment the user expiration time
         premiumUsers[u] += hoursToBuy * 3600; // 1h = 3600s
         // If there is a remaining value refund the user
-        uint remainder = v - hoursToBuy * premiumCostPerHour;
+        uint remainder = v - hoursToBuy * premiumCost;
         if (remainder > 0) u.transfer(remainder);
-    }
+    }*/
 
 }

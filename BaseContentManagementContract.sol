@@ -1,14 +1,11 @@
 pragma solidity ^0.4.0;
-contract BaseContentManagementContract {
 
-    /* FUNCTION ORDER
-        constructor
-        fallback function (if exists)
-        external
-        public
-        internal
-        private
-    */
+contract CatalogContract {
+    function hasAccess(address u, address x) public view returns(bool);
+}
+
+
+contract BaseContentManagementContract {
 
     /* VARIABLES */
 
@@ -21,6 +18,7 @@ contract BaseContentManagementContract {
     // Runtime
     address private author;
     byte[] private content;
+    CatalogContract catalogContract;
 
 
     /* EVENTS */
@@ -39,6 +37,7 @@ contract BaseContentManagementContract {
     /** Constructor */
     constructor() public {
         author = msg.sender;
+        catalogContract = CatalogContract(CATALOG_ADDRESS);
     }
 
     /** Fallback function */
@@ -69,7 +68,7 @@ contract BaseContentManagementContract {
       * @return the content.
       */
     function consumeContent() public view returns(byte[]) {
-        //require
+        require(catalogContract.hasAccess(msg.sender, this));
         return content;
     }
 }
