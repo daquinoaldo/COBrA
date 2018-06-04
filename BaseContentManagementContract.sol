@@ -17,7 +17,7 @@ contract BaseContentManagementContract {
 
     // Runtime
     address private author;
-    byte[] private content;
+    bytes private content;
     CatalogContract catalogContract;
 
 
@@ -59,7 +59,7 @@ contract BaseContentManagementContract {
 
     /** Used by the author to set the content.
       */
-    function setContent(byte[] c) public onlyOwner {
+    function setContent(bytes c) public onlyOwner {
         if (content.length != 0) revert("The content cannot be overwritten. Use the suicide function to delete this content and create a new one.");
         content = c;
     }
@@ -67,7 +67,7 @@ contract BaseContentManagementContract {
     /** Used by the customers to consume this content after requesting the access.
       * @return the content.
       */
-    function consumeContent() public view returns(byte[]) {
+    function consumeContent() public view returns(bytes) {
         require(catalogContract.hasAccess(msg.sender, this));
         return content;
     }
