@@ -51,6 +51,12 @@ contract CatalogContract {
         revert(fallbackFunctionMessage);
     }
 
+    /** Suicide function, can be called only by the owner */
+    function suicide() public onlyOwner {
+        // If there is some wei send it to the owner
+        this.selfdestruct(owner);
+    }
+
     /** Returns the cost per hour of a premium subscription.
      * @return uint the cost per hour in wei.
      */
