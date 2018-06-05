@@ -78,15 +78,25 @@ contract CatalogContract {
     // REQUIRED FUNCTIONS
 
     /** Returns the number of views for each content.
-     * @return stats[], stats has 2 field: name and view.
+     * @return (bytes32[], uint[]), names and views:
+     * each content in names is associated with the views number in views
      */
-    function getStatistics() public view returns(stats[]) {
+    function getStatistics() public view returns(bytes32[], uint[]) {
+        bytes32[] memory names = new bytes32[](contentList.length);
+        uint[] memory views = new uint[](contentList.length);
+        for (uint i = 0; i < contentList.length; i++) {
+            names[i] = contentList[i].name;
+            views[i] = contentList[i].views;
+        }
+        return (names, views);
+    }
+    /*function getStatistics() public view returns(stats[]) {
         stats[] memory statistics = new stats[](contentList.length);
         for (uint i = 0; i < contentList.length; i++) {
             statistics[i] = stats(contentList[i].name, contentList[i].views);
         }
         return statistics;
-    }
+    }*/
 
     /** Returns the list of contents without the number of views.
      * @return string[] with the content names.
