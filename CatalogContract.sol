@@ -12,8 +12,11 @@ contract CatalogContract {
 
     /* VARIABLES */
     // Constants
-    uint private premiumCost = 1000;    // in wei
-    uint private premiumTime = 5760;    // more or less a day
+    uint public contentCost = 50;       // in wei
+    uint public premiumCost = 1000;     // in wei
+    uint public premiumTime = 5760;     // more or less a day
+
+    uint public payAfter = 10;  // views
 
     uint private newContentListLength = 10;
 
@@ -24,8 +27,16 @@ contract CatalogContract {
     address private owner;
 
     // Structs
-    mapping (address => uint) private premiumUsers; // map a user to its subscription expiration time
-    mapping (address => mapping (address => bool)) private accessibleContent;   // map a user to its accessible contents
+    struct content {
+        address author;
+        string genre;
+        uint views;
+        uint viewsFromLastPayment;
+    }
+
+    mapping (address => uint) private premiumUsers; // map a user into its subscription expiration time
+    mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into its accessible contents
+    mapping (string => content) contentList;    // map a content title into a content struct
 
 
     /* EVENTS */
@@ -59,11 +70,6 @@ contract CatalogContract {
     }
 
     // REQUIRED FUNCTIONS
-
-    /** Returns the cost per hour of a premium subscription.
-     * @return uint the cost per hour in wei.
-     */
-    function getPremiumCost() public view returns(uint) { return premiumCost; }
 
     /** Returns the number of views for each content.
      * @return .
@@ -117,18 +123,27 @@ contract CatalogContract {
     /** Pays for access to content x.
      * @param x the address of the block of the ContentManagementContract.
      */
-    function getContent(address x) public payable {}
+    function getContent(address x) public payable {
+        require(msg.value == contentCost);
+        accessibleContent[msg.sender].push(x);
+    }
 
     /** Requests access to content x without paying, premium accounts only.
      * @param x the address of the block of the ContentManagementContract.
      */
-    function getContentPremium(address x) public {}
+    function getContentPremium(address x) public {
+        require(isPremium(msg.sender));
+        accessibleContent[msg.sender].push(x);
+    }
 
     /** Pays for granting access to content x to the user u.
      * @param x the address of the block of the ContentManagementContract.
      * @param u the user to whom you want to gift the content.
      */
-    function giftContent(address x, address u) public payable {}
+    function giftContent(address x, address u) public payable {
+        require(msg.value == contentCost);
+        accessibleContent[u].push(x);
+    }
 
     /** Pays for granting a Premium Account to the user u.
      * @param u the user to whom you want to gift the subscription.
@@ -143,7 +158,7 @@ contract CatalogContract {
         setPremium(msg.sender, msg.value);
     }
 
-    // ADDITIONAL FUNCTIONS
+    // ADDITIONAL FUNCTIONS FOR USERS
 
     /** Checks if a user u has access to a content x.
      * @param u the user of whom you want to check the access right.
@@ -154,8 +169,16 @@ contract CatalogContract {
         return accessibleContent[u][x];
     }
 
+    // AUXILIARY FUNCTIONS FOR CONTENTS CONTRACT
 
-    /* AUXILIARY FUNCTIONS */
+    /** Called from a ContentManagementContract, adds the content to the catalog.
+     */
+    function addMe() public {
+
+    }
+
+
+    /* INTERNAL AUXILIARY FUNCTIONS */
 
     /** Starts a new premium subscription for the user u based on the amount v.
      * @param u the user.
