@@ -1,4 +1,9 @@
 pragma solidity ^0.4.0;
+
+contract BaseContentManagementContract {
+    address public author;
+}
+
 contract CatalogContract {
 
     /* FUNCTION ORDER
@@ -55,6 +60,11 @@ contract CatalogContract {
         _;
     }
 
+    modifier exists(address c) {
+        require (BaseContentManagementContract(c).author() != 0);
+        _;
+    }
+
 
     /* FUNCTIONS */
 
@@ -80,6 +90,8 @@ contract CatalogContract {
     /** Returns the number of views for each content.
      * @return (bytes32[], uint[]), names and views:
      * each content in names is associated with the views number in views
+     * Gas: no one pay.
+     * Burden: O(n).
      */
     function getStatistics() public view returns(bytes32[], uint[]) {
         bytes32[] memory names = new bytes32[](contentList.length);
@@ -100,6 +112,8 @@ contract CatalogContract {
 
     /** Returns the list of contents without the number of views.
      * @return string[] with the content names.
+     * Gas: no one pay.
+     * Burden: O(n).
      */
     function getContentList() public view returns(bytes32[]) {
         bytes32[] memory list = new bytes32[](contentList.length);
@@ -111,6 +125,8 @@ contract CatalogContract {
 
     /** Returns the list of x newest contents.
      * @return string[] with the content names.
+     * Gas: no one pay.
+     * Burden: O(x) ~ O(1).
      */
     function getNewContentsList() public view returns(bytes32[]) {
         bytes32[] memory list = new bytes32[](newContentListLength);
@@ -124,6 +140,8 @@ contract CatalogContract {
     /** Returns the most recent content with genre x.
      * @param g the genre of which you want to get the latest contents.
      * @return string[] with the content names.
+     * Gas: no one pay.
+     * Burden: < O(n).
      */
     function getLatestByGenre(bytes32 g) public view returns(bytes32[]) {
         uint i = 0;
@@ -148,6 +166,8 @@ contract CatalogContract {
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
      * @return string[] with the content names.
+     * Gas: no one pay.
+     * Burden: < O(n).
      */
     function getLatestByAuthor(address a) public view returns(bytes32[]) {
         uint i = 0;
@@ -172,6 +192,8 @@ contract CatalogContract {
     /** Checks if a user u has an active premium subscription.
      * @param u the user of whom you want to check the premium subscription.
      * @return bool true if the user hold a still valid premium account, false otherwise.
+     * Gas: no one pay.
+     * Burden: small.
      */
     function isPremium(address u) public view returns(bool) {
         return premiumUsers[u] >= block.number;
@@ -179,16 +201,18 @@ contract CatalogContract {
 
     /** Pays for access to content x.
      * @param x the address of the block of the ContentManagementContract.
+     * Gas: who requests the content pays.
      */
-    function getContent(address x) public payable {
+    function getContent(address x) public payable exists(x) {
         require(msg.value == contentCost);
         accessibleContent[msg.sender][x] = true;
     }
 
     /** Requests access to content x without paying, premium accounts only.
      * @param x the address of the block of the ContentManagementContract.
+     * Gas: who requests the content pays.
      */
-    function getContentPremium(address x) public {
+    function getContentPremium(address x) public exists(x) {
         require(isPremium(msg.sender));
         accessibleContent[msg.sender][x] = true;
     }
@@ -196,37 +220,40 @@ contract CatalogContract {
     /** Pays for granting access to content x to the user u.
      * @param x the address of the block of the ContentManagementContract.
      * @param u the user to whom you want to gift the content.
+     * Gas: who gift pays.
      */
-    function giftContent(address x, address u) public payable {
+    function giftContent(address x, address u) public payable exists(x) {
         require(msg.value == contentCost);
         accessibleContent[u][x] = true;
     }
 
     /** Pays for granting a Premium Account to the user u.
      * @param u the user to whom you want to gift the subscription.
+     * Gas: who gift pays.
      */
     function giftPremium(address u) public payable {
         setPremium(u, msg.value);
     }
 
     /** Starts a new premium subscription.
+     * Gas: who subscribe pays.
      */
     function buyPremium() public payable {
         setPremium(msg.sender, msg.value);
     }
 
-    // ADDITIONAL FUNCTIONS FOR USERS
+    // AUXILIARY FUNCTIONS FOR CONTENTS CONTRACT
 
     /** Checks if a user u has access to a content x.
      * @param u the user of whom you want to check the access right.
      * @param x the content of which you want to check the access right.
      * @return bool true if the user has the access right, false otherwise.
+     * Gas: no one pay.
+     * Burden: small.
      */
     function hasAccess(address u, address x) public view returns(bool) {
         return accessibleContent[u][x];
     }
-
-    // AUXILIARY FUNCTIONS FOR CONTENTS CONTRACT
 
     /** Called from a ContentManagementContract, adds the content to the catalog.
      */

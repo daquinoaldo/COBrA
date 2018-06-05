@@ -4,7 +4,6 @@ contract CatalogContract {
     function hasAccess(address u, address x) public view returns(bool);
 }
 
-
 contract BaseContentManagementContract {
 
     /* VARIABLES */
@@ -16,9 +15,9 @@ contract BaseContentManagementContract {
     string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
 
     // Runtime
-    address private author;
+    address author;
     bytes private content;
-    CatalogContract catalogContract;
+    CatalogContract private catalogContract;
 
 
     /* EVENTS */
@@ -51,11 +50,6 @@ contract BaseContentManagementContract {
         // If there is some wei send it to the author
         selfdestruct(author);
     }
-
-    /** Used to know who is the creator of this content.
-      * @return the content creator address.
-      */
-    function getAuthor() public view returns(address) { return author; }
 
     /** Used by the author to set the content.
       */
