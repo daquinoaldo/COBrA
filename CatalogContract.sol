@@ -28,16 +28,16 @@ contract CatalogContract {
 
     // Structs
     struct content {
-        string name;
+        bytes32 name;
         address author;
-        string genre;
+        bytes32 genre;
         uint views;
         uint viewsFromLastPayment;
     }
 
     struct stats {
-        string name;
-        string views;
+        bytes32 name;
+        uint views;
     }
 
     mapping (address => uint) private premiumUsers; // map a user into its subscription expiration time
@@ -80,8 +80,8 @@ contract CatalogContract {
     /** Returns the number of views for each content.
      * @return stats[], stats has 2 field: name and view.
      */
-    function getStatistics() public view {
-        stats[contentList.length] statistics;
+    function getStatistics() public view returns(stats[]) {
+        stats[] memory statistics = new stats[](contentList.length);
         for (uint i = 0; i < contentList.length; i++) {
             statistics[i] = stats(contentList[i].name, contentList[i].views);
         }
@@ -91,31 +91,33 @@ contract CatalogContract {
     /** Returns the list of contents without the number of views.
      * @return string[] with the content names.
      */
-    function getContentList() public view {
-        string[contentList.length] list;
+    function getContentList() public view returns(bytes32[]) {
+        bytes32[] memory list = new bytes32[](contentList.length);
         for (uint i = 0; i < contentList.length; i++) {
             list[i] = contentList[i].name;
         }
+        return list;
     }
 
     /** Returns the list of x newest contents.
      * @return string[] with the content names.
      */
-    function getNewContentsList() public view {
-        string[newContentListLength] list;
+    function getNewContentsList() public view returns(bytes32[]) {
+        bytes32[] memory list = new bytes32[](newContentListLength);
         for (uint i = 0; i < newContentListLength; i++) {
             // add it in reverse order: the latest first
-            list[i] = contentList[contentList - 1 - i].name;
+            list[i] = contentList[contentList.length - 1 - i].name;
         }
+        return list;
     }
 
     /** Returns the most recent content with genre x.
      * @param g the genre of which you want to get the latest contents.
      * @return string[] with the content names.
      */
-    function getLatestByGenre(string g) public view {
+    function getLatestByGenre(bytes32 g) public view returns(bytes32[]) {
         uint i = 0;
-        string[newContentListLength] list;
+        bytes32[] memory list = new bytes32[](newContentListLength);
         uint j = contentList.length - 1;
         while (i < newContentListLength && j >= 0)  {
             if (contentList[j].genre == g) {
@@ -131,15 +133,15 @@ contract CatalogContract {
      * @param g the genre of which you want to get the most popular contents.
      * @return stats[], stats has 2 field: name and view.
      */
-    function getMostPopularByGenre(string g) public view {}
+    function getMostPopularByGenre(bytes32 g) public view {}
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
      * @return string[] with the content names.
      */
-    function getLatestByAuthor(address a) public view {
+    function getLatestByAuthor(address a) public view returns(bytes32[]) {
         uint i = 0;
-        string[newContentListLength] list;
+        bytes32[] memory list = new bytes32[](newContentListLength);
         uint j = contentList.length - 1;
         while (i < newContentListLength && j >= 0)  {
             if (contentList[j].author == a) {
@@ -170,7 +172,7 @@ contract CatalogContract {
      */
     function getContent(address x) public payable {
         require(msg.value == contentCost);
-        accessibleContent[msg.sender].push(x);
+        accessibleContent[msg.sender][x] = true;
     }
 
     /** Requests access to content x without paying, premium accounts only.
@@ -178,7 +180,7 @@ contract CatalogContract {
      */
     function getContentPremium(address x) public {
         require(isPremium(msg.sender));
-        accessibleContent[msg.sender].push(x);
+        accessibleContent[msg.sender][x] = true;
     }
 
     /** Pays for granting access to content x to the user u.
@@ -187,7 +189,7 @@ contract CatalogContract {
      */
     function giftContent(address x, address u) public payable {
         require(msg.value == contentCost);
-        accessibleContent[u].push(x);
+        accessibleContent[u][x] = true;
     }
 
     /** Pays for granting a Premium Account to the user u.
