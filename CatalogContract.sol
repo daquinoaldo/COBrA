@@ -28,15 +28,21 @@ contract CatalogContract {
 
     // Structs
     struct content {
+        string name;
         address author;
         string genre;
         uint views;
         uint viewsFromLastPayment;
     }
 
+    struct stats {
+        string name;
+        string views;
+    }
+
     mapping (address => uint) private premiumUsers; // map a user into its subscription expiration time
     mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into its accessible contents
-    mapping (string => content) contentList;    // map a content title into a content struct
+    content[] contentList;
 
 
     /* EVENTS */
@@ -72,43 +78,82 @@ contract CatalogContract {
     // REQUIRED FUNCTIONS
 
     /** Returns the number of views for each content.
-     * @return .
+     * @return stats[], stats has 2 field: name and view.
      */
-    function getStatistics() public view {}
+    function getStatistics() public view {
+        stats[contentList.length] statistics;
+        for (uint i = 0; i < contentList.length; i++) {
+            statistics[i] = stats(contentList[i].name, contentList[i].views);
+        }
+        return statistics;
+    }
 
     /** Returns the list of contents without the number of views.
-     * @return .
+     * @return string[] with the content names.
      */
-    function getContentList() public view {}
+    function getContentList() public view {
+        string[contentList.length] list;
+        for (uint i = 0; i < contentList.length; i++) {
+            list[i] = contentList[i].name;
+        }
+    }
 
     /** Returns the list of x newest contents.
-     * @return .
+     * @return string[] with the content names.
      */
     function getNewContentsList() public view {
-        // x = newContentListLength
+        string[newContentListLength] list;
+        for (uint i = 0; i < newContentListLength; i++) {
+            // add it in reverse order: the latest first
+            list[i] = contentList[contentList - 1 - i].name;
+        }
     }
 
     /** Returns the most recent content with genre x.
      * @param g the genre of which you want to get the latest contents.
-     * @return .
+     * @return string[] with the content names.
      */
-    function getLatestByGenre(string g) public view {}
+    function getLatestByGenre(string g) public view {
+        uint i = 0;
+        string[newContentListLength] list;
+        uint j = contentList.length - 1;
+        while (i < newContentListLength && j >= 0)  {
+            if (contentList[j].genre == g) {
+                list[i] = contentList[j].name;
+                i++;
+            }
+            j--;
+        }
+        return list;
+    }
 
     /** Returns the content with genre x, which has received the maximum number of views
      * @param g the genre of which you want to get the most popular contents.
-     * @return .
+     * @return stats[], stats has 2 field: name and view.
      */
     function getMostPopularByGenre(string g) public view {}
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
-     * @return .
+     * @return string[] with the content names.
      */
-    function getLatestByAuthor(address a) public view {}
+    function getLatestByAuthor(address a) public view {
+        uint i = 0;
+        string[newContentListLength] list;
+        uint j = contentList.length - 1;
+        while (i < newContentListLength && j >= 0)  {
+            if (contentList[j].author == a) {
+                list[i] = contentList[j].name;
+                i++;
+            }
+            j--;
+        }
+        return list;
+    }
 
     /** Get the chart of the author a.
      * @param a the author of whom you want to get the most popular contents.
-     * @return .
+     * @return stats[], stats has 2 field: name and view.
      */
     function getMostPopularByAuthor(address a) public view {}
 
