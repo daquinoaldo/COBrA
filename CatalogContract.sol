@@ -304,6 +304,15 @@ contract CatalogContract {
         return accessibleContent[u][x];
     }
 
+    /** Notice the catalog that the user u has consumed the content x.
+     * @param u the user that consume the content.
+     * @param x the content that has been consumed.
+     * Gas: the user that consumes the content pays
+     */
+    function consumeContent(address u, address x) public {
+        delete accessibleContent[u][x];
+    }
+
     /** Called from a ContentManagementContract, adds the content to the catalog.
      */
     function addMe() public {

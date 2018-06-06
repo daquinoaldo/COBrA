@@ -2,6 +2,7 @@ pragma solidity ^0.4.0;
 
 contract CatalogContract {
     function hasAccess(address u, address x) public view returns(bool);
+    function consumeContent(address u, address x) public;
 }
 
 contract BaseContentManagementContract {
@@ -63,6 +64,7 @@ contract BaseContentManagementContract {
       */
     function consumeContent() public view returns(bytes) {
         require(catalogContract.hasAccess(msg.sender, this));
+        consumeContent(msg.sender, this);
         return content;
     }
 }
