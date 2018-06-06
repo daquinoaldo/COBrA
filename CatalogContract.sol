@@ -2,6 +2,8 @@ pragma solidity ^0.4.0;
 
 contract BaseContentManagementContract {
     address public author;
+    bytes32 public name = "";
+    bytes32 public genre = "";
 }
 
 contract CatalogContract {
@@ -157,7 +159,7 @@ contract CatalogContract {
         bytes32[] memory list = new bytes32[](chartListLength);
         uint j = addressList.length - 1;
         while (i < chartListLength && j >= 0)  {
-            content c = contents[addressList[j]];   // perform only one storage read
+            content memory c = contents[addressList[j]];   // perform only one storage read
             if (c.genre == g) {
                 list[i] = c.name;
                 i++;
@@ -215,7 +217,7 @@ contract CatalogContract {
         bytes32[] memory list = new bytes32[](chartListLength);
         uint j = addressList.length - 1;
         while (i < chartListLength && j >= 0)  {
-            content c = contents[addressList[j]];   // perform only one storage read
+            content memory c = contents[addressList[j]];   // perform only one storage read
             if (c.author == a) {
                 list[i] = c.name;
                 i++;
@@ -355,9 +357,9 @@ contract CatalogContract {
      */
     function addMe() public {
         BaseContentManagementContract cc = BaseContentManagementContract(msg.sender);
-        content c = content(cc.name, cc.author, cc.genre, 0, 0);
+        content memory c = content(cc.name(), cc.author(), cc.genre(), 0, 0);
         contents[cc] = c;
-        addressList.push(c);
+        addressList.push(cc);
     }
 
     /** Called from a ContentManagementContract, removes the content from the catalog (used by the suicide function).
@@ -409,14 +411,4 @@ contract CatalogContract {
         uint remainder = v - hoursToBuy * premiumCost;
         if (remainder > 0) u.transfer(remainder);
     }*/
-
-    function removeAtIndex(uint index, address[] array) returns(address[]) {
-        if (index >= array.length) return;
-        for (uint i = index; i<array.length-1; i++) {
-            array[i] = array[i+1];
-        }
-        delete array[array.length - 1];
-        array.length--;
-        return array;
-    }
 }

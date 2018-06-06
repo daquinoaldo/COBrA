@@ -18,9 +18,9 @@ contract BaseContentManagementContract {
     string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
 
     // Runtime
-    address author;
-    address name = "";
-    bytes32 genre = "";
+    address public author;
+    bytes32 public name = "";
+    bytes32 public genre = "";
     bytes private content = "";
     CatalogContract private catalogContract;
 
