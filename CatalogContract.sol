@@ -23,7 +23,7 @@ contract CatalogContract {
 
     uint public payAfter = 10;  // views
 
-    uint private newContentListLength = 10;
+    uint public chartListLength = 10;
 
     // Messages
     string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
@@ -97,8 +97,9 @@ contract CatalogContract {
         bytes32[] memory names = new bytes32[](contentList.length);
         uint[] memory views = new uint[](contentList.length);
         for (uint i = 0; i < contentList.length; i++) {
-            names[i] = contentList[i].name;
-            views[i] = contentList[i].views;
+            content c = contentList[i]; // perform only one storage read
+            names[i] = c.name;
+            views[i] = c.views;
         }
         return (names, views);
     }
@@ -124,20 +125,22 @@ contract CatalogContract {
     }
 
     /** Returns the list of x newest contents.
-     * @return string[] with the content names.
+     * @return string[] with the content names ordered from the newest.
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
     function getNewContentsList() public view returns(bytes32[]) {
-        bytes32[] memory list = new bytes32[](newContentListLength);
-        for (uint i = 0; i < newContentListLength; i++) {
+        // NOTE: I assume that the latest content is not the last deployed contract in the blockchain (with the highest
+        // block number), but is the last added to the catalog (that ideally is when is "published").
+        bytes32[] memory list = new bytes32[](chartListLength);
+        for (uint i = 0; i < chartListLength; i++) {
             // add it in reverse order: the latest first
             list[i] = contentList[contentList.length - 1 - i].name;
         }
         return list;
     }
 
-    /** Returns the most recent content with genre x.
+    /** Get the latest release of genre g.
      * @param g the genre of which you want to get the latest contents.
      * @return string[] with the content names.
      * Gas: no one pay.
@@ -145,9 +148,9 @@ contract CatalogContract {
      */
     function getLatestByGenre(bytes32 g) public view returns(bytes32[]) {
         uint i = 0;
-        bytes32[] memory list = new bytes32[](newContentListLength);
+        bytes32[] memory list = new bytes32[](chartListLength);
         uint j = contentList.length - 1;
-        while (i < newContentListLength && j >= 0)  {
+        while (i < chartListLength && j >= 0)  {
             if (contentList[j].genre == g) {
                 list[i] = contentList[j].name;
                 i++;
@@ -157,11 +160,32 @@ contract CatalogContract {
         return list;
     }
 
-    /** Returns the content with genre x, which has received the maximum number of views
+    /** Get the chart of the genre g.
      * @param g the genre of which you want to get the most popular contents.
-     * @return stats[], stats has 2 field: name and view.
+     * @return string[] with the content names ordered from the most popular an then for block number (if there are 2
+     * or more content with the same number of view the oldest comes first).
+     * Gas: no one pay.
+     * Burden: chartListLength * O(n) => between O(n) and O(n^2).
      */
-    function getMostPopularByGenre(bytes32 g) public view {}
+    function getMostPopularByGenre(bytes32 g) public view {
+        bytes32[] memory list = new bytes32[](chartListLength);
+        mapping(bytes32 => bool) memory alreadyFound; // support struct to check in constant time if the element is already in the list
+        for (uint i = 0; i < chartListLength; i++) {
+            uint maxViews = -1;
+            bytes32 maxName;
+            for (uint j = 0; j < contentList.length; j++) {
+                content c = contentList[j]; // perform only one storage read
+                // check if is gt the last found but is not already in the array (and of course the genre is g)
+                if (c.genre == g && c.views > maxView && !alreadyFound(c.name)) {
+                    maxViews = c.views;
+                    maxName = c.name;
+                }
+            }
+            list[i] = maxName;
+            alreadyFound[maxName] = true;
+        }
+        return list;
+    }
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
@@ -171,9 +195,9 @@ contract CatalogContract {
      */
     function getLatestByAuthor(address a) public view returns(bytes32[]) {
         uint i = 0;
-        bytes32[] memory list = new bytes32[](newContentListLength);
+        bytes32[] memory list = new bytes32[](chartListLength);
         uint j = contentList.length - 1;
-        while (i < newContentListLength && j >= 0)  {
+        while (i < chartListLength && j >= 0)  {
             if (contentList[j].author == a) {
                 list[i] = contentList[j].name;
                 i++;
@@ -185,9 +209,30 @@ contract CatalogContract {
 
     /** Get the chart of the author a.
      * @param a the author of whom you want to get the most popular contents.
-     * @return stats[], stats has 2 field: name and view.
+     * @return string[] with the content names ordered from the most popular an then for block number (if there are 2
+     * or more content with the same number of view the oldest comes first).
+     * Gas: no one pay.
+     * Burden: chartListLength * O(n) => between O(n) and O(n^2).
      */
-    function getMostPopularByAuthor(address a) public view {}
+    function getMostPopularByAuthor(address a) public view {
+        bytes32[] memory list = new bytes32[](chartListLength);
+        mapping(bytes32 => bool) memory alreadyFound; // support struct to check in constant time if the element is already in the list
+        for (uint i = 0; i < chartListLength; i++) {
+            uint maxViews = -1;
+            bytes32 maxName;
+            for (uint j = 0; j < contentList.length; j++) {
+                content c = contentList[j]; // perform only one storage read
+                // check if is gt the last found but is not already in the array (and of course the author is a)
+                if (c.author == a && c.views > maxView && !alreadyFound(c.name)) {
+                    maxViews = c.views;
+                    maxName = c.name;
+                }
+            }
+            list[i] = maxName;
+            alreadyFound[maxName] = true;
+        }
+        return list;
+    }
 
     /** Checks if a user u has an active premium subscription.
      * @param u the user of whom you want to check the premium subscription.
