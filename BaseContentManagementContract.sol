@@ -4,6 +4,7 @@ contract CatalogContract {
     function hasAccess(address u, address x) public view returns(bool);
     function consumeContent(address u, address x) public;
     function addMe() public;
+    function removesMe() public;
 }
 
 contract BaseContentManagementContract {
@@ -54,6 +55,7 @@ contract BaseContentManagementContract {
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
         // If there is some wei send it to the author
+        catalogContract.removesMe();
         selfdestruct(author);
     }
 

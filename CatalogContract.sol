@@ -31,6 +31,7 @@ contract CatalogContract {
 
     // Runtime
     address private owner;
+    uint private authorPayoutAmount;    // computed one time in che constructor to not recalculate it each time (that consume lots of gas for math operations and multiple storage reads)
 
     // Structs
     struct content {
@@ -48,9 +49,8 @@ contract CatalogContract {
 
     mapping (address => uint) private premiumUsers; // map a user into its subscription expiration time
     mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into its accessible contents
-    content[] contentList;  // list of all contents
-    mapping (string => uint) cIndexByName;    // map a content name into the position of this content in the content list (for a constant access)
-    mapping (address => uint) cIndexByAddress;    // map a content address into the position of this content in the content list (for a constant access)
+    address[] addressList;  // list of all contents
+    mapping (address => content) contents;  // map content addresses into contents
 
 
     /* EVENTS */
@@ -65,6 +65,7 @@ contract CatalogContract {
     }
 
     modifier exists(address c) {
+        //TODO: check che sia in elenco
         require (BaseContentManagementContract(c).author() != 0);
         _;
     }
@@ -75,6 +76,7 @@ contract CatalogContract {
     /** Constructor */
     constructor() public {
         owner = msg.sender;
+        authorPayoutAmount = contentCost * payAfter * (100 - withheldPercentage)/100;
     }
 
     /** Fallback function */
@@ -98,10 +100,10 @@ contract CatalogContract {
      * Burden: O(n).
      */
     function getStatistics() public view returns(bytes32[], uint[]) {
-        bytes32[] memory names = new bytes32[](contentList.length);
-        uint[] memory views = new uint[](contentList.length);
-        for (uint i = 0; i < contentList.length; i++) {
-            content memory c = contentList[i]; // perform only one storage read
+        bytes32[] memory names = new bytes32[](addressList.length);
+        uint[] memory views = new uint[](addressList.length);
+        for (uint i = 0; i < addressList.length; i++) {
+            content memory c = contents[addressList[i]]; // perform only one storage read
             names[i] = c.name;
             views[i] = c.views;
         }
@@ -121,9 +123,9 @@ contract CatalogContract {
      * Burden: O(n).
      */
     function getContentList() public view returns(bytes32[]) {
-        bytes32[] memory list = new bytes32[](contentList.length);
-        for (uint i = 0; i < contentList.length; i++) {
-            list[i] = contentList[i].name;
+        bytes32[] memory list = new bytes32[](addressList.length);
+        for (uint i = 0; i < addressList.length; i++) {
+            list[i] = contents[addressList[i]].name;
         }
         return list;
     }
@@ -139,7 +141,7 @@ contract CatalogContract {
         bytes32[] memory list = new bytes32[](chartListLength);
         for (uint i = 0; i < chartListLength; i++) {
             // add it in reverse order: the latest first
-            list[i] = contentList[contentList.length - 1 - i].name;
+            list[i] = contents[addressList[addressList.length - 1 - i]].name;
         }
         return list;
     }
@@ -153,10 +155,11 @@ contract CatalogContract {
     function getLatestByGenre(bytes32 g) public view returns(bytes32[]) {
         uint i = 0;
         bytes32[] memory list = new bytes32[](chartListLength);
-        uint j = contentList.length - 1;
+        uint j = addressList.length - 1;
         while (i < chartListLength && j >= 0)  {
-            if (contentList[j].genre == g) {
-                list[i] = contentList[j].name;
+            content c = contents[addressList[j]];   // perform only one storage read
+            if (c.genre == g) {
+                list[i] = c.name;
                 i++;
             }
             j--;
@@ -174,13 +177,13 @@ contract CatalogContract {
     function getMostPopularByGenre(bytes32 g) public view returns(bytes32[]) {
         uint listLength = chartListLength;
         // If i have less than chartListLength element in the contentList I have to return contentList.length elements
-        if (contentList.length < listLength) listLength = contentList.length;
+        if (addressList.length < listLength) listLength = addressList.length;
         bytes32[] memory list = new bytes32[](listLength);
         for (uint i = 0; i < listLength; i++) {
             int maxViews = -1;
             bytes32 maxName;
-            for (uint j = 0; j < contentList.length; j++) {
-                content memory c = contentList[j]; // perform only one storage read
+            for (uint j = 0; j < addressList.length; j++) {
+                content memory c = contents[addressList[j]]; // perform only one storage read
                 // check if is gt the last found (and of course the genre is g)
                 if (c.genre == g && int(c.views) > maxViews) {
                     // check if not already in the array
@@ -200,25 +203,6 @@ contract CatalogContract {
         }
         return list;
     }
-    /*function getMostPopularByGenre(bytes32 g) public view {
-        bytes32[] memory list = new bytes32[](chartListLength);
-        mapping(bytes32 => bool) alreadyFound; // support struct to check in constant time if the element is already in the list
-        for (uint i = 0; i < chartListLength; i++) {
-            uint maxViews = -1;
-            bytes32 maxName;
-            for (uint j = 0; j < contentList.length; j++) {
-                content memory c = contentList[j]; // perform only one storage read
-                // check if is gt the last found but is not already in the array (and of course the genre is g)
-                if (c.genre == g && c.views > maxViews && !alreadyFound(c.name)) {
-                    maxViews = c.views;
-                    maxName = c.name;
-                }
-            }
-            list[i] = maxName;
-            alreadyFound[maxName] = true;
-        }
-        return list;
-    }*/
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
@@ -229,10 +213,11 @@ contract CatalogContract {
     function getLatestByAuthor(address a) public view returns(bytes32[]) {
         uint i = 0;
         bytes32[] memory list = new bytes32[](chartListLength);
-        uint j = contentList.length - 1;
+        uint j = addressList.length - 1;
         while (i < chartListLength && j >= 0)  {
-            if (contentList[j].author == a) {
-                list[i] = contentList[j].name;
+            content c = contents[addressList[j]];   // perform only one storage read
+            if (c.author == a) {
+                list[i] = c.name;
                 i++;
             }
             j--;
@@ -250,13 +235,13 @@ contract CatalogContract {
     function getMostPopularByAuthor(address a) public view returns(bytes32[]) {
         uint listLength = chartListLength;
         // If i have less than chartListLength element in the contentList I have to return contentList.length elements
-        if (contentList.length < listLength) listLength = contentList.length;
+        if (addressList.length < listLength) listLength = addressList.length;
         bytes32[] memory list = new bytes32[](listLength);
         for (uint i = 0; i < listLength; i++) {
             int maxViews = -1;
             bytes32 maxName;
-            for (uint j = 0; j < contentList.length; j++) {
-                content memory c = contentList[j]; // perform only one storage read
+            for (uint j = 0; j < addressList.length; j++) {
+                content memory c = contents[addressList[j]]; // perform only one storage read
                 // check if is gt the last found (and of course the author is a)
                 if (c.author == a && int(c.views) > maxViews) {
                     // check if not already in the array
@@ -295,10 +280,6 @@ contract CatalogContract {
         require(msg.value == contentCost);
         accessibleContent[msg.sender][x] = true;
         emit grantedAccess(x, msg.sender);
-        contentList[cIndexByAddress(x)].payedTimes++;
-        if (contentList[cIndexByAddress(x)].payedTimes >= payAfter) {
-            contentList[cIndexByAddress(x)].author.transfer(contentCost * payAfter * (100 - withheldPercentage)/100);
-        }
     }
 
     /** Requests access to content x without paying, premium accounts only.
@@ -320,10 +301,6 @@ contract CatalogContract {
         require(msg.value == contentCost);
         accessibleContent[u][x] = true;
         emit grantedAccess(x, u);
-        contentList[cIndexByAddress(x)].payedTimes++;
-        if (contentList[cIndexByAddress(x)].payedTimes >= payAfter) {
-            contentList[cIndexByAddress(x)].author.transfer(contentCost * payAfter * (100 - withheldPercentage)/100);
-        }
     }
 
     /** Pays for granting a Premium Account to the user u.
@@ -357,25 +334,53 @@ contract CatalogContract {
     /** Notice the catalog that the user u has consumed the content x.
      * @param u the user that consume the content.
      * @param x the content that has been consumed.
-     * Gas: the user that consumes the content pays
+     * Gas: the user that consumes the content pays.
      */
     function consumeContent(address u, address x) public exists(x) {
         delete accessibleContent[u][x];
-        contentList[cIndexByAddress(x)].views++;
+        contents[x].views++;
+        if (!isPremium(u)) {
+            contents[x].payedTimes++;
+            // pay the author if his content has enough views
+            //TODO: who pay for the gas of this transaction?
+            if (contents[x].payedTimes >= payAfter) {
+                contents[x].author.transfer(authorPayoutAmount);
+            }
+        }
+
     }
 
     /** Called from a ContentManagementContract, adds the content to the catalog.
+     * Gas: the author pays.
      */
     function addMe() public {
         BaseContentManagementContract cc = BaseContentManagementContract(msg.sender);
         content c = content(cc.name, cc.author, cc.genre, 0, 0);
-        //TODO
+        contents[cc] = c;
+        addressList.push(c);
     }
 
     /** Called from a ContentManagementContract, removes the content from the catalog (used by the suicide function).
+     * Gas: the author pays.
      */
     function removesMe() public exists(msg.sender) {
-
+        delete contents[msg.sender];
+        bool found = false;
+        // Search the address in the array
+        for (uint i = 0; i < addressList.length; i++) {
+            if (!found && addressList[i] == msg.sender) {   // lazy if: skip the storage read if found is true
+                found = true;
+            }
+            if (found) {
+                // move all the following items back of 1 position
+                addressList[i] = addressList[i+1];
+            }
+        }
+        if (found) {
+            // and finally delete the last item
+            delete addressList[addressList.length - 1];
+            addressList.length--;
+        }
     }
 
 
@@ -405,4 +410,13 @@ contract CatalogContract {
         if (remainder > 0) u.transfer(remainder);
     }*/
 
+    function removeAtIndex(uint index, address[] array) returns(address[]) {
+        if (index >= array.length) return;
+        for (uint i = index; i<array.length-1; i++) {
+            array[i] = array[i+1];
+        }
+        delete array[array.length - 1];
+        array.length--;
+        return array;
+    }
 }
