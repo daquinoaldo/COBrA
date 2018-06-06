@@ -23,6 +23,7 @@ contract BaseContentManagementContract {
 
     /* EVENTS */
     event FallbackFunctionCall(string message, bytes data);
+    event contentConsumed(address user);
 
 
     /* MODIFIERS */
@@ -65,6 +66,7 @@ contract BaseContentManagementContract {
     function consumeContent() public view returns(bytes) {
         require(catalogContract.hasAccess(msg.sender, this));
         consumeContent(msg.sender, this);
+        emit contentConsumed(msg.sender);
         return content;
     }
 }
