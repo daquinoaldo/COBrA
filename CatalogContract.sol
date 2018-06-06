@@ -67,8 +67,7 @@ contract CatalogContract {
     }
 
     modifier exists(address c) {
-        //TODO: check che sia in elenco
-        require (BaseContentManagementContract(c).author() != 0);
+        require (contents[c].name != "" && BaseContentManagementContract(c).author() != 0);
         _;
     }
 
@@ -344,7 +343,6 @@ contract CatalogContract {
         if (!isPremium(u)) {
             contents[x].payedTimes++;
             // pay the author if his content has enough views
-            //TODO: who pay for the gas of this transaction?
             if (contents[x].payedTimes >= payAfter) {
                 contents[x].author.transfer(authorPayoutAmount);
             }
