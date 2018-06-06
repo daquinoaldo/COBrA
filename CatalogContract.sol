@@ -98,7 +98,7 @@ contract CatalogContract {
         bytes32[] memory names = new bytes32[](contentList.length);
         uint[] memory views = new uint[](contentList.length);
         for (uint i = 0; i < contentList.length; i++) {
-            content c = contentList[i]; // perform only one storage read
+            content memory c = contentList[i]; // perform only one storage read
             names[i] = c.name;
             views[i] = c.views;
         }
@@ -168,16 +168,45 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: chartListLength * O(n) => between O(n) and O(n^2).
      */
-    function getMostPopularByGenre(bytes32 g) public view {
+    function getMostPopularByGenre(bytes32 g) public view returns(bytes32[]) {
+        uint listLength = chartListLength;
+        // If i have less than chartListLength element in the contentList I have to return contentList.length elements
+        if (contentList.length < listLength) listLength = contentList.length;
+        bytes32[] memory list = new bytes32[](listLength);
+        for (uint i = 0; i < listLength; i++) {
+            int maxViews = -1;
+            bytes32 maxName;
+            for (uint j = 0; j < contentList.length; j++) {
+                content memory c = contentList[j]; // perform only one storage read
+                // check if is gt the last found (and of course the genre is g)
+                if (c.genre == g && int(c.views) > maxViews) {
+                    // check if not already in the array
+                    uint k = 0;
+                    bool alreadyFound = false;
+                    while (k < list.length && !alreadyFound) {
+                        if (list[k] == c.name) alreadyFound = true;
+                        k++;
+                    }
+                    if (!alreadyFound) {
+                        maxViews = int(c.views);
+                        maxName = c.name;
+                    }
+                }
+            }
+            list[i] = maxName;
+        }
+        return list;
+    }
+    /*function getMostPopularByGenre(bytes32 g) public view {
         bytes32[] memory list = new bytes32[](chartListLength);
-        mapping(bytes32 => bool) memory alreadyFound; // support struct to check in constant time if the element is already in the list
+        mapping(bytes32 => bool) alreadyFound; // support struct to check in constant time if the element is already in the list
         for (uint i = 0; i < chartListLength; i++) {
             uint maxViews = -1;
             bytes32 maxName;
             for (uint j = 0; j < contentList.length; j++) {
-                content c = contentList[j]; // perform only one storage read
+                content memory c = contentList[j]; // perform only one storage read
                 // check if is gt the last found but is not already in the array (and of course the genre is g)
-                if (c.genre == g && c.views > maxView && !alreadyFound(c.name)) {
+                if (c.genre == g && c.views > maxViews && !alreadyFound(c.name)) {
                     maxViews = c.views;
                     maxName = c.name;
                 }
@@ -186,7 +215,7 @@ contract CatalogContract {
             alreadyFound[maxName] = true;
         }
         return list;
-    }
+    }*/
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
@@ -215,22 +244,32 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: chartListLength * O(n) => between O(n) and O(n^2).
      */
-    function getMostPopularByAuthor(address a) public view {
-        bytes32[] memory list = new bytes32[](chartListLength);
-        mapping(bytes32 => bool) memory alreadyFound; // support struct to check in constant time if the element is already in the list
-        for (uint i = 0; i < chartListLength; i++) {
-            uint maxViews = -1;
+    function getMostPopularByAuthor(address a) public view returns(bytes32[]) {
+        uint listLength = chartListLength;
+        // If i have less than chartListLength element in the contentList I have to return contentList.length elements
+        if (contentList.length < listLength) listLength = contentList.length;
+        bytes32[] memory list = new bytes32[](listLength);
+        for (uint i = 0; i < listLength; i++) {
+            int maxViews = -1;
             bytes32 maxName;
             for (uint j = 0; j < contentList.length; j++) {
-                content c = contentList[j]; // perform only one storage read
-                // check if is gt the last found but is not already in the array (and of course the author is a)
-                if (c.author == a && c.views > maxView && !alreadyFound(c.name)) {
-                    maxViews = c.views;
-                    maxName = c.name;
+                content memory c = contentList[j]; // perform only one storage read
+                // check if is gt the last found (and of course the author is a)
+                if (c.author == a && int(c.views) > maxViews) {
+                    // check if not already in the array
+                    uint k = 0;
+                    bool alreadyFound = false;
+                    while (k < list.length && !alreadyFound) {
+                        if (list[k] == c.name) alreadyFound = true;
+                        k++;
+                    }
+                    if (!alreadyFound) {
+                        maxViews = int(c.views);
+                        maxName = c.name;
+                    }
                 }
             }
             list[i] = maxName;
-            alreadyFound[maxName] = true;
         }
         return list;
     }

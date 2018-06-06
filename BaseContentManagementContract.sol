@@ -63,9 +63,9 @@ contract BaseContentManagementContract {
     /** Used by the customers to consume this content after requesting the access.
       * @return the content.
       */
-    function consumeContent() public view returns(bytes) {
+    function consumeContent() public returns(bytes) {
         require(catalogContract.hasAccess(msg.sender, this));
-        consumeContent(msg.sender, this);
+        catalogContract.consumeContent(msg.sender, this);
         emit contentConsumed(msg.sender);
         return content;
     }
