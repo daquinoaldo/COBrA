@@ -17,11 +17,12 @@ contract CatalogContract {
 
     /* VARIABLES */
     // Constants
-    uint public contentCost = 50;       // in wei
-    uint public premiumCost = 1000;     // in wei
+    uint public contentCost = 10000;       // in wei
+    uint public premiumCost = 100000;     // in wei
     uint public premiumTime = 5760;     // more or less a day
 
     uint public payAfter = 10;  // views
+    uint public withheldPercentage = 30;    // how much (in %) the system hold from the authors payment as service tax
 
     uint public chartListLength = 10;
 
@@ -37,7 +38,7 @@ contract CatalogContract {
         address author;
         bytes32 genre;
         uint views;
-        uint viewsFromLastPayment;
+        uint payedTimes;
     }
 
     struct stats {
@@ -47,7 +48,9 @@ contract CatalogContract {
 
     mapping (address => uint) private premiumUsers; // map a user into its subscription expiration time
     mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into its accessible contents
-    content[] contentList;
+    content[] contentList;  // list of all contents
+    mapping (string => uint) cIndexByName;    // map a content name into the position of this content in the content list (for a constant access)
+    mapping (address => uint) cIndexByAddress;    // map a content address into the position of this content in the content list (for a constant access)
 
 
     /* EVENTS */
@@ -292,6 +295,10 @@ contract CatalogContract {
         require(msg.value == contentCost);
         accessibleContent[msg.sender][x] = true;
         emit grantedAccess(x, msg.sender);
+        contentList[cIndexByAddress(x)].payedTimes++;
+        if (contentList[cIndexByAddress(x)].payedTimes >= payAfter) {
+            contentList[cIndexByAddress(x)].author.transfer(contentCost * payAfter * (100 - withheldPercentage)/100);
+        }
     }
 
     /** Requests access to content x without paying, premium accounts only.
@@ -313,6 +320,10 @@ contract CatalogContract {
         require(msg.value == contentCost);
         accessibleContent[u][x] = true;
         emit grantedAccess(x, u);
+        contentList[cIndexByAddress(x)].payedTimes++;
+        if (contentList[cIndexByAddress(x)].payedTimes >= payAfter) {
+            contentList[cIndexByAddress(x)].author.transfer(contentCost * payAfter * (100 - withheldPercentage)/100);
+        }
     }
 
     /** Pays for granting a Premium Account to the user u.
@@ -339,7 +350,7 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: small.
      */
-    function hasAccess(address u, address x) public view returns(bool) {
+    function hasAccess(address u, address x) public view exists(x) returns(bool) {
         return accessibleContent[u][x];
     }
 
@@ -348,13 +359,22 @@ contract CatalogContract {
      * @param x the content that has been consumed.
      * Gas: the user that consumes the content pays
      */
-    function consumeContent(address u, address x) public {
+    function consumeContent(address u, address x) public exists(x) {
         delete accessibleContent[u][x];
+        contentList[cIndexByAddress(x)].views++;
     }
 
     /** Called from a ContentManagementContract, adds the content to the catalog.
      */
     function addMe() public {
+        BaseContentManagementContract cc = BaseContentManagementContract(msg.sender);
+        content c = content(cc.name, cc.author, cc.genre, 0, 0);
+        //TODO
+    }
+
+    /** Called from a ContentManagementContract, removes the content from the catalog (used by the suicide function).
+     */
+    function removesMe() public exists(msg.sender) {
 
     }
 

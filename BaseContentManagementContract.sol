@@ -3,6 +3,7 @@ pragma solidity ^0.4.0;
 contract CatalogContract {
     function hasAccess(address u, address x) public view returns(bool);
     function consumeContent(address u, address x) public;
+    function addMe() public;
 }
 
 contract BaseContentManagementContract {
@@ -17,7 +18,9 @@ contract BaseContentManagementContract {
 
     // Runtime
     address author;
-    bytes private content;
+    address name = "";
+    bytes32 genre = "";
+    bytes private content = "";
     CatalogContract private catalogContract;
 
 
@@ -39,6 +42,7 @@ contract BaseContentManagementContract {
     constructor() public {
         author = msg.sender;
         catalogContract = CatalogContract(CATALOG_ADDRESS);
+        catalogContract.addMe();
     }
 
     /** Fallback function */
@@ -51,13 +55,6 @@ contract BaseContentManagementContract {
     function _suicide() public onlyOwner {
         // If there is some wei send it to the author
         selfdestruct(author);
-    }
-
-    /** Used by the author to set the content.
-      */
-    function setContent(bytes c) public onlyOwner {
-        if (content.length != 0) revert("The content cannot be overwritten. Use the suicide function to delete this content and create a new one.");
-        content = c;
     }
 
     /** Used by the customers to consume this content after requesting the access.
