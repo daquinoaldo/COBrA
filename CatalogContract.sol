@@ -52,6 +52,7 @@ contract CatalogContract {
 
     /* EVENTS */
     event FallbackFunctionCall(string message, bytes data);
+    event grantedAccess(address content, address user);
 
 
     /* MODIFIERS */
@@ -251,6 +252,7 @@ contract CatalogContract {
     function getContent(address x) public payable exists(x) {
         require(msg.value == contentCost);
         accessibleContent[msg.sender][x] = true;
+        emit grantedAccess(x, msg.sender);
     }
 
     /** Requests access to content x without paying, premium accounts only.
@@ -260,6 +262,7 @@ contract CatalogContract {
     function getContentPremium(address x) public exists(x) {
         require(isPremium(msg.sender));
         accessibleContent[msg.sender][x] = true;
+        emit grantedAccess(x, msg.sender);
     }
 
     /** Pays for granting access to content x to the user u.
@@ -270,6 +273,7 @@ contract CatalogContract {
     function giftContent(address x, address u) public payable exists(x) {
         require(msg.value == contentCost);
         accessibleContent[u][x] = true;
+        emit grantedAccess(x, u);
     }
 
     /** Pays for granting a Premium Account to the user u.
