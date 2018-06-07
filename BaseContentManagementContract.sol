@@ -55,6 +55,10 @@ contract BaseContentManagementContract {
 
 
     /* FUNCTIONS */
+    /** Constructor */
+    constructor() public {
+        author = msg.sender;
+    }
 
     /** Fallback function */
     function () public {
@@ -101,15 +105,17 @@ contract BaseContentManagementContract {
     function publish(address c) public onlyOwner validAddress(c) {
         require (!published, "This contract is already published in the catalog.");
         require (name != "" && content.length != 0, "Both name and content must be set before publish the content in the catalog.");
+        published = true;
+        catalog = c;
         catalogContract = CatalogContract(c);
         catalogContract.addMe();
-        catalog = c;
     }
 
     /** Used by the customers to consume this content after requesting the access.
      * @return the content.
      */
     function consumeContent() public returns(bytes) {
+        require(published, "The content is not yet published.");
         require(catalogContract.hasAccess(msg.sender, this), "You must reserve this content before accessing it. Please contact the catalog.");
         catalogContract.consumeContent(msg.sender, this);
         emit contentConsumed(msg.sender);
