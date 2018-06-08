@@ -2,7 +2,7 @@
   "name": "cobra",
   "version": "1.0.0",
   "description": "fair COntent trade on the BlockchAin",
-  "main": "dapp.js",
+  "main": "demo.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/daquinoaldo/COBrA#readme",
   "dependencies": {
+    "solc": "^0.4.24",
     "web3": "0.20.6"
   }
 }
