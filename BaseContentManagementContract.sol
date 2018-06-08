@@ -68,9 +68,16 @@ contract BaseContentManagementContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
-        // If there is some wei send it to the author
         catalogContract.removesMe();
+        // If there is some wei send it to the author
         selfdestruct(author);
+    }
+
+    /** Suicide function, can be called only by the owner */
+    function murder() public validAddress(catalog) {
+        require(msg.sender == catalog);
+        // If there is some wei send it to the catalog
+        selfdestruct(catalog);
     }
 
     /** Used by the author to set the content.

@@ -4,6 +4,7 @@ contract BaseContentManagementContract {
     address public author;
     bytes32 public name = "";
     bytes32 public genre = "";
+    function murder() public;
 }
 
 contract CatalogContract {
@@ -92,12 +93,18 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
+        // Murder all the contents in the catalog: this will free up space in
+        // the blockchain and create negative gas to consume less in this
+        // process: all this transfers cost a lot.
+        for (uint i = 0; i < contentsList.length; i++) {
+            BaseContentManagementContract(contentsList[i]).murder();
+        }
         // Distribute the balance to the authors according with their views
         // count
         uint totalViews = 0;
         uint totalUncollectedViews = 0;
         // Calculate totals of views and uncollectedViews of all the authors
-        for (uint i = 0; i < authorsList.length; i++) {
+        for (i = 0; i < authorsList.length; i++) {
             author memory a = authors[authorsList[i]];
             totalViews += a.views;
             totalUncollectedViews += a.uncollectedViews;
@@ -146,7 +153,7 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getContentList() public view returns(bytes32[], address[]) {
+    function getContentsList() public view returns(bytes32[], address[]) {
         bytes32[] memory names = new bytes32[](contentsList.length);
         for (uint i = 0; i < contentsList.length; i++) {
             names[i] = contents[contentsList[i]].name;
@@ -210,8 +217,8 @@ contract CatalogContract {
      */
     function getMostPopularByGenre(bytes32 g) public view returns(bytes32[], address[]) {
         uint listLength = chartListLength;
-        // If i have less than chartListLength element in the contentList I
-        // have to return contentList.length elements
+        // If i have less than chartListLength element in the contentsList I
+        // have to return contentsList.length elements
         if (contentsList.length < listLength) listLength = contentsList.length;
         bytes32[] memory names = new bytes32[](listLength);
         address[] memory addresses = new address[](listLength);
@@ -280,8 +287,8 @@ contract CatalogContract {
      */
     function getMostPopularByAuthor(address a) public view returns(bytes32[], address[]) {
         uint listLength = chartListLength;
-        // If i have less than chartListLength element in the contentList I
-        // have to return contentList.length elements
+        // If i have less than chartListLength element in the contentsList I
+        // have to return contentsList.length elements
         if (contentsList.length < listLength) listLength = contentsList.length;
         bytes32[] memory names = new bytes32[](listLength);
         address[] memory addresses = new address[](listLength);
