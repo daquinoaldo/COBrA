@@ -1,0 +1,28 @@
+{
+  "name": "cobra",
+  "version": "1.0.0",
+  "description": "fair COntent trade on the BlockchAin",
+  "main": "dapp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daquinoaldo/COBrA.git"
+  },
+  "keywords": [
+    "DAPP",
+    "Ethereum",
+    "Solidity",
+    "Node.js"
+  ],
+  "author": "Aldo D'Aquino",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/daquinoaldo/COBrA/issues"
+  },
+  "homepage": "https://github.com/daquinoaldo/COBrA#readme",
+  "dependencies": {
+    "web3": "0.20.6"
+  }
+}
