@@ -40,7 +40,6 @@ contract CatalogContract {
         address author;
         bytes32 genre;
         uint views;
-        uint uncollectedViews;
     }
 
     struct author {
@@ -53,6 +52,8 @@ contract CatalogContract {
     mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into his accessible contents
     address[] addressesList;  // list of all contents
     mapping (address => content) contents;  // map content addresses into contents
+    address[] authorsList;   // list of all authors
+    mapping (address => author) authors;    // map author address in its struct
 
 
     /* EVENTS */
@@ -89,33 +90,31 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
-        // Distribute the balance to the authors according with their views count
+        // Distribute the balance to the authors according with their views
+        // count
         uint totalViews = 0;
         uint totalUncollectedViews = 0;
-        address[] memory authorsList;
-        mapping (address => author) authors;
-        // Calculate total views and how many views has to be payed for each author
-        for (uint i = 0; i < addressesList.length; i++) {
-            content memory c = contents(addressesList[i]);  // perform only one storage read
-            if (!authors(c.author).alreadyFound) {
-                authorsList.push(c.author);
-                authors(c.author).alreadyFound = true;
-            }
-            authors(c.author).views += c.views;
-            totalViews += c.views;
-            authors(c.author).uncollectedViews += c.uncollectedViews;
-            totalUncollectedViews += c.uncollectedViews;
+        // Calculate totals of views and uncollectedViews of all the authors
+        for (uint i = 0; i < authorsList.length; i++) {
+            author memory a = authors[authorsList[i]];
+            totalViews += a.views;
+            totalUncollectedViews += a.uncollectedViews;
         }
-        // subtract from the balance the amount that has to be payed for the uncollected views to the authors
+        // subtract from the balance the amount that has to be payed for the
+        // uncollected views to the authors
         balance -= totalUncollectedViews * contentCost;
         for (i = 0; i < authorsList.length; i++) {
+            a = authors[authorsList[i]];
             // for each author pay the uncollected views
-            uint amountFromUncollectedViews = authors(authorsList[i]).uncollectedViews * contentCost;
-            // distribute the remaining balance to the authors according with their views count
-            uint amountFromPremium = balance * authors(authorsList[i]).views / totalViews;
-            authorsList[i].transfer(amountFromUncollectedViews + amountFromPremium);
+            uint amountFromUncollectedViews = a.uncollectedViews * contentCost;
+            // distribute the remaining balance to the authors according with
+            // their views count
+            uint amountFromPremium = balance * a.views / totalViews;
+            authorsList[i].transfer(amountFromUncollectedViews +
+                amountFromPremium);
         }
-        // should not, but if there is some wei in excess transfer it to the owner
+        // should not, but if there is some wei in excess transfer it to the
+        // owner
         selfdestruct(owner);
     }
 
@@ -362,7 +361,8 @@ contract CatalogContract {
      * Burden: small.
      */
     function hasAccess(address u, address x) public view exists(x) returns(bool) {
-        // lazy or, premium first because we suppose they consume more content than standard users
+        // lazy or, premium first because we suppose they consume more content
+        // than standard users
         return isPremium(u) || accessibleContent[u][x];
     }
 
@@ -372,34 +372,38 @@ contract CatalogContract {
      * Gas: the user that consumes the content pays.
      */
     function consumeContent(address u, address x) public exists(x) {
-        // Premium users can consume contents for free and are not considered in the count of views
+        // Premium users can consume contents for free and are not considered
+        // in the count of views
         if (isPremium(u)) return;
         delete accessibleContent[u][x];
         contents[x].views++;
-        contents[x].uncollectedViews++;
-        /* Notice the author if his content has enough views.
-         * note that the event is emitted only once, when the number of views is exactly equal to payAfter:
-         * it is not an oversight but a caution not to spam too much.
-         * Can be changed in >= if this contract is deployed in a dedicated blockchain.
-         */
-        if (contents[x].uncollectedViews == payAfter) {
-            emit paymentAvailable(x);
+        address a = contents[x].author; // perform only one storage read
+        authors[a].views++;
+        authors[a].uncollectedViews++;
+        /* Notice the author if his contents has enough views.
+         * Note that the event is emitted only once, when the number of views
+         * is exactly equal to payAfter: it is not an oversight but a caution
+         * not to spam too much. Can be changed in >= if this contract is
+         * deployed in a dedicated blockchain. */
+        if (authors[a].uncollectedViews == payAfter) {
+            emit paymentAvailable(a);
         }
     }
 
     /** Used by the authors to collect their reached payout.
-     * @param x the content of which collect the payout.
-     * The content must has been visited at least payAfter (the author should have received the event).
+     * The author contents must has been visited at least payAfter times.
+     * (the author should have received the event).
      * Gas: the author (who receives money) pays.
      */
-    function collectPayout(address x) public exists(x) {
-        require(contents[x].author == msg.sender, "Only the author of the content can collect the payout.");
-        require(contents[x].uncollectedViews >= payAfter, "The content has not received enough views. Please listen for a paymentAvailable event on this content address.");
-        uint uncollectedViews = contents[x].uncollectedViews;
-        contents[x].uncollectedViews = 0;
-        uint amount = contentCost * contents[x].uncollectedViews;
+    function collectPayout() public {
+        uint uncollectedViews = authors[msg.sender].uncollectedViews;
+        require(uncollectedViews >= payAfter, "Your contents have not received\
+    enough views. Please listen for a paymentAvailable event relative\
+    to your address.");
+        authors[msg.sender].uncollectedViews = 0;
+        uint amount = contentCost * uncollectedViews;
         balance -= amount;
-        contents[x].author.transfer(amount);
+        msg.sender.transfer(amount);
     }
 
     /** Called from a ContentManagementContract, adds the content to the catalog.
@@ -407,12 +411,14 @@ contract CatalogContract {
      */
     function addMe() public {
         BaseContentManagementContract cc = BaseContentManagementContract(msg.sender);
-        content memory c = content(cc.name(), cc.author(), cc.genre(), 0, 0);
-        contents[cc] = c;
+        contents[cc] = content(cc.name(), cc.author(), cc.genre(), 0);
         addressesList.push(cc);
+        authors[cc.author()].alreadyFound = true;
+        authorsList.push(cc.author());
     }
 
-    /** Called from a ContentManagementContract, removes the content from the catalog (used by the suicide function).
+    /** Called from a ContentManagementContract, removes the content from the
+     * catalog (used by the suicide function).
      * Gas: the author pays.
      */
     function removesMe() public exists(msg.sender) {
@@ -420,7 +426,8 @@ contract CatalogContract {
         bool found = false;
         // Search the address in the array
         for (uint i = 0; i < addressesList.length; i++) {
-            if (!found && addressesList[i] == msg.sender) {   // lazy if: skip the storage read if found is true
+            // lazy if: skip the storage read if found is true
+            if (!found && addressesList[i] == msg.sender) {
                 found = true;
             }
             if (found) {
@@ -440,13 +447,14 @@ contract CatalogContract {
 
     /** Starts a new premium subscription for the user u based on the amount v.
      * @param u the user.
-     * @param v the value.
      */
     function setPremium(address u) private {
-        require (msg.value = premiumCost);
-        // If the user has never bought premium or the premium subscription is expired reset the expiration time to now
+        require (msg.value == premiumCost);
+        // If the user has never bought premium or the premium subscription is
+        // expired reset the expiration time to now
         if (!isPremium(u)) premiumUsers[u] = block.number;
-        // Increment the user expiration time (if he is already premium will be premium longer)
+        // Increment the user expiration time
+        // (if he is already premium will be premium longer)
         premiumUsers[u] += premiumTime;
         emit becomesPremium(u);
         balance += msg.value;
