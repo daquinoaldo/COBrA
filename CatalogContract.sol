@@ -50,7 +50,7 @@ contract CatalogContract {
 
     mapping (address => uint) private premiumUsers; // map a user into his subscription expiration time
     mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into his accessible contents
-    address[] addressesList;  // list of all contents
+    address[] contentsList;  // list of all contents
     mapping (address => content) contents;  // map content addresses into contents
     address[] authorsList;   // list of all authors
     mapping (address => author) authors;    // map author address in its struct
@@ -65,12 +65,14 @@ contract CatalogContract {
 
     /* MODIFIERS */
     modifier onlyOwner() {
-        require (msg.sender == owner);
+        require (msg.sender == owner,
+            "Only the contract owner can perform this action.");
         _;
     }
 
     modifier exists(address c) {
-        require (contents[c].name != "" && BaseContentManagementContract(c).author() != 0);
+        require (contents[c].name != "" &&
+        BaseContentManagementContract(c).author() != 0);
         _;
     }
 
@@ -121,177 +123,201 @@ contract CatalogContract {
     // REQUIRED FUNCTIONS
 
     /** Returns the number of views for each content.
-     * @return (bytes32[], uint[]), names and views:
-     * each content in names is associated with the views number in views
+     * @return (bytes32[], uint[], address[]), names, views and addresses:
+     * each content in names is associated with the views number in views and
+     * with its address in addresses.
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getStatistics() public view returns(bytes32[], uint[]) {
-        bytes32[] memory names = new bytes32[](addressesList.length);
-        uint[] memory views = new uint[](addressesList.length);
-        for (uint i = 0; i < addressesList.length; i++) {
-            content memory c = contents[addressesList[i]]; // perform only one storage read
+    function getStatistics() public view returns(bytes32[], uint[], address[]) {
+        bytes32[] memory names = new bytes32[](contentsList.length);
+        uint[] memory views = new uint[](contentsList.length);
+        for (uint i = 0; i < contentsList.length; i++) {
+            content memory c = contents[contentsList[i]]; // perform only one storage read
             names[i] = c.name;
             views[i] = c.views;
         }
-        return (names, views);
+        return (names, views, contentsList);
     }
-    /*function getStatistics() public view returns(stats[]) {
-        stats[] memory statistics = new stats[](contentList.length);
-        for (uint i = 0; i < contentList.length; i++) {
-            statistics[i] = stats(contentList[i].name, contentList[i].views);
-        }
-        return statistics;
-    }*/
 
     /** Returns the list of contents without the number of views.
-     * @return string[] with the content names.
+     * @return (string[], address[]) names and addresses: each content in names
+     * is associated with its address in addresses.
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getContentList() public view returns(bytes32[]) {
-        bytes32[] memory list = new bytes32[](addressesList.length);
-        for (uint i = 0; i < addressesList.length; i++) {
-            list[i] = contents[addressesList[i]].name;
+    function getContentList() public view returns(bytes32[], address[]) {
+        bytes32[] memory names = new bytes32[](contentsList.length);
+        for (uint i = 0; i < contentsList.length; i++) {
+            names[i] = contents[contentsList[i]].name;
         }
-        return list;
+        return (names, contentsList);
     }
 
     /** Returns the list of x newest contents.
-     * @return string[] with the content names ordered from the newest.
+     * @return (string[], address[]) names and addresses ordered from the
+     * newest: each content in names is associated with its address in addresses. 
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
-    function getNewContentsList() public view returns(bytes32[]) {
+    function getNewContentsList() public view returns(bytes32[], address[]) {
         // NOTE: I assume that the latest content is not the last deployed contract in the blockchain (with the highest
         // block number), but is the last added to the catalog (that ideally is when is "published").
-        bytes32[] memory list = new bytes32[](chartListLength);
+        bytes32[] memory names = new bytes32[](chartListLength);
+        address[] memory addresses = new address[](chartListLength);
         for (uint i = 0; i < chartListLength; i++) {
             // add it in reverse order: the latest first
-            list[i] = contents[addressesList[addressesList.length - 1 - i]].name;
+            address a = contentsList[contentsList.length - 1 - i];
+            names[i] = contents[a].name;
+            addresses[i] = a;
         }
-        return list;
+        return (names, addresses);
     }
 
     /** Get the latest release of genre g.
      * @param g the genre of which you want to get the latest contents.
-     * @return string[] with the content names.
+     * @return (string[], address[]) names and addresses ordered from the
+     * newest: each content in names is associated with its address in addresses.
      * Gas: no one pay.
      * Burden: < O(n).
      */
-    function getLatestByGenre(bytes32 g) public view returns(bytes32[]) {
+    function getLatestByGenre(bytes32 g) public view returns(bytes32[], address[]) {
         uint i = 0;
-        bytes32[] memory list = new bytes32[](chartListLength);
-        uint j = addressesList.length - 1;
+        bytes32[] memory names = new bytes32[](chartListLength);
+        address[] memory addresses = new address[](chartListLength);
+        uint j = contentsList.length - 1;
         while (i < chartListLength && j >= 0)  {
-            content memory c = contents[addressesList[j]];   // perform only one storage read
+            address addr = contentsList[j];
+            content memory c = contents[addr];   // perform only one storage read
             if (c.genre == g) {
-                list[i] = c.name;
+                names[i] = c.name;
+                addresses[i] = addr;
                 i++;
             }
             j--;
         }
-        return list;
+        return (names, addresses);
     }
 
     /** Get the chart of the genre g.
      * @param g the genre of which you want to get the most popular contents.
-     * @return string[] with the content names ordered from the most popular an then for block number (if there are 2
-     * or more content with the same number of view the oldest comes first).
+     * @return (string[], address[]) names and addresses ordered from the
+     * most popular and then for block number (if there are 2 or more content
+     * with the same number of view the oldest comes first). Each content in
+     * names is associated with its address in addresses.
      * Gas: no one pay.
      * Burden: chartListLength * O(n) => between O(n) and O(n^2).
      */
-    function getMostPopularByGenre(bytes32 g) public view returns(bytes32[]) {
+    function getMostPopularByGenre(bytes32 g) public view returns(bytes32[], address[]) {
         uint listLength = chartListLength;
-        // If i have less than chartListLength element in the contentList I have to return contentList.length elements
-        if (addressesList.length < listLength) listLength = addressesList.length;
-        bytes32[] memory list = new bytes32[](listLength);
+        // If i have less than chartListLength element in the contentList I
+        // have to return contentList.length elements
+        if (contentsList.length < listLength) listLength = contentsList.length;
+        bytes32[] memory names = new bytes32[](listLength);
+        address[] memory addresses = new address[](listLength);
         for (uint i = 0; i < listLength; i++) {
             int maxViews = -1;
             bytes32 maxName;
-            for (uint j = 0; j < addressesList.length; j++) {
-                content memory c = contents[addressesList[j]]; // perform only one storage read
+            address maxAddress;
+            for (uint j = 0; j < contentsList.length; j++) {
+                address addr = contentsList[j];
+                content memory c = contents[addr];
                 // check if is gt the last found (and of course the genre is g)
                 if (c.genre == g && int(c.views) > maxViews) {
                     // check if not already in the array
                     uint k = 0;
                     bool alreadyFound = false;
-                    while (k < list.length && !alreadyFound) {
-                        if (list[k] == c.name) alreadyFound = true;
+                    while (k < names.length && !alreadyFound) {
+                        if (names[k] == c.name) alreadyFound = true;
                         k++;
                     }
                     if (!alreadyFound) {
                         maxViews = int(c.views);
                         maxName = c.name;
+                        maxAddress = addr;
                     }
                 }
             }
-            list[i] = maxName;
+            names[i] = maxName;
+            addresses[i] = maxAddress;
         }
-        return list;
+        return (names, addresses);
     }
 
     /** Get the latest release of the author a.
      * @param a the author of whom you want to get the latest contents.
-     * @return string[] with the content names.
+     * @return (string[], address[]) names and addresses ordered from the
+     * newest: each content in names is associated with its address in addresses.
      * Gas: no one pay.
      * Burden: < O(n).
      */
-    function getLatestByAuthor(address a) public view returns(bytes32[]) {
+    function getLatestByAuthor(address a) public view returns(bytes32[], address[]) {
         uint i = 0;
-        bytes32[] memory list = new bytes32[](chartListLength);
-        uint j = addressesList.length - 1;
+        bytes32[] memory names = new bytes32[](chartListLength);
+        address[] memory addresses = new address[](chartListLength);
+        uint j = contentsList.length - 1;
         while (i < chartListLength && j >= 0)  {
-            content memory c = contents[addressesList[j]];   // perform only one storage read
+            address addr = contentsList[j];
+            content memory c = contents[addr];   // perform only one storage read
             if (c.author == a) {
-                list[i] = c.name;
+                names[i] = c.name;
+                addresses[i] = addr;
                 i++;
             }
             j--;
         }
-        return list;
+        return (names, addresses);
     }
 
     /** Get the chart of the author a.
      * @param a the author of whom you want to get the most popular contents.
-     * @return string[] with the content names ordered from the most popular an then for block number (if there are 2
-     * or more content with the same number of view the oldest comes first).
+     * @return (string[], address[]) names and addresses ordered from the
+     * most popular and then for block number (if there are 2 or more content
+     * with the same number of view the oldest comes first). Each content in
+     * names is associated with its address in addresses.
      * Gas: no one pay.
      * Burden: chartListLength * O(n) => between O(n) and O(n^2).
      */
-    function getMostPopularByAuthor(address a) public view returns(bytes32[]) {
+    function getMostPopularByAuthor(address a) public view returns(bytes32[], address[]) {
         uint listLength = chartListLength;
-        // If i have less than chartListLength element in the contentList I have to return contentList.length elements
-        if (addressesList.length < listLength) listLength = addressesList.length;
-        bytes32[] memory list = new bytes32[](listLength);
+        // If i have less than chartListLength element in the contentList I
+        // have to return contentList.length elements
+        if (contentsList.length < listLength) listLength = contentsList.length;
+        bytes32[] memory names = new bytes32[](listLength);
+        address[] memory addresses = new address[](listLength);
         for (uint i = 0; i < listLength; i++) {
             int maxViews = -1;
             bytes32 maxName;
-            for (uint j = 0; j < addressesList.length; j++) {
-                content memory c = contents[addressesList[j]]; // perform only one storage read
+            address maxAddress;
+            for (uint j = 0; j < contentsList.length; j++) {
+                address addr = contentsList[j];
+                content memory c = contents[addr];
                 // check if is gt the last found (and of course the author is a)
                 if (c.author == a && int(c.views) > maxViews) {
                     // check if not already in the array
                     uint k = 0;
                     bool alreadyFound = false;
-                    while (k < list.length && !alreadyFound) {
-                        if (list[k] == c.name) alreadyFound = true;
+                    while (k < names.length && !alreadyFound) {
+                        if (names[k] == c.name) alreadyFound = true;
                         k++;
                     }
                     if (!alreadyFound) {
                         maxViews = int(c.views);
                         maxName = c.name;
+                        maxAddress = addr;
                     }
                 }
             }
-            list[i] = maxName;
+            names[i] = maxName;
+            addresses[i] = maxAddress;
         }
-        return list;
+        return (names, addresses);
     }
 
     /** Checks if a user u has an active premium subscription.
      * @param u the user of whom you want to check the premium subscription.
-     * @return bool true if the user hold a still valid premium account, false otherwise.
+     * @return bool true if the user hold a still valid premium account, false
+     * otherwise.
      * Gas: no one pay.
      * Burden: small.
      */
@@ -410,9 +436,10 @@ contract CatalogContract {
      * Gas: the author pays.
      */
     function addMe() public {
-        BaseContentManagementContract cc = BaseContentManagementContract(msg.sender);
+        BaseContentManagementContract cc =
+        BaseContentManagementContract(msg.sender);
         contents[cc] = content(cc.name(), cc.author(), cc.genre(), 0);
-        addressesList.push(cc);
+        contentsList.push(cc);
         authors[cc.author()].alreadyFound = true;
         authorsList.push(cc.author());
     }
@@ -425,20 +452,20 @@ contract CatalogContract {
         delete contents[msg.sender];
         bool found = false;
         // Search the address in the array
-        for (uint i = 0; i < addressesList.length; i++) {
+        for (uint i = 0; i < contentsList.length; i++) {
             // lazy if: skip the storage read if found is true
-            if (!found && addressesList[i] == msg.sender) {
+            if (!found && contentsList[i] == msg.sender) {
                 found = true;
             }
             if (found) {
                 // move all the following items back of 1 position
-                addressesList[i] = addressesList[i+1];
+                contentsList[i] = contentsList[i+1];
             }
         }
         if (found) {
             // and finally delete the last item
-            delete addressesList[addressesList.length - 1];
-            addressesList.length--;
+            delete contentsList[contentsList.length - 1];
+            contentsList.length--;
         }
     }
 
