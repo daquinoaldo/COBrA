@@ -37,7 +37,7 @@ contract BaseContentManagementContract {
     }
 
     modifier notNull(bytes32 argument) {
-        require (argument != "", "The argument can not be null.");
+        require (argument[0] != 0, "The argument can not be null.");
         _;
     }
 
@@ -92,7 +92,7 @@ contract BaseContentManagementContract {
      * Can be called only one time.
      */
     function setName(bytes32 n) public onlyOwner notNull(n) {
-        require (name.length == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
+        require (name[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
         name = n;
     }
 
@@ -100,7 +100,7 @@ contract BaseContentManagementContract {
      * Can be called only one time, but its call is not mandatory (the content can not have a genre).
      */
     function setGenre(bytes32 g) public onlyOwner notNull(g) {
-        require (genre.length == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
+        require (genre[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
         genre = g;
     }
 
@@ -111,7 +111,7 @@ contract BaseContentManagementContract {
      */
     function publish(address c) public onlyOwner validAddress(c) {
         require (!published, "This contract is already published in the catalog.");
-        require (name != "" && content.length != 0, "Both name and content must be set before publish the content in the catalog.");
+        require (name[0] != 0 && content.length != 0, "Both name and content must be set before publish the content in the catalog.");
         published = true;
         catalog = c;
         catalogContract = CatalogContract(c);
