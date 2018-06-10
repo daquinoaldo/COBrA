@@ -32,7 +32,7 @@ contract CatalogContract {
     string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
 
     // Runtime
-    address private owner;
+    address public owner;
     uint private balance = 0;
 
     // Structs
