@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/daquinoaldo/COBrA#readme",
   "dependencies": {
+    "ethereumjs-testrpc": "^6.0.3",
     "solc": "^0.4.24",
     "web3": "0.20.6"
   }
