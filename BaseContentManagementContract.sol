@@ -80,6 +80,17 @@ contract BaseContentManagementContract {
         selfdestruct(catalog);
     }
 
+    /** Used by the customers to consume this content after requesting the access.
+     * @return the content.
+     */
+    function consumeContent() public returns(bytes) {
+        require(published, "The content is not yet published.");
+        require(catalogContract.hasAccess(msg.sender, this), "You must reserve this content before accessing it. Please contact the catalog.");
+        catalogContract.consumeContent(msg.sender, this);
+        emit contentConsumed(msg.sender);
+        return content;
+    }
+
     /** Used by the author to set the content.
      * Can be called only one time.
      */
@@ -116,16 +127,5 @@ contract BaseContentManagementContract {
         catalog = c;
         catalogContract = CatalogContract(c);
         catalogContract.addMe();
-    }
-
-    /** Used by the customers to consume this content after requesting the access.
-     * @return the content.
-     */
-    function consumeContent() public returns(bytes) {
-        require(published, "The content is not yet published.");
-        require(catalogContract.hasAccess(msg.sender, this), "You must reserve this content before accessing it. Please contact the catalog.");
-        catalogContract.consumeContent(msg.sender, this);
-        emit contentConsumed(msg.sender);
-        return content;
     }
 }

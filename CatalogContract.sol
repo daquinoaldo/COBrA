@@ -127,7 +127,149 @@ contract CatalogContract {
         selfdestruct(owner);
     }
 
-    // REQUIRED FUNCTIONS
+    /** Pays for access to content x.
+     * @param x the address of the block of the ContentManagementContract.
+     * Gas: who requests the content pays.
+     */
+    function getContent(address x) public payable exists(x) {
+        grantAccess(msg.sender, x);
+    }
+
+    /** Requests access to content x without paying, premium accounts only.
+     * @param x the address of the block of the ContentManagementContract.
+     * Gas: who requests the content pays.
+     */
+    /* DEPRECATED: a user could only pay a premium cycle and access all content (at most once) in the future,
+     * even if the premium account is no longer active. In this case the premium account would have turned into a
+     * "bundle" of content rather than a subscription. Since this is not the expected behavior, the function has
+     * been abolished and now a premium user can consume all content without having to first request access to it
+     * as long as his premium subscription still valid.
+     * Access to content from a premium account will not affect previously purchased content. The user can still
+     * consume the purchased content (once only) when the subscription has ended, even if that content has been
+     * accessed by this user multiple times during his premium account.
+     * In addition, a premium account can also purchase content. They will be consumable (once only) when the
+     * premium subscription has ended.
+    function getContentPremium(address x) public exists(x) {
+        require(isPremium(msg.sender));
+        accessibleContent[msg.sender][x] = true;
+        emit grantedAccess(x, msg.sender);
+    }*/
+
+    /** Pays for granting access to content x to the user u.
+     * @param x the address of the block of the ContentManagementContract.
+     * @param u the user to whom you want to gift the content.
+     * Gas: who gift pays.
+     */
+    function giftContent(address x, address u) public payable exists(x) {
+        grantAccess(u, x);
+    }
+
+    /** Pays for granting a Premium Account to the user u.
+     * @param u the user to whom you want to gift the subscription.
+     * Gas: who gift pays.
+     */
+    function giftPremium(address u) public payable {
+        setPremium(u);
+    }
+
+    /** Starts a new premium subscription.
+     * Gas: who subscribe pays.
+     */
+    function buyPremium() public payable {
+        setPremium(msg.sender);
+    }
+
+    // AUXILIARY FUNCTIONS FOR CONTENTS CONTRACT
+
+    /** Checks if a user u has access to a content x.
+     * @param u the user of whom you want to check the access right.
+     * @param x the content of which you want to check the access right.
+     * @return bool true if the user has the access right, false otherwise.
+     * Gas: no one pay.
+     * Burden: small.
+     */
+    function hasAccess(address u, address x) public view exists(x) returns(bool) {
+        // lazy or, premium first because we suppose they consume more content
+        // than standard users
+        return isPremium(u) || accessibleContent[u][x];
+    }
+
+    /** Notice the catalog that the user u has consumed the content x.
+     * @param u the user that consume the content.
+     * @param x the content that has been consumed.
+     * Gas: the user that consumes the content pays.
+     */
+    function consumeContent(address u, address x) public exists(x) {
+        // Premium users can consume contents for free and are not considered
+        // in the count of views
+        if (isPremium(u)) return;
+        delete accessibleContent[u][x];
+        contents[x].views++;
+        address a = contents[x].author; // perform only one storage read
+        authors[a].views++;
+        authors[a].uncollectedViews++;
+        /* Notice the author if his contents has enough views.
+         * Note that the event is emitted only once, when the number of views
+         * is exactly equal to payAfter: it is not an oversight but a caution
+         * not to spam too much. Can be changed in >= if this contract is
+         * deployed in a dedicated blockchain. */
+        if (authors[a].uncollectedViews == payAfter) {
+            emit paymentAvailable(a);
+        }
+    }
+
+    /** Used by the authors to collect their reached payout.
+     * The author contents must has been visited at least payAfter times.
+     * (the author should have received the event).
+     * Gas: the author (who receives money) pays.
+     */
+    function collectPayout() public {
+        uint uncollectedViews = authors[msg.sender].uncollectedViews;
+        require(uncollectedViews >= payAfter, "Your contents have not received\
+    enough views. Please listen for a paymentAvailable event relative\
+    to your address.");
+        authors[msg.sender].uncollectedViews = 0;
+        uint amount = contentCost * uncollectedViews;
+        balance -= amount;
+        msg.sender.transfer(amount);
+    }
+
+    /** Called from a ContentManagementContract, adds the content to the catalog.
+     * Gas: the author pays.
+     */
+    function addMe() public {
+        BaseContentManagementContract cc =
+        BaseContentManagementContract(msg.sender);
+        contents[cc] = content(cc.name(), cc.author(), cc.genre(), 0);
+        contentsList.push(cc);
+        authors[cc.author()].alreadyFound = true;
+        authorsList.push(cc.author());
+    }
+
+    /** Called from a ContentManagementContract, removes the content from the
+     * catalog (used by the suicide function).
+     * Gas: the author pays.
+     */
+    function removesMe() public exists(msg.sender) {
+        delete contents[msg.sender];
+        bool found = false;
+        // Search the address in the array
+        for (uint i = 0; i < contentsList.length; i++) {
+            // lazy if: skip the storage read if found is true
+            if (!found && contentsList[i] == msg.sender) {
+                found = true;
+            }
+            if (found) {
+                // move all the following items back of 1 position
+                contentsList[i] = contentsList[i+1];
+            }
+        }
+        if (found) {
+            // and finally delete the last item
+            delete contentsList[contentsList.length - 1];
+            contentsList.length--;
+        }
+    }
 
     /** Returns the number of views for each content.
      * @return (bytes32[], uint[], address[]), names, views and addresses:
@@ -163,7 +305,7 @@ contract CatalogContract {
 
     /** Returns the list of x newest contents.
      * @return (string[], address[]) names and addresses ordered from the
-     * newest: each content in names is associated with its address in addresses. 
+     * newest: each content in names is associated with its address in addresses.
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
@@ -330,150 +472,6 @@ contract CatalogContract {
      */
     function isPremium(address u) public view returns(bool) {
         return premiumUsers[u] >= block.number;
-    }
-
-    /** Pays for access to content x.
-     * @param x the address of the block of the ContentManagementContract.
-     * Gas: who requests the content pays.
-     */
-    function getContent(address x) public payable exists(x) {
-        grantAccess(msg.sender, x);
-    }
-
-    /** Requests access to content x without paying, premium accounts only.
-     * @param x the address of the block of the ContentManagementContract.
-     * Gas: who requests the content pays.
-     */
-    /* DEPRECATED: a user could only pay a premium cycle and access all content (at most once) in the future,
-     * even if the premium account is no longer active. In this case the premium account would have turned into a
-     * "bundle" of content rather than a subscription. Since this is not the expected behavior, the function has
-     * been abolished and now a premium user can consume all content without having to first request access to it
-     * as long as his premium subscription still valid.
-     * Access to content from a premium account will not affect previously purchased content. The user can still
-     * consume the purchased content (once only) when the subscription has ended, even if that content has been
-     * accessed by this user multiple times during his premium account.
-     * In addition, a premium account can also purchase content. They will be consumable (once only) when the
-     * premium subscription has ended.
-    function getContentPremium(address x) public exists(x) {
-        require(isPremium(msg.sender));
-        accessibleContent[msg.sender][x] = true;
-        emit grantedAccess(x, msg.sender);
-    }*/
-
-    /** Pays for granting access to content x to the user u.
-     * @param x the address of the block of the ContentManagementContract.
-     * @param u the user to whom you want to gift the content.
-     * Gas: who gift pays.
-     */
-    function giftContent(address x, address u) public payable exists(x) {
-        grantAccess(u, x);
-    }
-
-    /** Pays for granting a Premium Account to the user u.
-     * @param u the user to whom you want to gift the subscription.
-     * Gas: who gift pays.
-     */
-    function giftPremium(address u) public payable {
-        setPremium(u);
-    }
-
-    /** Starts a new premium subscription.
-     * Gas: who subscribe pays.
-     */
-    function buyPremium() public payable {
-        setPremium(msg.sender);
-    }
-
-    // AUXILIARY FUNCTIONS FOR CONTENTS CONTRACT
-
-    /** Checks if a user u has access to a content x.
-     * @param u the user of whom you want to check the access right.
-     * @param x the content of which you want to check the access right.
-     * @return bool true if the user has the access right, false otherwise.
-     * Gas: no one pay.
-     * Burden: small.
-     */
-    function hasAccess(address u, address x) public view exists(x) returns(bool) {
-        // lazy or, premium first because we suppose they consume more content
-        // than standard users
-        return isPremium(u) || accessibleContent[u][x];
-    }
-
-    /** Notice the catalog that the user u has consumed the content x.
-     * @param u the user that consume the content.
-     * @param x the content that has been consumed.
-     * Gas: the user that consumes the content pays.
-     */
-    function consumeContent(address u, address x) public exists(x) {
-        // Premium users can consume contents for free and are not considered
-        // in the count of views
-        if (isPremium(u)) return;
-        delete accessibleContent[u][x];
-        contents[x].views++;
-        address a = contents[x].author; // perform only one storage read
-        authors[a].views++;
-        authors[a].uncollectedViews++;
-        /* Notice the author if his contents has enough views.
-         * Note that the event is emitted only once, when the number of views
-         * is exactly equal to payAfter: it is not an oversight but a caution
-         * not to spam too much. Can be changed in >= if this contract is
-         * deployed in a dedicated blockchain. */
-        if (authors[a].uncollectedViews == payAfter) {
-            emit paymentAvailable(a);
-        }
-    }
-
-    /** Used by the authors to collect their reached payout.
-     * The author contents must has been visited at least payAfter times.
-     * (the author should have received the event).
-     * Gas: the author (who receives money) pays.
-     */
-    function collectPayout() public {
-        uint uncollectedViews = authors[msg.sender].uncollectedViews;
-        require(uncollectedViews >= payAfter, "Your contents have not received\
-    enough views. Please listen for a paymentAvailable event relative\
-    to your address.");
-        authors[msg.sender].uncollectedViews = 0;
-        uint amount = contentCost * uncollectedViews;
-        balance -= amount;
-        msg.sender.transfer(amount);
-    }
-
-    /** Called from a ContentManagementContract, adds the content to the catalog.
-     * Gas: the author pays.
-     */
-    function addMe() public {
-        BaseContentManagementContract cc =
-        BaseContentManagementContract(msg.sender);
-        contents[cc] = content(cc.name(), cc.author(), cc.genre(), 0);
-        contentsList.push(cc);
-        authors[cc.author()].alreadyFound = true;
-        authorsList.push(cc.author());
-    }
-
-    /** Called from a ContentManagementContract, removes the content from the
-     * catalog (used by the suicide function).
-     * Gas: the author pays.
-     */
-    function removesMe() public exists(msg.sender) {
-        delete contents[msg.sender];
-        bool found = false;
-        // Search the address in the array
-        for (uint i = 0; i < contentsList.length; i++) {
-            // lazy if: skip the storage read if found is true
-            if (!found && contentsList[i] == msg.sender) {
-                found = true;
-            }
-            if (found) {
-                // move all the following items back of 1 position
-                contentsList[i] = contentsList[i+1];
-            }
-        }
-        if (found) {
-            // and finally delete the last item
-            delete contentsList[contentsList.length - 1];
-            contentsList.length--;
-        }
     }
 
 
