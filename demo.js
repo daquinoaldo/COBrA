@@ -4,7 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 3;
+const contentsNumber = 15;
 const gas = 4712388;
 
 let web3;
@@ -18,7 +18,7 @@ function connect() {
   return new Promise((resolve, reject) => {
     web3 = new Web3(new Web3.providers.HttpProvider(provider));
     if (!web3.isConnected()) reject("Cannot connect to "+provider+".");
-    console.log("Connected to Web3: "+web3.version.node+".\n");
+    console.log("\nConnected to Web3: "+web3.version.node+".\n");
     resolve(web3);
   })
 }
@@ -65,7 +65,7 @@ function deployContract(filename = "Contract.sol", address = web3.eth.coinbase) 
 /**
  * Auxiliary function: generates num contracts, that are object with 3 parameters: name, content and genre.
  * @param num the number of contents that you want to generate.
- * @returns an array of contents object.
+ * @returns Array of contents object.
  */
 function generateContents(num = 0) {
   const contents = [];
@@ -86,13 +86,11 @@ function generateContents(num = 0) {
 async function deployContentsContract(num) {
   function getParams(owner = web3.eth.coinbase) { return { from: owner, gas: gas } }
   // deploy num empty Contents
-  const promises = [];
   const contentContracts = [];
   for (let i = 0; i < num; i++)
-    promises[i] = deployContract('GenericContentManagementContract.sol',
-      web3.eth.accounts[rand(web3.eth.accounts.length)])
+    await deployContract('GenericContentManagementContract.sol',
+      web3.eth.accounts[rand(web3.eth.accounts.length - 1)])
       .then(contractInstance => contentContracts.push(contractInstance));
-  await Promise.all(promises);
   // set the name, content and genre of each content
   const contents = generateContents(num);
   for (let i = 0; i < num; i++) {
@@ -138,7 +136,6 @@ function parseContentsList(contentsList = ["", ""]) {
  * @param contentsList, the content list.
  */
 function printContentsList(contentsList = []) {
-  console.log("\nContents in the catalog:");
   for (let i = 0; i < contentsList.length; i++)
     console.log(" - "+contentsList[i].name+": "+contentsList[i].address);
 }
@@ -159,7 +156,12 @@ async function main() {
 
   // retrieve contents list
   const contentsList = parseContentsList(catalogContract.getContentsList());
+  console.log("\nContents in the catalog:");
   printContentsList(contentsList);
+
+  // check the getNewContentsList
+  console.log("\ngetNewContentsList: you should see the last 10 element of the previous list in the opposite order.");
+  printContentsList(parseContentsList(catalogContract.getNewContentsList()));
 }
 
 
