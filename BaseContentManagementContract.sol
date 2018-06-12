@@ -2,7 +2,7 @@ pragma solidity ^0.4.0;
 
 contract CatalogContract {
     function hasAccess(address u, address x) public view returns(bool);
-    function consumeContent(address u, address x) public;
+    function consumeContent(address u) public;
     function addMe() public;
     function removesMe() public;
 }
