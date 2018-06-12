@@ -198,31 +198,6 @@ contract CatalogContract {
         return isPremium(u) || accessibleContent[u][x];
     }
 
-    /** Notice the catalog that the user u has consumed the content x.
-     * @param u the user that consume the content.
-     * Gas: the user that consumes the content pays.
-     */
-    function consumeContent(address u) public exists(msg.sender) {
-        // Premium users can consume contents for free and are not considered
-        // in the count of views
-        if (isPremium(u)) return;
-        // Only contents can call this function, so the content to be delete
-        // is the msg.sender
-        delete accessibleContent[u][msg.sender];
-        contents[msg.sender].views++;
-        address a = contents[msg.sender].author; // perform only one storage read
-        authors[a].views++;
-        authors[a].uncollectedViews++;
-        /* Notice the author if his contents has enough views.
-         * Note that the event is emitted only once, when the number of views
-         * is exactly equal to payAfter: it is not an oversight but a caution
-         * not to spam too much. Can be changed in >= if this contract is
-         * deployed in a dedicated blockchain. */
-        if (authors[a].uncollectedViews == payAfter) {
-            emit paymentAvailable(a);
-        }
-    }
-
     /** Used by the authors to collect their reached payout.
      * The author contents must has been visited at least payAfter times.
      * (the author should have received the event).
@@ -250,6 +225,31 @@ contract CatalogContract {
         authors[cc.author()].alreadyFound = true;
         authorsList.push(cc.author());
         emit newContentAvailable(cc.name(), cc);
+    }
+
+    /** Notice the catalog that the user u has consumed the content x.
+     * @param u the user that consume the content.
+     * Gas: the user that consumes the content pays.
+     */
+    function consumeContent(address u) public exists(msg.sender) {
+        // Premium users can consume contents for free and are not considered
+        // in the count of views
+        if (isPremium(u)) return;
+        // Only contents can call this function, so the content to be delete
+        // is the msg.sender
+        delete accessibleContent[u][msg.sender];
+        contents[msg.sender].views++;
+        address a = contents[msg.sender].author; // perform only one storage read
+        authors[a].views++;
+        authors[a].uncollectedViews++;
+        /* Notice the author if his contents has enough views.
+         * Note that the event is emitted only once, when the number of views
+         * is exactly equal to payAfter: it is not an oversight but a caution
+         * not to spam too much. Can be changed in >= if this contract is
+         * deployed in a dedicated blockchain. */
+        if (authors[a].uncollectedViews == payAfter) {
+            emit paymentAvailable(a);
+        }
     }
 
     /** Called from a ContentManagementContract, removes the content from the
