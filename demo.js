@@ -4,11 +4,12 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 15;
+const contentsNumber = 3;
 const gas = 4712388;
 
 let web3;
 let catalogContract;
+let ContentContract;
 
 /**
  * Connects to the Ethereum provider specified in the variable "provider".
@@ -24,13 +25,12 @@ function connect() {
 }
 
 /**
- * Compile and deploy on Web3 a contract.
+ * Compile a contract.
  * @param filename the sol file to be deployed.
- * @param address, optional, the address with which deploy the contract. If not specify is the coinbase.
- * @returns {Promise<web3.eth.contract>} the contract instance.
+ * @returns {Promise<solc.output>} the compiled contract.
  */
-function deployContract(filename = "Contract.sol", address = web3.eth.coinbase) {
-  return new Promise((resolve, reject) => {
+function compileContract(filename = "Contract.sol") {
+  return new Promise(resolve => {
     // Compile the source code
     const outputContractName = filename+":"+filename.replace(".sol", "");
     const input = fs.readFileSync(filename);
@@ -40,17 +40,24 @@ function deployContract(filename = "Contract.sol", address = web3.eth.coinbase) 
     const source = { };
     source[filename] = input.toString();
     const output = solc.compile({ sources: source }, 1, findImports);
-    const bytecode = output.contracts[outputContractName].bytecode;
-    const abi = JSON.parse(output.contracts[outputContractName].interface);
+    resolve(output.contracts[outputContractName]);
+  })
+}
 
-    const contract = web3.eth.contract(abi);
-
+/**
+ * Deploy on Web3 a contract.
+ * @param compiledContract the compiled contract, give in output by the compileContract.
+ * @param address, optional, the address with which deploy the contract. If not specify is the first account.
+ * @returns {Promise<web3.eth.contract>} the contract instance.
+ */
+function deployContract(compiledContract, address = web3.eth.accounts[0]) {
+  return new Promise((resolve, reject) => {
+    const contract = web3.eth.contract(JSON.parse(compiledContract.interface));
     const options = {
-      data: '0x' + bytecode,
+      data: '0x' + compiledContract.bytecode,
       from: address,
       gas: gas
     };
-
     // Deploy contract instance
     const contractInstance = contract.new(options, (err, res) => {
       if (err) reject(err);
@@ -60,6 +67,16 @@ function deployContract(filename = "Contract.sol", address = web3.eth.coinbase) 
       }
     });
   })
+}
+
+/**
+ * Compiles and Deploy on Web3 a contract.
+ * @param filename the sol file to be deployed.
+ * @param address, optional, the address with which deploy the contract. If not specify is the first account.
+ * @returns {Promise<web3.eth.contract>} the contract instance.
+ */
+function compileAndDeployContract(filename = "Contract.sol", address = web3.eth.accounts[0]) {
+  return compileContract(filename).then(compiledContract => deployContract(compiledContract, address));
 }
 
 /**
@@ -79,17 +96,32 @@ function generateContents(num = 0) {
 }
 
 /**
+ * Auxiliary function: returns the object needed to call contract functions that modifies the state.
+ * @param from, the person that do the transaction.
+ * @param value of the transaction, optional. Default is 0.
+ * @returns object, the object needed for the function call.
+ */
+function getParams(from = web3.eth.accounts[0], value = 0) {
+  return {
+    from: from,
+    gas: gas,
+    value: value
+  }
+}
+
+/**
  * Auxiliary function: deploy num content contracts on the blockchain and returns it in an array.
  * @param num the number of contents that you want to deploy.
  * @returns {Promise<contract[]>} an array contract instances.
  */
 async function deployContentsContract(num) {
-  function getParams(owner = web3.eth.coinbase) { return { from: owner, gas: gas } }
+  // compile the contract
+  const compiledContract = await compileContract('GenericContentManagementContract.sol');
+  ContentContract = web3.eth.contract(JSON.parse(compiledContract.interface));
   // deploy num empty Contents
   const contentContracts = [];
   for (let i = 0; i < num; i++)
-    await deployContract('GenericContentManagementContract.sol',
-      web3.eth.accounts[rand(web3.eth.accounts.length - 1)])
+    await deployContract(compiledContract, web3.eth.accounts[rand(web3.eth.accounts.length - 1)])
       .then(contractInstance => contentContracts.push(contractInstance));
   // set the name, content and genre of each content
   const contents = generateContents(num);
@@ -141,6 +173,79 @@ function printContentsList(contentsList = []) {
 }
 
 /**
+ * Small test of the functions to buy and gift content.
+ * Are needed at least 3 accounts in web3.eth.accounts and at least 3 contents.
+ * The first account (web3.eth.accounts[0]) buys the first two contents.
+ * Then the second account (web3.eth.accounts[1]) gifts to the first one the third content.
+ * It is also tested the purchase of an already purchased content (title3) that should raise an error.
+ * @param contentsList, the list of all available contents.
+ * @returns Array of the contents on which the first account has access.
+ */
+function grantAccessTest(contentsList = []) {
+  const value = catalogContract.contentCost();
+  console.log("The first account ("+web3.eth.accounts[0]+") buys the first two contents:");
+  catalogContract.getContent(contentsList[0].address, getParams(web3.eth.accounts[0], value));
+  console.log(" - "+contentsList[0].name);
+  catalogContract.getContent(contentsList[1].address, getParams(web3.eth.accounts[0], value));
+  console.log(" - "+contentsList[1].name);
+  console.log("The second account ("+web3.eth.accounts[1]+") gifts to the first one the third content:");
+  catalogContract.giftContent(contentsList[2].address, web3.eth.accounts[0], getParams(web3.eth.accounts[1], value));
+  console.log(" - "+contentsList[2].name);
+  console.log("Is now tested the purchase of an already purchased content ("+contentsList[2].name+") " +
+    "that should raise an error:");
+  try {
+    catalogContract.getContent(contentsList[2].address, getParams(web3.eth.accounts[0], value));
+  } catch(e) {
+    console.log(" - ERROR: "+e.message);
+  }
+  if (!catalogContract.hasAccess(web3.eth.accounts[0], contentsList[0].address)
+    || !catalogContract.hasAccess(web3.eth.accounts[0], contentsList[1].address)
+    || !catalogContract.hasAccess(web3.eth.accounts[0], contentsList[2].address))
+    throw "The user doesn't have the access right: something went wrong.";
+  console.log("Access rights verified: OK.");
+  return [contentsList[0], contentsList[1], contentsList[2]];
+}
+
+/**
+ * Small test of the consumeContent function. Consume a content.
+ * @param contentAddress, the consumable content.
+ * @param account, the account with which consume the content.
+ */
+function consumeContentTest(contentAddress, account = web3.eth.accounts[0]) {
+  if (!contentAddress) throw "You must specify the content.";
+  return ContentContract.at(contentAddress).consumeContent(getParams(account));
+}
+
+/**
+ * Small test about the grantAccess (getContent and giftContent),
+ * both the consumeContent functions (Premium and Standard),
+ * and the Premium subscription.
+ * Produces verbose logs to better understand the behaviour.
+ * Are needed at least 3 accounts in web3.eth.accounts and at least 3 contents.
+ * @param contentsList, the list of all available contents.
+ */
+function smallTests(contentsList) {
+  console.log("\n\n --- Small tests ---");
+  // grant access to web3.eth.accounts[0] on the first 3 contents in contentsList
+  const accessibleContents = grantAccessTest(contentsList);
+  // consume the first content and check that is no more consumable
+  console.log("\nConsuming the first content: "+accessibleContents[0].name);
+  console.log(" - "+consumeContentTest(accessibleContents[0].address, web3.eth.accounts[0]));
+  if (catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[0].address))
+    throw "The content still consumable: something went wrong.";
+  else console.log("The content is no more consumable: OK.");
+  // apply for a premium account
+  //TODO
+  // consume the second content and check that it still consumable
+  // (should be, because Premium account should not consume previously bought content)
+  console.log("\nConsuming the first content: "+accessibleContents[0].name);
+  console.log(" - "+consumeContentTest(accessibleContents[1].address, web3.eth.accounts[0]));
+  if (catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
+    throw "The content is no more consumable: something went wrong.";
+  else console.log("The content still consumable: OK.");
+}
+
+/**
  * Main function of the program.
  * @returns {Promise<void>} because the function is async.
  */
@@ -148,7 +253,7 @@ async function main() {
   await connect();
   // deploy the Catalog
   console.log("Deploying catalog...");
-  catalogContract = await deployContract('CatalogContract.sol');
+  catalogContract = await compileAndDeployContract('CatalogContract.sol');
 
   // deploy contentsNumber contract from different accounts
   console.log("\nDeploying "+contentsNumber+" contents...");
@@ -160,8 +265,14 @@ async function main() {
   printContentsList(contentsList);
 
   // check the getNewContentsList
-  console.log("\ngetNewContentsList: you should see the last 10 element of the previous list in the opposite order.");
-  printContentsList(parseContentsList(catalogContract.getNewContentsList()));
+  //console.log("\ngetNewContentsList: you should see the last 10 element of the previous list in the opposite order.");
+  //printContentsList(parseContentsList(catalogContract.getNewContentsList()));
+
+  // Small test about the grantAccess (getContent and giftContent),
+  // both the consumeContent functions (Premium and Standard),
+  // and the Premium subscription.
+  // Produces verbose logs to better understand the behaviour.
+  smallTests(contentsList);
 }
 
 
