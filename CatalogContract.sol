@@ -63,7 +63,7 @@ contract CatalogContract {
     event grantedAccess(address user, address content);
     event paymentAvailable(address content);
     event becomesPremium(address user);
-    event newAvailableContent(bytes32 name, address addr);
+    event newContentAvailable(bytes32 name, address addr);
 
 
     /* MODIFIERS */
@@ -248,7 +248,7 @@ contract CatalogContract {
         contentsList.push(cc);
         authors[cc.author()].alreadyFound = true;
         authorsList.push(cc.author());
-        emit newContentAvailable(cc.name, cc);
+        emit newContentAvailable(cc.name(), cc);
     }
 
     /** Called from a ContentManagementContract, removes the content from the
