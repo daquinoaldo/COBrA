@@ -4,14 +4,6 @@ import "./BaseContentManagementContract.sol";
 
 contract GenericContentManagementContract is BaseContentManagementContract {
 
-    /* VARIABLES */
-    /* Already declared as private in base BaseContentManagementContract
-     * Declared again, because if we declare it internal who extends the
-     * contract can see it and get access the content for free.
-      */
-    bytes private content;
-
-
     /* MODIFIERS */
 
     modifier notNull(bytes32 argument) {

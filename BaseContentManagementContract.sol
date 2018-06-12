@@ -19,7 +19,7 @@ contract BaseContentManagementContract {
     address public author;
     bytes32 public name;
     bytes32 public genre;
-    bytes private content;
+    bytes internal content;
     bool private published = false;
     CatalogContract private catalogContract;
 
