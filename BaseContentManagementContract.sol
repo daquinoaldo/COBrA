@@ -19,7 +19,6 @@ contract BaseContentManagementContract {
     address public author;
     bytes32 public name;
     bytes32 public genre;
-
     bytes private content;
     bool private published = false;
     CatalogContract private catalogContract;
@@ -35,16 +34,6 @@ contract BaseContentManagementContract {
     /* MODIFIERS */
     modifier onlyOwner() {
         require(msg.sender == author, "Only the author can perform this action.");
-        _;
-    }
-
-    modifier notNull(bytes32 argument) {
-        require(argument[0] != 0, "The argument can not be null.");
-        _;
-    }
-
-    modifier notEmpty(bytes argument) {
-        require(argument.length != 0, "The argument can not be empty.");
         _;
     }
 
@@ -96,30 +85,6 @@ contract BaseContentManagementContract {
         catalogContract.consumeContent(msg.sender, this);
         emit contentConsumed(msg.sender);
         return content;
-    }
-
-    /** Used by the author to set the content.
-     * Can be called only one time.
-     */
-    function setContent(bytes c) public onlyOwner notEmpty(c) {
-        require(content.length == 0, "The content can not be overwritten. Use the suicide function to delete this content and create a new one.");
-        content = c;
-    }
-
-    /** Used by the author to set the name.
-     * Can be called only one time.
-     */
-    function setName(bytes32 n) public onlyOwner notNull(n) {
-        require(name[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
-        name = n;
-    }
-
-    /** Used by the author to set the genre.
-     * Can be called only one time, but its call is not mandatory (the content can not have a genre).
-     */
-    function setGenre(bytes32 g) public onlyOwner notNull(g) {
-        require(genre[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
-        genre = g;
     }
 
     /** Used by the author to publish the content.
