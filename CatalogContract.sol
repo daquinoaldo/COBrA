@@ -316,11 +316,15 @@ contract CatalogContract {
      * Burden: O(x) ~ O(1).
      */
     function getNewContentsList() public view returns(bytes32[], address[]) {
+        uint listLength = chartListLength;
+        // If i have less than chartListLength element in the contentsList I
+        // have to return contentsList.length elements
+        if (contentsList.length < listLength) listLength = contentsList.length;
         // NOTE: I assume that the latest content is not the last deployed contract in the blockchain (with the highest
         // block number), but is the last added to the catalog (that ideally is when is "published").
-        bytes32[] memory names = new bytes32[](chartListLength);
-        address[] memory addresses = new address[](chartListLength);
-        for (uint i = 0; i < chartListLength; i++) {
+        bytes32[] memory names = new bytes32[](listLength);
+        address[] memory addresses = new address[](listLength);
+        for (uint i = 0; i < listLength; i++) {
             // add it in reverse order: the latest first
             address a = contentsList[contentsList.length - 1 - i];
             names[i] = contents[a].name;
@@ -504,6 +508,7 @@ contract CatalogContract {
     */
     function grantAccess(address u, address x) private {
         require(msg.value == contentCost);
+        require(!accessibleContent[u][x]);
         accessibleContent[u][x] = true;
         emit grantedAccess(u, x);
         balance += msg.value;
