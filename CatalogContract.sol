@@ -200,16 +200,17 @@ contract CatalogContract {
 
     /** Notice the catalog that the user u has consumed the content x.
      * @param u the user that consume the content.
-     * @param x the content that has been consumed.
      * Gas: the user that consumes the content pays.
      */
-    function consumeContent(address u, address x) public exists(x) {
+    function consumeContent(address u) public exists(msg.sender) {
         // Premium users can consume contents for free and are not considered
         // in the count of views
         if (isPremium(u)) return;
-        delete accessibleContent[u][x];
-        contents[x].views++;
-        address a = contents[x].author; // perform only one storage read
+        // Only contents can call this function, so the content to be delete
+        // is the msg.sender
+        delete accessibleContent[u][msg.sender];
+        contents[msg.sender].views++;
+        address a = contents[msg.sender].author; // perform only one storage read
         authors[a].views++;
         authors[a].uncollectedViews++;
         /* Notice the author if his contents has enough views.
@@ -230,8 +231,8 @@ contract CatalogContract {
     function collectPayout() public {
         uint uncollectedViews = authors[msg.sender].uncollectedViews;
         require(uncollectedViews >= payAfter, "Your contents have not received\
-    enough views. Please listen for a paymentAvailable event relative\
-    to your address.");
+            enough views. Please listen for a paymentAvailable event relative\
+            to your address.");
         authors[msg.sender].uncollectedViews = 0;
         uint amount = contentCost * uncollectedViews;
         balance -= amount;

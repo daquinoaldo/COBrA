@@ -82,7 +82,7 @@ contract BaseContentManagementContract {
     function consumeContent() public returns(bytes) {
         require(published, "The content is not yet published.");
         require(catalogContract.hasAccess(msg.sender, this), "You must reserve this content before accessing it. Please contact the catalog.");
-        catalogContract.consumeContent(msg.sender, this);
+        catalogContract.consumeContent(msg.sender);
         emit contentConsumed(msg.sender);
         return content;
     }
