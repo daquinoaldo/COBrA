@@ -4,7 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 1;
+const contentsNumber = 3;
 const gas = 4712388;
 
 let web3;
@@ -65,7 +65,7 @@ function deployContract(filename = "Contract.sol", address = web3.eth.coinbase) 
 /**
  * Auxiliary function: generates num contracts, that are object with 3 parameters: name, content and genre.
  * @param num the number of contents that you want to generate.
- * returns an array of contents object.
+ * @returns an array of contents object.
  */
 function generateContents(num = 0) {
   const contents = [];
@@ -81,7 +81,7 @@ function generateContents(num = 0) {
 /**
  * Auxiliary function: deploy num content contracts on the blockchain and returns it in an array.
  * @param num the number of contents that you want to deploy.
- * returns {Promise<contract[]>} an array contract instances.
+ * @returns {Promise<contract[]>} an array contract instances.
  */
 async function deployContentsContract(num) {
   function getParams(owner = web3.eth.coinbase) { return { from: owner, gas: gas } }
@@ -100,7 +100,6 @@ async function deployContentsContract(num) {
     contentContracts[i].setName(contents[i].name, getParams(owner));
     contentContracts[i].setContent(contents[i].content, getParams(owner));
     contentContracts[i].setGenre(contents[i].genre, getParams(owner));
-    console.log(catalogContract.address);
     contentContracts[i].publish(catalogContract.address, getParams(owner));
   }
   return contentContracts;
@@ -110,12 +109,38 @@ async function deployContentsContract(num) {
  * Auxiliary function: generates a random number.
  * @param to, optional, the last number of the range.
  * @param from, optional, the starting number of the range.
- * returns the random number.
+ * @returns number (random).
  */
 function rand(to = 1, from = 0) {
   if (from > to) return -1;
   if (from === to) return from;
   return from + Math.floor(Math.random() * to+1);
+}
+
+/**
+ * Auxiliary function: parse the content list returned by catalogContract.getContentsList().
+ * @param contentsList, the content list.
+ * @returns Array of object with 2 field: name and address.
+ */
+function parseContentsList(contentsList = ["", ""]) {
+  const list = [];
+  for (let i = 0; i < contentsList[0].length; i++) {
+    list[i] = {
+      name: web3.toUtf8(contentsList[0][i]),
+      address: contentsList[1][i]
+    }
+  }
+  return list;
+}
+
+/**
+ * Auxiliary function: print the content list.
+ * @param contentsList, the content list.
+ */
+function printContentsList(contentsList = []) {
+  console.log("\nContents in the catalog:");
+  for (let i = 0; i < contentsList.length; i++)
+    console.log(" - "+contentsList[i].name+": "+contentsList[i].address);
 }
 
 /**
@@ -127,13 +152,14 @@ async function main() {
   // deploy the Catalog
   console.log("Deploying catalog...");
   catalogContract = await deployContract('CatalogContract.sol');
+
+  // deploy contentsNumber contract from different accounts
   console.log("\nDeploying "+contentsNumber+" contents...");
   const contentContracts = await deployContentsContract(contentsNumber);
 
-  // TEST
-  for (let i = 0; i < contentsNumber; i++)
-    console.log(contentContracts[i].name());
-  //console.log(catalogContract.contentCost());
+  // retrieve contents list
+  const contentsList = parseContentsList(catalogContract.getContentsList());
+  printContentsList(contentsList);
 }
 
 
