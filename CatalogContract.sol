@@ -265,7 +265,7 @@ contract CatalogContract {
             if (!found && contentsList[i] == msg.sender) {
                 found = true;
             }
-            if (found) {
+            if (found && i < contentsList.length - 1) {
                 // move all the following items back of 1 position
                 contentsList[i] = contentsList[i+1];
             }
