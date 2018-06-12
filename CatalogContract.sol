@@ -59,6 +59,7 @@ contract CatalogContract {
 
     /* EVENTS */
     event FallbackFunctionCall(string message, bytes data);
+    event CatalogClosed();
     event grantedAccess(address user, address content);
     event paymentAvailable(address content);
     event becomesPremium(address user);
@@ -67,13 +68,13 @@ contract CatalogContract {
 
     /* MODIFIERS */
     modifier onlyOwner() {
-        require (msg.sender == owner,
+        require(msg.sender == owner,
             "Only the contract owner can perform this action.");
         _;
     }
 
     modifier exists(address c) {
-        require (contents[c].name != "" &&
+        require(contents[c].name != "" &&
         BaseContentManagementContract(c).author() != 0);
         _;
     }
@@ -123,6 +124,8 @@ contract CatalogContract {
             authorsList[i].transfer(amountFromUncollectedViews +
                 amountFromPremium);
         }
+        // emit an event
+        emit CatalogClosed();
         // should not, but if there is some wei in excess transfer it to the
         // owner
         selfdestruct(owner);
@@ -140,7 +143,7 @@ contract CatalogContract {
      * @param x the address of the block of the ContentManagementContract.
      * Gas: who requests the content pays.
      */
-    /* DEPRECATED: a user could only pay a premium cycle and access all content (at most once) in the future,
+    /* DEPRECATED: a user could pay only a premium cycle and access all content (at most once) in the future,
      * even if the premium account is no longer active. In this case the premium account would have turned into a
      * "bundle" of content rather than a subscription. Since this is not the expected behavior, the function has
      * been abolished and now a premium user can consume all content without having to first request access to it
@@ -483,7 +486,7 @@ contract CatalogContract {
      * @param u the user.
      */
     function setPremium(address u) private {
-        require (msg.value == premiumCost);
+        require(msg.value == premiumCost);
         // If the user has never bought premium or the premium subscription is
         // expired reset the expiration time to now
         if (!isPremium(u)) premiumUsers[u] = block.number;

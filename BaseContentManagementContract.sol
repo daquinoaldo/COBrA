@@ -27,29 +27,31 @@ contract BaseContentManagementContract {
 
     /* EVENTS */
     event FallbackFunctionCall(string message, bytes data);
+    event ContentPublished();
+    event ContentDeleted();
     event contentConsumed(address user);
 
 
     /* MODIFIERS */
     modifier onlyOwner() {
-        require (msg.sender == author, "Only the author can perform this action.");
+        require(msg.sender == author, "Only the author can perform this action.");
         _;
     }
 
     modifier notNull(bytes32 argument) {
-        require (argument[0] != 0, "The argument can not be null.");
+        require(argument[0] != 0, "The argument can not be null.");
         _;
     }
 
     modifier notEmpty(bytes argument) {
-        require (argument.length != 0, "The argument can not be empty.");
+        require(argument.length != 0, "The argument can not be empty.");
         _;
     }
 
     modifier validAddress(address addr) {
         uint size;
         assembly { size := extcodesize(addr) }
-        require (size > 0, "The address is not valid.");
+        require(size > 0, "The address is not valid.");
         _;
     }
 
@@ -68,16 +70,21 @@ contract BaseContentManagementContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
+        // notice the catalog
         catalogContract.removesMe();
-        // If there is some wei send it to the author
+        // emit an event
+        emit ContentDeleted();
+        // if there is some wei send it to the author
         selfdestruct(author);
     }
 
     /** Suicide function, can be called only by the owner */
     function murder() public validAddress(catalog) {
         require(msg.sender == catalog);
-        // If there is some wei send it to the catalog
-        selfdestruct(catalog);
+        // emit an event
+        emit ContentDeleted();
+        // if there is some wei send it to the author
+        selfdestruct(author);
     }
 
     /** Used by the customers to consume this content after requesting the access.
@@ -95,7 +102,7 @@ contract BaseContentManagementContract {
      * Can be called only one time.
      */
     function setContent(bytes c) public onlyOwner notEmpty(c) {
-        require (content.length == 0, "The content can not be overwritten. Use the suicide function to delete this content and create a new one.");
+        require(content.length == 0, "The content can not be overwritten. Use the suicide function to delete this content and create a new one.");
         content = c;
     }
 
@@ -103,7 +110,7 @@ contract BaseContentManagementContract {
      * Can be called only one time.
      */
     function setName(bytes32 n) public onlyOwner notNull(n) {
-        require (name[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
+        require(name[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
         name = n;
     }
 
@@ -111,7 +118,7 @@ contract BaseContentManagementContract {
      * Can be called only one time, but its call is not mandatory (the content can not have a genre).
      */
     function setGenre(bytes32 g) public onlyOwner notNull(g) {
-        require (genre[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
+        require(genre[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
         genre = g;
     }
 
@@ -121,11 +128,12 @@ contract BaseContentManagementContract {
      * Can be called only one time.
      */
     function publish(address c) public onlyOwner validAddress(c) {
-        require (!published, "This contract is already published in the catalog.");
-        require (name[0] != 0 && content.length != 0, "Both name and content must be set before publish the content in the catalog.");
+        require(!published, "This contract is already published in the catalog.");
+        require(name[0] != 0 && content.length != 0, "Both name and content must be set before publish the content in the catalog.");
         published = true;
         catalog = c;
         catalogContract = CatalogContract(c);
         catalogContract.addMe();
+        emit ContentPublished();
     }
 }
