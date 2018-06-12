@@ -4,7 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 3;
+const contentsNumber = 4;
 const gas = 4712388;
 
 let web3;
@@ -213,6 +213,7 @@ function grantAccessTest(contentsList = []) {
  */
 function consumeContentTest(contentAddress, account = web3.eth.accounts[0]) {
   if (!contentAddress) throw "You must specify the content.";
+  //TODO: receive the content
   return ContentContract.at(contentAddress).consumeContent(getParams(account));
 }
 
@@ -235,12 +236,21 @@ function smallTests(contentsList) {
     throw "The content still consumable: something went wrong.";
   else console.log("The content is no more consumable: OK.");
   // apply for a premium account
-  //TODO
+  const premiumCost = catalogContract.premiumCost();
+  console.log("\nSubscribing a Premium account on the first account ("+web3.eth.accounts[0]+").");
+  catalogContract.buyPremium(getParams(web3.eth.accounts[0], premiumCost));
+  console.log("isPremium("+web3.eth.accounts[0]+"): "+catalogContract.isPremium(web3.eth.accounts[0])+
+    " (must be true).");
+  // gift a premium account
+  console.log("\nGifting a Premium account from the first account to the second one ("+web3.eth.accounts[1]+").");
+  catalogContract.giftPremium(web3.eth.accounts[1], getParams(web3.eth.accounts[0], premiumCost));
+  console.log("isPremium("+web3.eth.accounts[1]+"): "+catalogContract.isPremium(web3.eth.accounts[1])+
+    " (must be true).");
   // consume the second content and check that it still consumable
   // (should be, because Premium account should not consume previously bought content)
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
   console.log(" - "+consumeContentTest(accessibleContents[1].address, web3.eth.accounts[0]));
-  if (catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
+  if (!catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
     throw "The content is no more consumable: something went wrong.";
   else console.log("The content still consumable: OK.");
 }
@@ -265,8 +275,16 @@ async function main() {
   printContentsList(contentsList);
 
   // check the getNewContentsList
-  //console.log("\ngetNewContentsList: you should see the last 10 element of the previous list in the opposite order.");
-  //printContentsList(parseContentsList(catalogContract.getNewContentsList()));
+  console.log("\ngetNewContentsList: you should see the last 10 element of the previous list in the opposite order.");
+  printContentsList(parseContentsList(catalogContract.getNewContentsList()));
+
+  // check the suicide function of a content
+  console.log("\nTesting the suicide function: we have called the suicide function on the last item.");
+  contentContracts[contentContracts.length - 1]._suicide(
+    getParams(contentContracts[contentContracts.length - 1].author()));
+  console.log("getNewContentsList: you should see a list very similar to the preceding one, " +
+    "but without the first element.");
+  printContentsList(parseContentsList(catalogContract.getNewContentsList()));
 
   // Small test about the grantAccess (getContent and giftContent),
   // both the consumeContent functions (Premium and Standard),
