@@ -7,7 +7,7 @@ const genres = ["adventure", "fantasy", "romance", "horror"];
 const contentsNum = 30;
 
 let web3;
-const contentContracts[];
+const contentContracts = [];
 
 /**
  * Connects to the Ethereum provider specified in the variable "provider".
@@ -62,8 +62,8 @@ function deployContract(filename = "Contract.sol", address = web3.eth.coinbase) 
  * returns an array of contents object.
  */
 function generateContents(num = 0) {
-  const contents[];
-  for (int i = 0; i < num; i++)
+  const contents = [];
+  for (let i = 0; i < num; i++)
     contents[i] = {
       name: "title"+i,
       content: "This is content "+i,
@@ -80,7 +80,7 @@ function generateContents(num = 0) {
  */
 function rand(to = 1, from = 0) {
   if (from > to) return -1;
-  if (from == to) return from;
+  if (from === to) return from;
   return from + Math.floor(Math.random() * to+1);
 }
 
@@ -93,14 +93,14 @@ async function main() {
   // deploy the Catalog
   const catalogContract = await deployContract('CatalogContract.sol');
   // deploy contentsNum empty Contents
-  const promises[];
-  for (i = 0; i < contentsNum, i++)
+  const promises = [];
+  for (let i = 0; i < contentsNum; i++)
     promises[i] = deployContract('BaseContentManagementContract.sol')
-      .then(contractInstance => contentContracts.push(contractInstance);
+      .then(contractInstance => contentContracts.push(contractInstance));
   await Promise.all(promises);
   // set the name, content and genre of each content
   const contents = generateContents(contentsNum);
-  for (i = 0; i < contentsNum, i++) {
+  for (let i = 0; i < contentsNum; i++) {
     contentContracts[i].setName(contents[i].name);
     contentContracts[i].setContent(contents[i].content);
     contentContracts[i].setGenre(contents[i].genre);
