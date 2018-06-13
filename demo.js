@@ -4,12 +4,15 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 4;
 const gas = 4712388;
+const contentsNumber = 15;
 
 let web3;
 let catalogContract;
 let ContentContract;
+let latestByAuthor0;
+let latestByGenre0;
+let contentCost;
 
 /**
  * Connects to the Ethereum provider specified in the variable "provider".
@@ -62,7 +65,7 @@ function deployContract(compiledContract, address = web3.eth.accounts[0]) {
     const contractInstance = contract.new(options, (err, res) => {
       if (err) reject(err);
       if (res.address) {
-        console.log("Contract address: " + res.address);
+        console.log(" - contract address: " + res.address);
         resolve(contractInstance);
       }
     });
@@ -88,9 +91,9 @@ function generateContents(num = 0) {
   const contents = [];
   for (let i = 0; i < num; i++)
     contents[i] = {
-      name: web3.fromAscii("title"+i),
-      content: web3.fromAscii("This is content "+i),
-      genre: web3.fromAscii(genres[rand(genres.length-1)])
+      name: web3.fromUtf8("title"+i),
+      content: web3.fromUtf8("This is content "+i),
+      genre: web3.fromUtf8(genres[rand(genres.length-1)])
     };
   return contents;
 }
@@ -120,9 +123,15 @@ async function deployContentsContract(num) {
   ContentContract = web3.eth.contract(JSON.parse(compiledContract.interface));
   // deploy num empty Contents
   const contentContracts = [];
-  for (let i = 0; i < num; i++)
-    await deployContract(compiledContract, web3.eth.accounts[rand(web3.eth.accounts.length - 1)])
-      .then(contractInstance => contentContracts.push(contractInstance));
+  for (let i = 0; i < num; i++) {
+    const authorIndex = rand(web3.eth.accounts.length - 1);
+    await deployContract(compiledContract, web3.eth.accounts[authorIndex])
+      .then(contractInstance => {
+        contentContracts.push(contractInstance);
+        // exclude the last one because it will deleted
+        if (i < num - 1 && authorIndex === 0) latestByAuthor0 = contractInstance;
+      });
+  }
   // set the name, content and genre of each content
   const contents = generateContents(num);
   for (let i = 0; i < num; i++) {
@@ -131,6 +140,8 @@ async function deployContentsContract(num) {
     contentContracts[i].setContent(contents[i].content, getParams(owner));
     contentContracts[i].setGenre(contents[i].genre, getParams(owner));
     contentContracts[i].publish(catalogContract.address, getParams(owner));
+    // exclude the last one because it will deleted
+    if (i < num - 1 && contents[i].genre === web3.fromUtf8(genres[0])) latestByGenre0 = contentContracts[i];
   }
   return contentContracts;
 }
@@ -144,7 +155,7 @@ async function deployContentsContract(num) {
 function rand(to = 1, from = 0) {
   if (from > to) return -1;
   if (from === to) return from;
-  return from + Math.floor(Math.random() * to+1);
+  return from + Math.floor(Math.random() * (to - from + 1));
 }
 
 /**
@@ -164,12 +175,70 @@ function parseContentsList(contentsList = ["", ""]) {
 }
 
 /**
+ * Auxiliary function: parse the statistics list returned by catalogContract.getStatistics().
+ * @param contentsList, the content list.
+ * @returns Array of object with 3 field: name, address and views.
+ */
+function parseStatistics(contentsList = ["", ""]) {
+  const list = [];
+  for (let i = 0; i < contentsList[0].length; i++) {
+    list[i] = {
+      name: web3.toUtf8(contentsList[0][i]),
+      address: contentsList[1][i],
+      views: contentsList[2][i]
+    }
+  }
+  return list;
+}
+
+/**
  * Auxiliary function: print the content list.
  * @param contentsList, the content list.
  */
 function printContentsList(contentsList = []) {
   for (let i = 0; i < contentsList.length; i++)
     console.log(" - "+contentsList[i].name+": "+contentsList[i].address);
+}
+
+/**
+ * Auxiliary function: print the statistics.
+ * @param contentsList, the content list.
+ */
+function printStatistics(contentsList = []) {
+  for (let i = 0; i < contentsList.length; i++)
+    console.log(" - "+contentsList[i].name+": "+contentsList[i].address+" - "+contentsList[i].views+" views");
+}
+
+/**
+ * testing the getLatestByGenre function.
+ */
+function latestByGenreTest() {
+  console.log("\nTesting the latestByGenre function on the genre "+genres[0]+".");
+  if(!latestByGenre0) throw "There is no content of genre "+genres[0]+". Try again with more contents.";
+  console.log(" - expected: "+web3.toUtf8(latestByGenre0.name())+": "+latestByGenre0.address);
+  const latest = catalogContract.getLatestByGenre(web3.fromUtf8(genres[0]));
+  console.log(" - got (should be the same): "+web3.toUtf8(latest[0])+": "+latest[1]);
+}
+
+/**
+ * testing the getLatestByAuthor function.
+ */
+function latestByAuthorTest() {
+  console.log("\nTesting the latestByAuthor function on the author "+web3.eth.accounts[0]+".");
+  if(!latestByAuthor0) throw "There is no content of author "+web3.eth.accounts[0]+". Try again with more contents.";
+  console.log(" - expected: "+web3.toUtf8(latestByAuthor0.name())+": "+latestByAuthor0.address);
+  const latest = catalogContract.getLatestByAuthor(web3.eth.accounts[0]);
+  console.log(" - got (should be the same): "+web3.toUtf8(latest[0])+": "+latest[1]);
+}
+
+/**
+ * Auxiliary function: grant to an user the access to a content.
+ * @param contentAddress the content.
+ * @param user the user.
+ */
+function grantAccess(contentAddress, user = web3.eth.accounts[0]) {
+  if (!contentCost) contentCost = catalogContract.contentCost();
+  catalogContract.getContent(contentAddress, getParams(user, contentCost));
 }
 
 /**
@@ -182,19 +251,21 @@ function printContentsList(contentsList = []) {
  * @returns Array of the contents on which the first account has access.
  */
 function grantAccessTest(contentsList = []) {
-  const value = catalogContract.contentCost();
   console.log("The first account ("+web3.eth.accounts[0]+") buys the first two contents:");
-  catalogContract.getContent(contentsList[0].address, getParams(web3.eth.accounts[0], value));
+  grantAccess(contentsList[0].address);
+  //catalogContract.getContent(contentsList[0].address, getParams(web3.eth.accounts[0], value));
   console.log(" - "+contentsList[0].name);
-  catalogContract.getContent(contentsList[1].address, getParams(web3.eth.accounts[0], value));
+  grantAccess(contentsList[1].address);
+  //catalogContract.getContent(contentsList[1].address, getParams(web3.eth.accounts[0], value));
   console.log(" - "+contentsList[1].name);
   console.log("The second account ("+web3.eth.accounts[1]+") gifts to the first one the third content:");
-  catalogContract.giftContent(contentsList[2].address, web3.eth.accounts[0], getParams(web3.eth.accounts[1], value));
+  catalogContract.giftContent(contentsList[2].address, web3.eth.accounts[0], getParams(web3.eth.accounts[1], contentCost));
   console.log(" - "+contentsList[2].name);
   console.log("Is now tested the purchase of an already purchased content ("+contentsList[2].name+") " +
     "that should raise an error:");
   try {
-    catalogContract.getContent(contentsList[2].address, getParams(web3.eth.accounts[0], value));
+    grantAccess(contentsList[0].address);
+    //catalogContract.getContent(contentsList[2].address, getParams(web3.eth.accounts[0], value));
   } catch(e) {
     console.log(" - ERROR: "+e.message);
   }
@@ -211,7 +282,7 @@ function grantAccessTest(contentsList = []) {
  * @param contentAddress, the consumable content.
  * @param account, the account with which consume the content.
  */
-function consumeContentTest(contentAddress, account = web3.eth.accounts[0]) {
+function consumeContent(contentAddress, account = web3.eth.accounts[0]) {
   if (!contentAddress) throw "You must specify the content.";
   //TODO: receive the content
   return ContentContract.at(contentAddress).consumeContent(getParams(account));
@@ -231,7 +302,7 @@ function smallTests(contentsList) {
   const accessibleContents = grantAccessTest(contentsList);
   // consume the first content and check that is no more consumable
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
-  console.log(" - "+consumeContentTest(accessibleContents[0].address, web3.eth.accounts[0]));
+  console.log(" - "+consumeContent(accessibleContents[0].address, web3.eth.accounts[0]));
   if (catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[0].address))
     throw "The content still consumable: something went wrong.";
   else console.log("The content is no more consumable: OK.");
@@ -239,20 +310,42 @@ function smallTests(contentsList) {
   const premiumCost = catalogContract.premiumCost();
   console.log("\nSubscribing a Premium account on the first account ("+web3.eth.accounts[0]+").");
   catalogContract.buyPremium(getParams(web3.eth.accounts[0], premiumCost));
-  console.log("isPremium("+web3.eth.accounts[0]+"): "+catalogContract.isPremium(web3.eth.accounts[0])+
+  console.log(" - isPremium("+web3.eth.accounts[0]+"): "+catalogContract.isPremium(web3.eth.accounts[0])+
     " (must be true).");
   // gift a premium account
   console.log("\nGifting a Premium account from the first account to the second one ("+web3.eth.accounts[1]+").");
   catalogContract.giftPremium(web3.eth.accounts[1], getParams(web3.eth.accounts[0], premiumCost));
-  console.log("isPremium("+web3.eth.accounts[1]+"): "+catalogContract.isPremium(web3.eth.accounts[1])+
+  console.log(" - isPremium("+web3.eth.accounts[1]+"): "+catalogContract.isPremium(web3.eth.accounts[1])+
     " (must be true).");
   // consume the second content and check that it still consumable
   // (should be, because Premium account should not consume previously bought content)
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
-  console.log(" - "+consumeContentTest(accessibleContents[1].address, web3.eth.accounts[0]));
+  console.log(" - "+consumeContent(accessibleContents[1].address, web3.eth.accounts[0]));
   if (!catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
     throw "The content is no more consumable: something went wrong.";
   else console.log("The content still consumable: OK.");
+}
+
+/**
+ * Big tests about the statistics functions (getStatistics, getMostPopularByGenre, getMostPopularByAuthor) and the
+ * payout function. Is needed a big amount of contents.
+ * @param contentsList, the list of all available contents.
+ */
+function bigTests(contentsList) {
+  console.log("\n\n --- Big tests ---");
+  console.log("For each available account, except the last ones, buy and consume 10 random contents. " +
+    "It will take a while.");
+  // Exclude the last account for later use
+  for (let i = 0; i < web3.eth.accounts.length - 1; i++)
+    for (let j = 0; j < 10; j++) {
+      const index = rand(contentsList.length - 1);
+      if (!catalogContract.hasAccess(web3.eth.accounts[i], contentsList[index].address))
+        grantAccess(contentsList[index].address, web3.eth.accounts[i]);
+      consumeContent(contentsList[index].address, web3.eth.accounts[i]);
+      console.log(" - i: "+i+", j: "+j);
+    }
+  console.log("statistics: "+catalogContract.getStatistics());
+  printStatistics(parseStatistics(catalogContract.getStatistics()));
 }
 
 /**
@@ -270,27 +363,45 @@ async function main() {
   const contentContracts = await deployContentsContract(contentsNumber);
 
   // retrieve contents list
-  const contentsList = parseContentsList(catalogContract.getContentsList());
+  let contentsList = parseContentsList(catalogContract.getContentsList());
   console.log("\nContents in the catalog:");
   printContentsList(contentsList);
 
   // check the getNewContentsList
   console.log("\ngetNewContentsList: you should see the last 10 element of the previous list in the opposite order.");
-  printContentsList(parseContentsList(catalogContract.getNewContentsList()));
+  printContentsList(parseContentsList(catalogContract.getNewContentsList(10)));
 
   // check the suicide function of a content
-  console.log("\nTesting the suicide function: we have called the suicide function on the last item.");
+  console.log("\nTesting the suicide function of a content: we have called the suicide function on the last item.");
   contentContracts[contentContracts.length - 1]._suicide(
     getParams(contentContracts[contentContracts.length - 1].author()));
   console.log("getNewContentsList: you should see a list very similar to the preceding one, " +
     "but without the first element.");
-  printContentsList(parseContentsList(catalogContract.getNewContentsList()));
+  printContentsList(parseContentsList(catalogContract.getNewContentsList(10)));
+
+  // test getLatestByGenre and getLatestByAuthor functions
+  latestByGenreTest();
+  latestByAuthorTest();
+
+  // get the new content list after the suicide
+  contentsList = parseContentsList(catalogContract.getContentsList());
 
   // Small test about the grantAccess (getContent and giftContent),
   // both the consumeContent functions (Premium and Standard),
   // and the Premium subscription.
   // Produces verbose logs to better understand the behaviour.
   smallTests(contentsList);
+
+  // Big tests about the statistics functions (getStatistics, getMostPopularByGenre, getMostPopularByAuthor) and the
+  // payout function.
+  bigTests(contentsList);
+
+  // check the suicide function of the catalog
+  console.log("\nTesting the suicide function of the catalog: all the values of content contracts should change " +
+    "from a value to null. We test it with the name of the first content");
+  console.log(" - before: "+ contentContracts[0].name());
+  catalogContract._suicide(getParams(catalogContract.owner()));
+  console.log(" - after: "+ contentContracts[0].name());
 }
 
 
