@@ -1,8 +1,14 @@
 # COBrA
-An Ethereum blockchain university project
+An Ethereum blockchain university project.
 
-## Installation
-Just run `npm install`.
+Check the [assignment](docs/COBrA_assignment.pdf) for more information.
+
+## Requirements
+- [Node.js](https://nodejs.org/it/download/)
+- [geth](https://geth.ethereum.org/downloads/) (optional)
+
+## Dependency installation
+To prepare test suit just run `npm install`.
 
 #### Troubleshooting
 In case of problem with node-gyp run `sudo npm install -g node-gyp rebuild` (python 2 is needed).
@@ -15,3 +21,10 @@ without `sudo`.
 
 If you got vulnerability alerts with this version of web3 you can use the latest version running
 `npm install ethereum/web3.js` instead of `npm install`.
+
+## Run
+The test suite requires a web3 interface running at `http://localhost:8545`.
+You can use [geth](https://github.com/ethereum/go-ethereum/wiki/geth) or you can run `node node_modules/.bin/testrpc`
+to start the RPC testing environment.  
+
+To start the tests just run `npm start` or `node demo.js`.
