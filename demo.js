@@ -4,7 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const gas = 4712388;
+const defaultGas = 5000000; //5.000.000
 const contentsNumber = 15;
 
 let web3;
@@ -13,6 +13,7 @@ let ContentContract;
 let latestByAuthor0;
 let latestByGenre0;
 let contentCost;
+let gasLimit;
 
 /**
  * Connects to the Ethereum provider specified in the variable "provider".
@@ -23,6 +24,7 @@ function connect() {
     web3 = new Web3(new Web3.providers.HttpProvider(provider));
     if (!web3.isConnected()) reject("Cannot connect to "+provider+".");
     console.log("\nConnected to Web3: "+web3.version.node+".\n");
+    gasLimit = web3.eth.getBlock("latest").gasLimit;
     resolve(web3);
   })
 }
@@ -59,7 +61,7 @@ function deployContract(compiledContract, address = web3.eth.accounts[0]) {
     const options = {
       data: '0x' + compiledContract.bytecode,
       from: address,
-      gas: gas
+      gas: defaultGas
     };
     // Deploy contract instance
     const contractInstance = contract.new(options, (err, res) => {
@@ -102,9 +104,10 @@ function generateContents(num = 0) {
  * Auxiliary function: returns the object needed to call contract functions that modifies the state.
  * @param from, the person that do the transaction.
  * @param value of the transaction, optional. Default is 0.
+ * @param gas, max gas that the transaction can use.
  * @returns object, the object needed for the function call.
  */
-function getParams(from = web3.eth.accounts[0], value = 0) {
+function getParams(from = web3.eth.accounts[0], value = 0, gas = defaultGas) {
   return {
     from: from,
     gas: gas,
@@ -377,18 +380,23 @@ function bigTests(contentsList) {
   for (let i = 0; i < web3.eth.accounts.length - 1; i++)
     for (let j = 0; j < 5; j++) {
       const index = rand(contentsList.length - 1);
-      console.log(" - i: "+i+", j: "+j+", index: "+index);
       // the first account has already bought some contents
       if (!catalogContract.hasAccess(web3.eth.accounts[i], contentsList[index].address))
         grantAccess(contentsList[index].address, web3.eth.accounts[i]);
-      console.log("granted");
       consumeContent(contentsList[index].address, web3.eth.accounts[i]);
-      console.log("accessed");
     }
   printStatistics(parseStatistics(catalogContract.getStatistics()));
 
   mostPopularByGenreTest();
   mostPopularByAuthorTest();
+
+  // collectPayout test
+  console.log("\n"+web3.toUtf8(latestByAuthor0.name())+" has enough view, so author "+web3.eth.accounts[0]+" can collect his payout");
+  console.log("before - account balance: "+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0]))+", " +
+    "contract balance: "+web3.eth.getBalance(catalogContract.address));
+  catalogContract.collectPayout(getParams());
+  console.log("after - account balance: "+web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0]))+", " +
+    "contract balance: "+web3.eth.getBalance(catalogContract.address));
 }
 
 /**
@@ -443,7 +451,7 @@ async function main() {
   console.log("\nTesting the suicide function of the catalog: all the values of content contracts should change " +
     "from a value to null. We test it with the name of the first content");
   console.log(" - before: "+ contentContracts[0].name());
-  catalogContract._suicide(getParams(catalogContract.owner()));
+  catalogContract._suicide(getParams(catalogContract.owner(), 0, gasLimit));
   console.log(" - after: "+ contentContracts[0].name());
 }
 

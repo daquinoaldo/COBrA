@@ -115,12 +115,12 @@ contract CatalogContract {
         for (i = 0; i < authorsList.length; i++) {
             a = authors[authorsList[i]];
             // for each author pay the uncollected views
-            uint amountFromUncollectedViews = a.uncollectedViews * contentCost;
+            uint256 amountFromUncollectedViews = a.uncollectedViews * contentCost;
             // distribute the remaining balance to the authors according with
             // their views count
-            uint amountFromPremium = balance * a.views / totalViews;
-            authorsList[i].transfer(amountFromUncollectedViews +
-                amountFromPremium);
+            uint256 amountFromPremium = balance * a.views / totalViews;
+            uint256 amount = amountFromUncollectedViews + amountFromPremium;
+            authorsList[i].send(amount);
         }
         // emit an event
         emit CatalogClosed();
