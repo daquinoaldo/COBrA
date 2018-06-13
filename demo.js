@@ -4,8 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const defaultGas = 5000000; //5.000.000
-const contentsNumber = 15;
+const contentsNumber = 20;
 
 let web3;
 let catalogContract;
@@ -61,7 +60,7 @@ function deployContract(compiledContract, address = web3.eth.accounts[0]) {
     const options = {
       data: '0x' + compiledContract.bytecode,
       from: address,
-      gas: defaultGas
+      gas: gasLimit
     };
     // Deploy contract instance
     const contractInstance = contract.new(options, (err, res) => {
@@ -107,7 +106,7 @@ function generateContents(num = 0) {
  * @param gas, max gas that the transaction can use.
  * @returns object, the object needed for the function call.
  */
-function getParams(from = web3.eth.accounts[0], value = 0, gas = defaultGas) {
+function getParams(from = web3.eth.accounts[0], value = 0, gas = gasLimit) {
   return {
     from: from,
     gas: gas,
@@ -374,7 +373,7 @@ function smallTests(contentsList) {
  */
 function bigTests(contentsList) {
   console.log("\n\n --- Big tests ---");
-  console.log("For each available account, except the last ones, buy and consume 10 random contents. " +
+  console.log("For each available account, except the last ones, buy and consume 5 random contents. " +
     "It will take a while.");
   // Exclude the last account for later use
   for (let i = 0; i < web3.eth.accounts.length - 1; i++)
@@ -451,7 +450,7 @@ async function main() {
   console.log("\nTesting the suicide function of the catalog: all the values of content contracts should change " +
     "from a value to null. We test it with the name of the first content");
   console.log(" - before: "+ contentContracts[0].name());
-  catalogContract._suicide(getParams(catalogContract.owner(), 0, gasLimit));
+  catalogContract._suicide(getParams(catalogContract.owner()));
   console.log(" - after: "+ contentContracts[0].name());
 }
 
