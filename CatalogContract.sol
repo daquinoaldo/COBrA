@@ -20,13 +20,11 @@ contract CatalogContract {
 
     /* VARIABLES */
     // Constants
-    uint public contentCost = 10000;       // in wei
-    uint public premiumCost = 100000;     // in wei
+    uint public contentCost = 10000;    // in wei
+    uint public premiumCost = 100000;   // in wei
     uint public premiumTime = 5760;     // more or less a day
 
     uint public payAfter = 10;  // views
-
-    uint public chartListLength = 10;
 
     // Messages
     string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
@@ -206,8 +204,8 @@ contract CatalogContract {
     function collectPayout() public {
         uint uncollectedViews = authors[msg.sender].uncollectedViews;
         require(uncollectedViews >= payAfter, "Your contents have not received\
-            enough views. Please listen for a paymentAvailable event relative\
-            to your address.");
+    enough views. Please listen for a paymentAvailable event relative\
+    to your address.");
         authors[msg.sender].uncollectedViews = 0;
         uint amount = contentCost * uncollectedViews;
         balance -= amount;
@@ -315,8 +313,8 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
-    function getNewContentsList() public view returns(bytes32[], address[]) {
-        uint listLength = chartListLength;
+    function getNewContentsList(uint n) public view returns(bytes32[], address[]) {
+        uint listLength = n;
         // If i have less than chartListLength element in the contentsList I
         // have to return contentsList.length elements
         if (contentsList.length < listLength) listLength = contentsList.length;
@@ -334,143 +332,89 @@ contract CatalogContract {
     }
 
     /** Get the latest release of genre g.
-     * @param g the genre of which you want to get the latest contents.
-     * @return (string[], address[]) names and addresses ordered from the
-     * newest: each content in names is associated with its address in addresses.
+     * @param g the genre of which you want to get the latest content.
+     * @return (bytes32, address) names and addresses of the content.
      * Gas: no one pay.
      * Burden: < O(n).
      */
-    function getLatestByGenre(bytes32 g) public view returns(bytes32[], address[]) {
-        uint i = 0;
-        bytes32[] memory names = new bytes32[](chartListLength);
-        address[] memory addresses = new address[](chartListLength);
-        uint j = contentsList.length - 1;
-        while (i < chartListLength && j >= 0)  {
-            address addr = contentsList[j];
-            content memory c = contents[addr];   // perform only one storage read
+    function getLatestByGenre(bytes32 g) public view returns(bytes32, address) {
+        uint i = contentsList.length;
+        while (i >= 0)  {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
             if (c.genre == g) {
-                names[i] = c.name;
-                addresses[i] = addr;
-                i++;
+                return (c.name, addr);
             }
-            j--;
+            i--;
         }
-        return (names, addresses);
+        // fallback, return empy if not exist a release of g
+        return("", 0);
     }
 
-    /** Get the chart of the genre g.
-     * @param g the genre of which you want to get the most popular contents.
-     * @return (string[], address[]) names and addresses ordered from the
-     * most popular and then for block number (if there are 2 or more content
-     * with the same number of view the oldest comes first). Each content in
-     * names is associated with its address in addresses.
+    /** Get most popular release of genre g.
+     * @param g the genre of which you want to get the most popular content.
+     * @return (string, address) name and address of the most popular content.
+     * If there are 2 or more content with the same number of view the oldest comes first.
      * Gas: no one pay.
-     * Burden: chartListLength * O(n) => between O(n) and O(n^2).
+     * Burden: O(n).
      */
-    function getMostPopularByGenre(bytes32 g) public view returns(bytes32[], address[]) {
-        uint listLength = chartListLength;
-        // If i have less than chartListLength element in the contentsList I
-        // have to return contentsList.length elements
-        if (contentsList.length < listLength) listLength = contentsList.length;
-        bytes32[] memory names = new bytes32[](listLength);
-        address[] memory addresses = new address[](listLength);
-        for (uint i = 0; i < listLength; i++) {
-            int maxViews = -1;
-            bytes32 maxName;
-            address maxAddress;
-            for (uint j = 0; j < contentsList.length; j++) {
-                address addr = contentsList[j];
-                content memory c = contents[addr];
-                // check if is gt the last found (and of course the genre is g)
-                if (c.genre == g && int(c.views) > maxViews) {
-                    // check if not already in the array
-                    uint k = 0;
-                    bool alreadyFound = false;
-                    while (k < names.length && !alreadyFound) {
-                        if (names[k] == c.name) alreadyFound = true;
-                        k++;
-                    }
-                    if (!alreadyFound) {
-                        maxViews = int(c.views);
-                        maxName = c.name;
-                        maxAddress = addr;
-                    }
-                }
+    function getMostPopularByGenre(bytes32 g) public view returns(bytes32, address) {
+        int maxViews = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            if (c.genre == g && int(c.views) > maxViews) {
+                maxViews = int(c.views);
+                maxName = c.name;
+                maxAddress = addr;
             }
-            names[i] = maxName;
-            addresses[i] = maxAddress;
         }
-        return (names, addresses);
+        return (maxName, maxAddress);
     }
 
     /** Get the latest release of the author a.
-     * @param a the author of whom you want to get the latest contents.
-     * @return (string[], address[]) names and addresses ordered from the
-     * newest: each content in names is associated with its address in addresses.
+     * @param a the author of whom you want to get the latest content.
+     * @return (bytes32, address) names and addresses of the content.
      * Gas: no one pay.
      * Burden: < O(n).
      */
-    function getLatestByAuthor(address a) public view returns(bytes32[], address[]) {
-        uint i = 0;
-        bytes32[] memory names = new bytes32[](chartListLength);
-        address[] memory addresses = new address[](chartListLength);
-        uint j = contentsList.length - 1;
-        while (i < chartListLength && j >= 0)  {
-            address addr = contentsList[j];
-            content memory c = contents[addr];   // perform only one storage read
+    function getLatestByAuthor(address a) public view returns(bytes32, address) {
+        uint i = contentsList.length;
+        while (i >= 0)  {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
             if (c.author == a) {
-                names[i] = c.name;
-                addresses[i] = addr;
-                i++;
+                return (c.name, addr);
             }
-            j--;
+            i--;
         }
-        return (names, addresses);
+        // fallback, return empy if not exist a release of a
+        return("", 0);
     }
 
-    /** Get the chart of the author a.
-     * @param a the author of whom you want to get the most popular contents.
-     * @return (string[], address[]) names and addresses ordered from the
-     * most popular and then for block number (if there are 2 or more content
-     * with the same number of view the oldest comes first). Each content in
-     * names is associated with its address in addresses.
+    /** Get the most popular release of the author a.
+     * @param a the author of which you want to get the most popular content.
+     * @return (string, address) name and address of the most popular content.
+     * If there are 2 or more content with the same number of view the oldest comes first.
      * Gas: no one pay.
-     * Burden: chartListLength * O(n) => between O(n) and O(n^2).
+     * Burden: O(n).
      */
-    function getMostPopularByAuthor(address a) public view returns(bytes32[], address[]) {
-        uint listLength = chartListLength;
-        // If i have less than chartListLength element in the contentsList I
-        // have to return contentsList.length elements
-        if (contentsList.length < listLength) listLength = contentsList.length;
-        bytes32[] memory names = new bytes32[](listLength);
-        address[] memory addresses = new address[](listLength);
-        for (uint i = 0; i < listLength; i++) {
-            int maxViews = -1;
-            bytes32 maxName;
-            address maxAddress;
-            for (uint j = 0; j < contentsList.length; j++) {
-                address addr = contentsList[j];
-                content memory c = contents[addr];
-                // check if is gt the last found (and of course the author is a)
-                if (c.author == a && int(c.views) > maxViews) {
-                    // check if not already in the array
-                    uint k = 0;
-                    bool alreadyFound = false;
-                    while (k < names.length && !alreadyFound) {
-                        if (names[k] == c.name) alreadyFound = true;
-                        k++;
-                    }
-                    if (!alreadyFound) {
-                        maxViews = int(c.views);
-                        maxName = c.name;
-                        maxAddress = addr;
-                    }
-                }
+    function getMostPopularByAuthor(address a) public view returns(bytes32, address) {
+        int maxViews = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            if (c.author == a && int(c.views) > maxViews) {
+                maxViews = int(c.views);
+                maxName = c.name;
+                maxAddress = addr;
             }
-            names[i] = maxName;
-            addresses[i] = maxAddress;
         }
-        return (names, addresses);
+        return (maxName, maxAddress);
     }
 
     /** Checks if a user u has an active premium subscription.
