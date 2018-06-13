@@ -1,0 +1,10 @@
+https://ethereum.stackexchange.com/questions/28813/how-to-write-an-optimized-gas-cost-smart-contract
+
+Short address attack https://medium.com/@merunasgrincalaitis/how-to-audit-a-smart-contract-most-dangerous-attacks-in-solidity-ae402a7e7868
+
+
+
+GAS COST:
+Deploy catalog: transaction 2470605 - execution 1859489
+Deploy content: transaction 1190425 - execution 877537
+
