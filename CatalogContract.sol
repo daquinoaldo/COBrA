@@ -181,21 +181,6 @@ contract CatalogContract {
         setPremium(msg.sender);
     }
 
-    // AUXILIARY FUNCTIONS FOR CONTENTS CONTRACT
-
-    /** Checks if a user u has access to a content x.
-     * @param u the user of whom you want to check the access right.
-     * @param x the content of which you want to check the access right.
-     * @return bool true if the user has the access right, false otherwise.
-     * Gas: no one pay.
-     * Burden: small.
-     */
-    function hasAccess(address u, address x) public view exists(x) returns(bool) {
-        // lazy or, premium first because we suppose they consume more content
-        // than standard users
-        return isPremium(u) || accessibleContent[u][x];
-    }
-
     /** Used by the authors to collect their reached payout.
      * The author contents must has been visited at least payAfter times.
      * (the author should have received the event).
@@ -276,13 +261,13 @@ contract CatalogContract {
     }
 
     /** Returns the number of views for each content.
-     * @return (bytes32[], uint[], address[]), names, views and addresses:
+     * @return (bytes32[], uint[], address[]), names, addresses and views:
      * each content in names is associated with the views number in views and
      * with its address in addresses.
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getStatistics() public view returns(bytes32[], uint[], address[]) {
+    function getStatistics() public view returns(bytes32[], address[], uint[]) {
         bytes32[] memory names = new bytes32[](contentsList.length);
         uint[] memory views = new uint[](contentsList.length);
         for (uint i = 0; i < contentsList.length; i++) {
@@ -290,7 +275,7 @@ contract CatalogContract {
             names[i] = c.name;
             views[i] = c.views;
         }
-        return (names, views, contentsList);
+        return (names, contentsList, views);
     }
 
     /** Returns the list of contents without the number of views.
@@ -338,16 +323,18 @@ contract CatalogContract {
      * Burden: < O(n).
      */
     function getLatestByGenre(bytes32 g) public view returns(bytes32, address) {
-        uint i = contentsList.length;
+        // using int because i can be negative if the list is empty or there
+        // aren't element of genre g. Should not fail.
+        int i = int(contentsList.length - 1);
         while (i >= 0)  {
-            address addr = contentsList[i];
+            address addr = contentsList[uint(i)];
             content memory c = contents[addr];
             if (c.genre == g) {
                 return (c.name, addr);
             }
             i--;
         }
-        // fallback, return empy if not exist a release of g
+        // fallback, return empty if not exist a release of g
         return("", 0);
     }
 
@@ -381,9 +368,11 @@ contract CatalogContract {
      * Burden: < O(n).
      */
     function getLatestByAuthor(address a) public view returns(bytes32, address) {
-        uint i = contentsList.length;
+        // using int because i can be negative if the list is empty or there
+        // aren't element of genre g. Should not fail.
+        int i = int(contentsList.length - 1);
         while (i >= 0)  {
-            address addr = contentsList[i];
+            address addr = contentsList[uint(i)];
             content memory c = contents[addr];
             if (c.author == a) {
                 return (c.name, addr);
@@ -415,6 +404,19 @@ contract CatalogContract {
             }
         }
         return (maxName, maxAddress);
+    }
+
+    /** Checks if a user u has access to a content x.
+     * @param u the user of whom you want to check the access right.
+     * @param x the content of which you want to check the access right.
+     * @return bool true if the user has the access right, false otherwise.
+     * Gas: no one pay.
+     * Burden: small.
+     */
+    function hasAccess(address u, address x) public view exists(x) returns(bool) {
+        // lazy or, premium first because we suppose they consume more content
+        // than standard users
+        return isPremium(u) || accessibleContent[u][x];
     }
 
     /** Checks if a user u has an active premium subscription.
