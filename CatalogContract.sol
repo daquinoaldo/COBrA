@@ -20,9 +20,9 @@ contract CatalogContract {
 
     /* VARIABLES */
     // Constants
-    uint public contentCost = 10000;    // in wei
-    uint public premiumCost = 100000;   // in wei
-    uint public premiumTime = 5760;     // more or less a day
+    uint public contentCost = 0.01 ether;   // ~ 4€
+    uint public premiumCost = 0.1 ether;    // ~ 40€
+    uint public premiumTime = 172800;       // ~ 1 month
 
     uint public payAfter = 10;  // views
 
