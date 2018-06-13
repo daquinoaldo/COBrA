@@ -9,15 +9,6 @@ contract BaseContentManagementContract {
 
 contract CatalogContract {
 
-    /* FUNCTION ORDER
-        constructor
-        fallback function (if exists)
-        external
-        public
-        internal
-        private
-    */
-
     /* VARIABLES */
     // Constants
     uint public contentCost = 0.01 ether;   // ~ 4€
