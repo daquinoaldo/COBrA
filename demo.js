@@ -213,7 +213,7 @@ function printStatistics(contentsList = []) {
  * testing the getLatestByGenre function.
  */
 function latestByGenreTest() {
-  console.log("\nTesting the latestByGenre function on the genre "+genres[0]+".");
+  console.log("\nTesting the getLatestByGenre function on the genre "+genres[0]+".");
   if(!latestByGenre0) throw "There is no content of genre "+genres[0]+". Try again with more contents.";
   console.log(" - expected: "+web3.toUtf8(latestByGenre0.name())+": "+latestByGenre0.address);
   const latest = catalogContract.getLatestByGenre(web3.fromUtf8(genres[0]));
@@ -224,11 +224,49 @@ function latestByGenreTest() {
  * testing the getLatestByAuthor function.
  */
 function latestByAuthorTest() {
-  console.log("\nTesting the latestByAuthor function on the author "+web3.eth.accounts[0]+".");
+  console.log("\nTesting the getLatestByAuthor function on the author "+web3.eth.accounts[0]+".");
   if(!latestByAuthor0) throw "There is no content of author "+web3.eth.accounts[0]+". Try again with more contents.";
   console.log(" - expected: "+web3.toUtf8(latestByAuthor0.name())+": "+latestByAuthor0.address);
   const latest = catalogContract.getLatestByAuthor(web3.eth.accounts[0]);
   console.log(" - got (should be the same): "+web3.toUtf8(latest[0])+": "+latest[1]);
+}
+
+/**
+ * testing the getMostPopularByGenre function.
+ */
+function mostPopularByGenreTest() {
+  console.log("\nTesting the getMostPopularByGenre function on the genre "+genres[0]+".");
+  const before = catalogContract.getMostPopularByGenre(web3.fromUtf8(genres[0]));
+  console.log(" - before: "+web3.toUtf8(before[0])+": "+before[1]);
+  console.log(" - generating 10 views on the "+web3.toUtf8(latestByGenre0.name())+" content. " +
+    "After that this content should be the most popular.");
+  const account = web3.eth.accounts[web3.eth.accounts.length - 1];
+  for (let i = 0; i < 10; i++) {
+    if (!catalogContract.hasAccess(account, latestByGenre0.address))
+      grantAccess(latestByGenre0.address, account);
+    consumeContent(latestByGenre0.address, account);
+  }
+  const after = catalogContract.getMostPopularByGenre(web3.fromUtf8(genres[0]));
+  console.log(" - after: "+web3.toUtf8(after[0])+": "+after[1]);
+}
+
+/**
+ * testing the getMostPopularByAuthor function.
+ */
+function mostPopularByAuthorTest() {
+  console.log("\nTesting the getMostPopularByAuthor function on the author "+web3.eth.accounts[0]+".");
+  const before = catalogContract.getMostPopularByAuthor(web3.eth.accounts[0]);
+  console.log(" - before: "+web3.toUtf8(before[0])+": "+before[1]);
+  console.log(" - generating 10 views on the "+web3.toUtf8(latestByAuthor0.name())+" content. " +
+    "After that this content should be the most popular.");
+  const account = web3.eth.accounts[web3.eth.accounts.length - 1];
+  for (let i = 0; i < 10; i++) {
+    if (!catalogContract.hasAccess(account, latestByAuthor0.address))
+      grantAccess(latestByAuthor0.address, account);
+    consumeContent(latestByAuthor0.address, account);
+  }
+  const after = catalogContract.getMostPopularByAuthor(web3.eth.accounts[0]);
+  console.log(" - after: "+web3.toUtf8(after[0])+": "+after[1]);
 }
 
 /**
@@ -337,15 +375,20 @@ function bigTests(contentsList) {
     "It will take a while.");
   // Exclude the last account for later use
   for (let i = 0; i < web3.eth.accounts.length - 1; i++)
-    for (let j = 0; j < 10; j++) {
+    for (let j = 0; j < 5; j++) {
       const index = rand(contentsList.length - 1);
+      console.log(" - i: "+i+", j: "+j+", index: "+index);
+      // the first account has already bought some contents
       if (!catalogContract.hasAccess(web3.eth.accounts[i], contentsList[index].address))
         grantAccess(contentsList[index].address, web3.eth.accounts[i]);
+      console.log("granted");
       consumeContent(contentsList[index].address, web3.eth.accounts[i]);
-      console.log(" - i: "+i+", j: "+j);
+      console.log("accessed");
     }
-  console.log("statistics: "+catalogContract.getStatistics());
   printStatistics(parseStatistics(catalogContract.getStatistics()));
+
+  mostPopularByGenreTest();
+  mostPopularByAuthorTest();
 }
 
 /**

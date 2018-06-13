@@ -7,3 +7,5 @@ node_modules
 
 geth
 geth-ropsten.sh
+
+.node-xmlhttprequest-sync-*
