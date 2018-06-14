@@ -4,7 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 20;
+const contentsNumber = 25;
 
 let web3;
 let catalogContract;
