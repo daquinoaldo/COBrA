@@ -4,6 +4,7 @@
   "description": "fair COntent trade on the BlockchAin",
   "main": "demo.js",
   "scripts": {
+  	"start": "node demo.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
