@@ -93,7 +93,6 @@ function generateContents(num = 0) {
   for (let i = 0; i < num; i++)
     contents[i] = {
       name: web3.fromUtf8("title"+i),
-      content: web3.fromUtf8("This is content "+i),
       genre: web3.fromUtf8(genres[rand(genres.length-1)])
     };
   return contents;
@@ -139,7 +138,6 @@ async function deployContentsContract(num) {
   for (let i = 0; i < num; i++) {
     const owner = contentContracts[i].author();
     contentContracts[i].setName(contents[i].name, getParams(owner));
-    contentContracts[i].setContent(contents[i].content, getParams(owner));
     contentContracts[i].setGenre(contents[i].genre, getParams(owner));
     contentContracts[i].publish(catalogContract.address, getParams(owner));
     // exclude the last one because it will deleted
@@ -324,7 +322,6 @@ function grantAccessTest(contentsList = []) {
  */
 function consumeContent(contentAddress, account = web3.eth.accounts[0]) {
   if (!contentAddress) throw "You must specify the content.";
-  //TODO: receive the content
   return ContentContract.at(contentAddress).consumeContent(getParams(account));
 }
 
@@ -342,7 +339,8 @@ function smallTests(contentsList) {
   const accessibleContents = grantAccessTest(contentsList);
   // consume the first content and check that is no more consumable
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
-  console.log(" - "+consumeContent(accessibleContents[0].address, web3.eth.accounts[0]));
+  console.log(" - "+accessibleContents[0].address);
+  consumeContent(accessibleContents[0].address, web3.eth.accounts[0]);
   if (catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[0].address))
     throw "The content still consumable: something went wrong.";
   else console.log("The content is no more consumable: OK.");
@@ -360,7 +358,8 @@ function smallTests(contentsList) {
   // consume the second content and check that it still consumable
   // (should be, because Premium account should not consume previously bought content)
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
-  console.log(" - "+consumeContent(accessibleContents[1].address, web3.eth.accounts[0]));
+  console.log(" - "+accessibleContents[1].address);
+  consumeContent(accessibleContents[1].address, web3.eth.accounts[0])
   if (!catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
     throw "The content is no more consumable: something went wrong.";
   else console.log("The content still consumable: OK.");
