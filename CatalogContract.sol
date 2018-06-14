@@ -188,11 +188,13 @@ contract CatalogContract {
      */
     function addMe() public {
         BaseContentManagementContract cc =
-        BaseContentManagementContract(msg.sender);
+            BaseContentManagementContract(msg.sender);
         contents[cc] = content(cc.name(), cc.author(), cc.genre(), 0);
         contentsList.push(cc);
-        authors[cc.author()].alreadyFound = true;
-        authorsList.push(cc.author());
+        if (!authors[cc.author()].alreadyFound) {
+            authors[cc.author()].alreadyFound = true;
+            authorsList.push(cc.author());
+        }
         emit newContentAvailable(cc.name(), cc);
     }
 
