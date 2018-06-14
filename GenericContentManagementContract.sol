@@ -26,14 +26,6 @@ contract GenericContentManagementContract is BaseContentManagementContract {
 
     /* FUNCTIONS */
 
-    /** Used by the author to set the content.
-     * Can be called only one time.
-     */
-    function setContent(bytes c) public onlyOwner notEmpty(c) {
-        require(content.length == 0, "The content can not be overwritten. Use the suicide function to delete this content and create a new one.");
-        content = c;
-    }
-
     /** Used by the author to set the name.
      * Can be called only one time.
      */

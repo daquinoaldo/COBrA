@@ -16,7 +16,6 @@ contract BaseContentManagementContract {
     address public author;
     bytes32 public name;
     bytes32 public genre;
-    bytes internal content;
     bool private published = false;
     CatalogContract private catalogContract;
 
@@ -80,7 +79,6 @@ contract BaseContentManagementContract {
         require(catalogContract.hasAccess(msg.sender, this), "You must reserve this content before accessing it. Please contact the catalog.");
         catalogContract.consumeContent(msg.sender);
         emit contentConsumed(msg.sender);
-        return content;
     }
 
     /** Used by the author to publish the content.
@@ -90,7 +88,7 @@ contract BaseContentManagementContract {
      */
     function publish(address c) public onlyOwner validAddress(c) {
         require(!published, "This contract is already published in the catalog.");
-        require(name[0] != 0 && content.length != 0, "Both name and content must be set before publish the content in the catalog.");
+        require(name[0] != 0, "The content name must be set before publish the content in the catalog.");
         published = true;
         catalog = c;
         catalogContract = CatalogContract(c);
