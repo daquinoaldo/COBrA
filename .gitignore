@@ -9,3 +9,5 @@ geth
 geth-ropsten.sh
 
 .node-xmlhttprequest-*
+
+test.js
