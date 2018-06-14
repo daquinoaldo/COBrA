@@ -359,7 +359,7 @@ function smallTests(contentsList) {
   // (should be, because Premium account should not consume previously bought content)
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
   console.log(" - "+accessibleContents[1].address);
-  consumeContent(accessibleContents[1].address, web3.eth.accounts[0])
+  consumeContent(accessibleContents[1].address, web3.eth.accounts[0]);
   if (!catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
     throw "The content is no more consumable: something went wrong.";
   else console.log("The content still consumable: OK.");
