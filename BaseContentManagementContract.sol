@@ -11,9 +11,6 @@ contract BaseContentManagementContract {
 
     /* VARIABLES */
 
-    // Messages
-    string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
-
     // Runtime
     address public catalog;
     address public author;
@@ -53,8 +50,7 @@ contract BaseContentManagementContract {
 
     /** Fallback function */
     function () public {
-        emit FallbackFunctionCall(fallbackFunctionMessage, msg.data);
-        revert(fallbackFunctionMessage);
+        revert();
     }
 
     /** Suicide function, can be called only by the owner */

@@ -14,11 +14,7 @@ contract CatalogContract {
     uint public contentCost = 0.01 ether;   // ~ 4€
     uint public premiumCost = 0.1 ether;    // ~ 40€
     uint public premiumTime = 172800;       // ~ 1 month
-
     uint public payAfter = 10;  // views
-
-    // Messages
-    string private fallbackFunctionMessage = "Unexpected call: function does not exist. The fallback function has reverted the state.";
 
     // Runtime
     address public owner;
@@ -78,8 +74,7 @@ contract CatalogContract {
 
     /** Fallback function */
     function () public {
-        emit FallbackFunctionCall(fallbackFunctionMessage, msg.data);
-        revert(fallbackFunctionMessage);
+        revert();
     }
 
     /** Suicide function, can be called only by the owner */
