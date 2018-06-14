@@ -106,7 +106,7 @@ contract CatalogContract {
             // their views count
             uint256 amountFromPremium = balance * a.views / totalViews;
             uint256 amount = amountFromUncollectedViews + amountFromPremium;
-            authorsList[i].send(amount);
+            authorsList[i].transfer(amount);
         }
         // emit an event
         emit CatalogClosed();
