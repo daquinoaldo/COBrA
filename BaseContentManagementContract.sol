@@ -15,6 +15,7 @@ contract BaseContentManagementContract {
     address public catalog;
     address public author;
     bytes32 public name;
+    uint price; // is assumed that the content can be free, and so the price is 0.
     bytes32 public genre;
     bool private published = false;
     CatalogContract private catalogContract;
@@ -29,14 +30,7 @@ contract BaseContentManagementContract {
 
     /* MODIFIERS */
     modifier onlyOwner() {
-        require(msg.sender == author, "Only the author can perform this action.");
-        _;
-    }
-
-    modifier validAddress(address addr) {
-        uint size;
-        assembly { size := extcodesize(addr) }
-        require(size > 0, "The address is not valid.");
+        require(msg.sender == author);
         _;
     }
 
@@ -63,7 +57,7 @@ contract BaseContentManagementContract {
     }
 
     /** Suicide function, can be called only by the owner */
-    function murder() public validAddress(catalog) {
+    function murder() public {
         require(msg.sender == catalog);
         // emit an event
         emit ContentDeleted();
@@ -75,8 +69,8 @@ contract BaseContentManagementContract {
      * @return the content.
      */
     function consumeContent() public returns(bytes) {
-        require(published, "The content is not yet published.");
-        require(catalogContract.hasAccess(msg.sender, this), "You must reserve this content before accessing it. Please contact the catalog.");
+        require(published);
+        require(catalogContract.hasAccess(msg.sender, this));
         catalogContract.consumeContent(msg.sender);
         emit contentConsumed(msg.sender);
     }
@@ -86,9 +80,9 @@ contract BaseContentManagementContract {
      * The author must specify name and content of this contract before calling this function.
      * Can be called only one time.
      */
-    function publish(address c) public onlyOwner validAddress(c) {
-        require(!published, "This contract is already published in the catalog.");
-        require(name[0] != 0, "The content name must be set before publish the content in the catalog.");
+    function publish(address c) public onlyOwner {
+        require(!published);
+        require(name[0] != 0);
         published = true;
         catalog = c;
         catalogContract = CatalogContract(c);
