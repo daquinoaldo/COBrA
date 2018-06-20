@@ -2,8 +2,9 @@ pragma solidity ^0.4.0;
 
 contract BaseContentManagementContract {
     address public author;
-    bytes32 public name = "";
-    bytes32 public genre = "";
+    bytes32 public name;
+    bytes32 public genre;
+    uint public price;
     function murder() public;
 }
 
@@ -25,6 +26,7 @@ contract CatalogContract {
         bytes32 name;
         address author;
         bytes32 genre;
+        uint price;
         uint views;
     }
 
@@ -190,8 +192,8 @@ contract CatalogContract {
      */
     function addMe() public {
         BaseContentManagementContract cc =
-            BaseContentManagementContract(msg.sender);
-        contents[cc] = content(cc.name(), cc.author(), cc.genre(), 0);
+        BaseContentManagementContract(msg.sender);
+        contents[cc] = content(cc.name(), cc.author(), cc.genre(), cc.price(), 0);
         contentsList.push(cc);
         if (!authors[cc.author()].alreadyFound) {
             authors[cc.author()].alreadyFound = true;
@@ -443,7 +445,7 @@ contract CatalogContract {
     * @param x the content.
     */
     function grantAccess(address u, address x) private {
-        require(msg.value == contentCost);
+        require(msg.value == contents[x].price);
         require(!accessibleContent[u][x]);
         accessibleContent[u][x] = true;
         emit grantedAccess(u, x);

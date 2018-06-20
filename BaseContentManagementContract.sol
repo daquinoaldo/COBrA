@@ -15,8 +15,8 @@ contract BaseContentManagementContract {
     address public catalog;
     address public author;
     bytes32 public name;
-    uint price; // is assumed that the content can be free, and so the price is 0.
     bytes32 public genre;
+    uint price; // is assumed that the content can be free, and so the price is 0.
     bool private published = false;
     CatalogContract private catalogContract;
 
