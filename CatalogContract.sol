@@ -51,8 +51,6 @@ contract CatalogContract {
     mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into his accessible contents
     address[] contentsList;  // list of all contents
     mapping (address => content) contents;  // map content addresses into contents
-    address[] authorsList;   // list of all authors
-    mapping (address => author) authors;    // map author address in its struct
     mapping (address => mapping (address => bool)) private pendingFeedback;   // map a user into the content that he can vote
 
 
@@ -91,6 +89,12 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
+        address[] authorsList;   // list of all authors
+        mapping (address => author) authors;
+        if (!authors[cc.author()].alreadyFound) {
+            authors[cc.author()].alreadyFound = true;
+            authorsList.push(cc.author());
+        }
         // Murder all the contents in the catalog: this will free up space in
         // the blockchain and create negative gas to consume less in this
         // process: all this transfers cost a lot.
@@ -184,15 +188,23 @@ contract CatalogContract {
     }
 
     /** Used by the authors to collect their reached payout.
-     * The author contents must has been visited at least payAfter times.
+     * The content must has been visited at least payAfter times.
+     * @param x the content.
      * (the author should have received the event).
      * Gas: the author (who receives money) pays.
      */
-    function collectPayout() public {
-        uint uncollectedViews = authors[msg.sender].uncollectedViews;
+    function collectPayout(address x) public {
+        content memory c = contents[x];
+        require (c.author == msg.sender);
+        uint uncollectedViews = c.uncollectedViews;
         require(uncollectedViews >= payAfter);
-        authors[msg.sender].uncollectedViews = 0;
-        uint amount = contentCost * uncollectedViews;
+        contents[x].uncollectedViews = 0;
+        uint avarage_rate = (c.enjoySum / c.enjoyNum +
+        c.priceFairnessSum / c.priceFairnessNum +
+        c.contentSum / c.contentNum) / 3;
+        /*uint avarage_rate = (c.enjoySum + c.priceFairnessSum + c.contentSum) /
+        (c.enjoyNum + c.priceFairnessNum + c.contentNum);*/
+        uint amount = c.price * uncollectedViews * avarage_rate / 5;
         balance -= amount;
         msg.sender.transfer(amount);
     }
@@ -206,10 +218,6 @@ contract CatalogContract {
         contents[cc] = content(cc.name(), cc.author(), cc.genre(), cc.price(),
             0, 0, 0, 0, 0, 0, 0, 0);
         contentsList.push(cc);
-        if (!authors[cc.author()].alreadyFound) {
-            authors[cc.author()].alreadyFound = true;
-            authorsList.push(cc.author());
-        }
         emit newContentAvailable(cc.name(), cc);
     }
 
