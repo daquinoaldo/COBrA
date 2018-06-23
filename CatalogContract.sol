@@ -28,6 +28,17 @@ contract CatalogContract {
         bytes32 genre;
         uint price;
         uint views;
+        uint uncollectedViews;
+        // Feedback category:
+        // - how much do you enjoy the content (personal opinion)
+        // - price quality ratio
+        // - how do you think the content is good (objective opinion, based on massage
+        uint enjoySum;
+        uint enjoyNum;
+        uint priceFairnessSum;
+        uint priceFairnessNum;
+        uint contentSum;
+        uint contentNum;
     }
 
     struct author {
@@ -42,6 +53,7 @@ contract CatalogContract {
     mapping (address => content) contents;  // map content addresses into contents
     address[] authorsList;   // list of all authors
     mapping (address => author) authors;    // map author address in its struct
+    mapping (address => mapping (address => bool)) private pendingFeedback;   // map a user into the content that he can vote
 
 
     /* EVENTS */
@@ -55,14 +67,12 @@ contract CatalogContract {
 
     /* MODIFIERS */
     modifier onlyOwner() {
-        require(msg.sender == owner,
-            "Only the contract owner can perform this action.");
+        require(msg.sender == owner);
         _;
     }
 
     modifier exists(address c) {
-        require(contents[c].name != "" &&
-        BaseContentManagementContract(c).author() != 0);
+        require(contents[c].name != "" && BaseContentManagementContract(c).author() != 0);
         _;
     }
 
@@ -114,8 +124,7 @@ contract CatalogContract {
         }
         // emit an event
         emit CatalogClosed();
-        // should not, but if there is some wei in excess transfer it to the
-        // owner
+        // Transfer weis in excess to the owner
         selfdestruct(owner);
     }
 
@@ -126,26 +135,6 @@ contract CatalogContract {
     function getContent(address x) public payable exists(x) {
         grantAccess(msg.sender, x);
     }
-
-    /** Requests access to content x without paying, premium accounts only.
-     * @param x the address of the block of the ContentManagementContract.
-     * Gas: who requests the content pays.
-     */
-    /* DEPRECATED: a user could pay only a premium cycle and access all content (at most once) in the future,
-     * even if the premium account is no longer active. In this case the premium account would have turned into a
-     * "bundle" of content rather than a subscription. Since this is not the expected behavior, the function has
-     * been abolished and now a premium user can consume all content without having to first request access to it
-     * as long as his premium subscription still valid.
-     * Access to content from a premium account will not affect previously purchased content. The user can still
-     * consume the purchased content (once only) when the subscription has ended, even if that content has been
-     * accessed by this user multiple times during his premium account.
-     * In addition, a premium account can also purchase content. They will be consumable (once only) when the
-     * premium subscription has ended.
-    function getContentPremium(address x) public exists(x) {
-        require(isPremium(msg.sender));
-        accessibleContent[msg.sender][x] = true;
-        emit grantedAccess(x, msg.sender);
-    }*/
 
     /** Pays for granting access to content x to the user u.
      * @param x the address of the block of the ContentManagementContract.
@@ -171,6 +160,29 @@ contract CatalogContract {
         setPremium(msg.sender);
     }
 
+    /** Leave a feedback on a content.
+     * @param c the content address.
+     * @param y the category in which leave the feedback.
+     *        Can be "enjoy", "value for money" or "content".
+     * @param r the vote that you want to assign, from 1 to 5.
+     */
+    function leaveFeedback(address c, bytes32 y, uint r) public {
+        require (r <= 5);
+        if (y == "enjoy") {
+            contents[c].enjoySum += r;
+            contents[c].enjoyNum++;
+        }
+        if (y == "value for money") {
+            contents[c].priceFairnessSum += r;
+            contents[c].priceFairnessNum++;
+        }
+        if (y == "content") {
+            contents[c].contentSum += r;
+            contents[c].contentNum++;
+        }
+        pendingFeedback[msg.sender][c] = false;
+    }
+
     /** Used by the authors to collect their reached payout.
      * The author contents must has been visited at least payAfter times.
      * (the author should have received the event).
@@ -178,9 +190,7 @@ contract CatalogContract {
      */
     function collectPayout() public {
         uint uncollectedViews = authors[msg.sender].uncollectedViews;
-        require(uncollectedViews >= payAfter, "Your contents have not received\
-    enough views. Please listen for a paymentAvailable event relative\
-    to your address.");
+        require(uncollectedViews >= payAfter);
         authors[msg.sender].uncollectedViews = 0;
         uint amount = contentCost * uncollectedViews;
         balance -= amount;
@@ -193,7 +203,8 @@ contract CatalogContract {
     function addMe() public {
         BaseContentManagementContract cc =
         BaseContentManagementContract(msg.sender);
-        contents[cc] = content(cc.name(), cc.author(), cc.genre(), cc.price(), 0);
+        contents[cc] = content(cc.name(), cc.author(), cc.genre(), cc.price(),
+            0, 0, 0, 0, 0, 0, 0, 0);
         contentsList.push(cc);
         if (!authors[cc.author()].alreadyFound) {
             authors[cc.author()].alreadyFound = true;
@@ -213,17 +224,16 @@ contract CatalogContract {
         // Only contents can call this function, so the content to be delete
         // is the msg.sender
         delete accessibleContent[u][msg.sender];
+        pendingFeedback[u][msg.sender] = true;
         contents[msg.sender].views++;
-        address a = contents[msg.sender].author; // perform only one storage read
-        authors[a].views++;
-        authors[a].uncollectedViews++;
+        contents[msg.sender].uncollectedViews++;
         /* Notice the author if his contents has enough views.
          * Note that the event is emitted only once, when the number of views
          * is exactly equal to payAfter: it is not an oversight but a caution
          * not to spam too much. Can be changed in >= if this contract is
          * deployed in a dedicated blockchain. */
-        if (authors[a].uncollectedViews == payAfter) {
-            emit paymentAvailable(a);
+        if (contents[msg.sender].uncollectedViews == payAfter) {
+            emit paymentAvailable(msg.sender);
         }
     }
 
@@ -332,7 +342,7 @@ contract CatalogContract {
 
     /** Get most popular release of genre g.
      * @param g the genre of which you want to get the most popular content.
-     * @return (string, address) name and address of the most popular content.
+     * @return (string, address) name and address of the content.
      * If there are 2 or more content with the same number of view the oldest comes first.
      * Gas: no one pay.
      * Burden: O(n).
@@ -371,13 +381,13 @@ contract CatalogContract {
             }
             i--;
         }
-        // fallback, return empy if not exist a release of a
+        // fallback, return empty if not exist a release of a
         return("", 0);
     }
 
     /** Get the most popular release of the author a.
      * @param a the author of which you want to get the most popular content.
-     * @return (string, address) name and address of the most popular content.
+     * @return (string, address) name and address of the content.
      * If there are 2 or more content with the same number of view the oldest comes first.
      * Gas: no one pay.
      * Burden: O(n).
@@ -393,6 +403,119 @@ contract CatalogContract {
                 maxViews = int(c.views);
                 maxName = c.name;
                 maxAddress = addr;
+            }
+        }
+        return (maxName, maxAddress);
+    }
+
+    /** Get the release with highest rating in category y.
+     * @param y the category, optional. If not specified returns the content
+     * with the maximum average rating.
+     * @return (string, address) name and address of the content.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getMostRated(bytes32 y) public view returns(bytes32, address) {
+        int maxRate = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            uint rate = 0;
+            if (y == "enjoy") {
+                rate = c.enjoySum / c.enjoyNum;
+            }
+            if (y == "value for money") {
+                rate = c.priceFairnessSum / c.priceFairnessNum;
+            }
+            if (y == "content") {
+                rate = c.contentSum / c.contentSum;
+            }
+            if (int(rate) > maxRate) {
+                maxRate = int(rate);
+                maxName = c.name;
+                maxAddress = addr;
+            }
+        }
+        return (maxName, maxAddress);
+    }
+
+    /** Get the release with highest rating in category y with genre g.
+     * @param g the genre.
+     * @param y the category, optional. If not specified returns the content
+     * with the maximum average rating.
+     * @return (string, address) name and address of the content.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getMostRatedByGenre(bytes32 g, bytes32 y) public view returns(bytes32, address) {
+        int maxRate = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            if (c.genre == g) {
+                uint rate = 0;
+                if (y == "enjoy") {
+                    rate = c.enjoySum / c.enjoyNum;
+                }
+                if (y == "value for money") {
+                    rate = c.priceFairnessSum / c.priceFairnessNum;
+                }
+                if (y == "content") {
+                    rate = c.contentSum / c.contentSum;
+                }
+                if (int(rate) > maxRate) {
+                    maxRate = int(rate);
+                    maxName = c.name;
+                    maxAddress = addr;
+                }
+
+            }
+        }
+        return (maxName, maxAddress);
+    }
+
+    /** Get the release with highest rating in category y by author a.
+     * @param a the author.
+     * @param y the category, optional. If not specified returns the content
+     * with the maximum average rating.
+     * @return (string, address) name and address of the content.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getMostRatedByAuthor(address a, bytes32 y) public view returns(bytes32, address) {
+        int maxRate = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            if (c.author == a) {
+                uint rate = 0;
+                if (y == "enjoy") {
+                    rate = c.enjoySum / c.enjoyNum;
+                }
+                if (y == "value for money") {
+                    rate = c.priceFairnessSum / c.priceFairnessNum;
+                }
+                if (y == "content") {
+                    rate = c.contentSum / c.contentSum;
+                }
+                if (int(rate) > maxRate) {
+                    maxRate = int(rate);
+                    maxName = c.name;
+                    maxAddress = addr;
+                }
+
             }
         }
         return (maxName, maxAddress);
