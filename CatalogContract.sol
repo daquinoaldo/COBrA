@@ -32,7 +32,8 @@ contract CatalogContract {
         // Feedback category:
         // - how much do you enjoy the content (personal opinion)
         // - price quality ratio
-        // - how do you think the content is good (objective opinion, based on massage
+        // - how do you think the content is good (objective opinion, based on
+        // the meaning it would like to have)
         uint enjoySum;
         uint enjoyNum;
         uint priceFairnessSum;
@@ -47,11 +48,19 @@ contract CatalogContract {
         uint uncollectedViews;
     }
 
-    mapping (address => uint) private premiumUsers; // map a user into his subscription expiration time
-    mapping (address => mapping (address => bool)) private accessibleContent;   // map a user into his accessible contents
+    // map a user into his subscription expiration time
+    mapping (address => uint) private premiumUsers;
+    // map a user into his accessible contents
+    mapping (address => mapping (address => bool)) private accessibleContent;
     address[] contentsList;  // list of all contents
-    mapping (address => content) contents;  // map content addresses into contents
-    mapping (address => mapping (address => bool)) private pendingFeedback;   // map a user into the content that he can vote
+    // map content addresses into contents
+    mapping (address => content) contents;
+    // map a user into the content that he can vote
+    mapping (address => mapping (address => bool)) private pendingFeedback;
+
+    // Support structure for suicide function
+    address[] private authorsList;   // list of all authors
+    mapping (address => author) private authors;
 
 
     /* EVENTS */
@@ -70,7 +79,8 @@ contract CatalogContract {
     }
 
     modifier exists(address c) {
-        require(contents[c].name != "" && BaseContentManagementContract(c).author() != 0);
+        require(contents[c].name != "" &&
+        BaseContentManagementContract(c).author() != 0);
         _;
     }
 
@@ -89,16 +99,16 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
-        address[] authorsList;   // list of all authors
-        mapping (address => author) authors;
-        if (!authors[cc.author()].alreadyFound) {
-            authors[cc.author()].alreadyFound = true;
-            authorsList.push(cc.author());
-        }
-        // Murder all the contents in the catalog: this will free up space in
-        // the blockchain and create negative gas to consume less in this
-        // process: all this transfers cost a lot.
         for (uint i = 0; i < contentsList.length; i++) {
+            BaseContentManagementContract cc =
+            BaseContentManagementContract(contentsList[i]);
+            if (!authors[cc.author()].alreadyFound) {
+                authors[cc.author()].alreadyFound = true;
+                authorsList.push(cc.author());
+            }
+            // Murder all the contents in the catalog: this will free up space
+            // in the blockchain and create negative gas to consume less in this
+            // process: all this transfers cost a lot.
             BaseContentManagementContract(contentsList[i]).murder();
         }
         // Distribute the balance to the authors according with their views
@@ -118,9 +128,10 @@ contract CatalogContract {
             for (i = 0; i < authorsList.length; i++) {
                 a = authors[authorsList[i]];
                 // for each author pay the uncollected views
-                uint256 amountFromUncollectedViews = a.uncollectedViews * contentCost;
-                // distribute the remaining balance to the authors according with
-                // their views count
+                uint256 amountFromUncollectedViews =
+                a.uncollectedViews * contentCost;
+                // distribute the remaining balance to the authors according
+                // with their views count
                 uint256 amountFromPremium = balance * a.views / totalViews;
                 uint256 amount = amountFromUncollectedViews + amountFromPremium;
                 if (amount != 0) authorsList[i].transfer(amount);
@@ -171,7 +182,7 @@ contract CatalogContract {
      * @param r the vote that you want to assign, from 1 to 5.
      */
     function leaveFeedback(address c, bytes32 y, uint r) public {
-        require (r <= 5);
+        require(r <= 5 && pendingFeedback[msg.sender][c]);
         if (y == "enjoy") {
             contents[c].enjoySum += r;
             contents[c].enjoyNum++;
@@ -209,7 +220,8 @@ contract CatalogContract {
         msg.sender.transfer(amount);
     }
 
-    /** Called from a ContentManagementContract, adds the content to the catalog.
+    /** Called from a ContentManagementContract.
+     * Adds the content to the catalog.
      * Gas: the author pays.
      */
     function addMe() public {
@@ -281,7 +293,7 @@ contract CatalogContract {
         bytes32[] memory names = new bytes32[](contentsList.length);
         uint[] memory views = new uint[](contentsList.length);
         for (uint i = 0; i < contentsList.length; i++) {
-            content memory c = contents[contentsList[i]]; // perform only one storage read
+            content memory c = contents[contentsList[i]];
             names[i] = c.name;
             views[i] = c.views;
         }
@@ -308,13 +320,15 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
-    function getNewContentsList(uint n) public view returns(bytes32[], address[]) {
+    function getNewContentsList(uint n) public view
+    returns(bytes32[], address[]) {
         uint listLength = n;
         // If i have less than chartListLength element in the contentsList I
         // have to return contentsList.length elements
         if (contentsList.length < listLength) listLength = contentsList.length;
-        // NOTE: I assume that the latest content is not the last deployed contract in the blockchain (with the highest
-        // block number), but is the last added to the catalog (that ideally is when is "published").
+        // NOTE: I assume that the latest content is not the last deployed
+        // contract in the blockchain (with the highest block number), but is
+        // the last added to the catalog (that ideally is when is "published").
         bytes32[] memory names = new bytes32[](listLength);
         address[] memory addresses = new address[](listLength);
         for (uint i = 0; i < listLength; i++) {
@@ -351,11 +365,13 @@ contract CatalogContract {
     /** Get most popular release of genre g.
      * @param g the genre of which you want to get the most popular content.
      * @return (string, address) name and address of the content.
-     * If there are 2 or more content with the same number of view the oldest comes first.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getMostPopularByGenre(bytes32 g) public view returns(bytes32, address) {
+    function getMostPopularByGenre(bytes32 g) public view
+    returns(bytes32, address) {
         int maxViews = -1;
         bytes32 maxName;
         address maxAddress;
@@ -377,7 +393,8 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: < O(n).
      */
-    function getLatestByAuthor(address a) public view returns(bytes32, address) {
+    function getLatestByAuthor(address a) public view
+    returns(bytes32, address) {
         // using int because i can be negative if the list is empty or there
         // aren't element of genre g. Should not fail.
         int i = int(contentsList.length - 1);
@@ -396,11 +413,13 @@ contract CatalogContract {
     /** Get the most popular release of the author a.
      * @param a the author of which you want to get the most popular content.
      * @return (string, address) name and address of the content.
-     * If there are 2 or more content with the same number of view the oldest comes first.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getMostPopularByAuthor(address a) public view returns(bytes32, address) {
+    function getMostPopularByAuthor(address a) public view
+    returns(bytes32, address) {
         int maxViews = -1;
         bytes32 maxName;
         address maxAddress;
@@ -461,7 +480,8 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getMostRatedByGenre(bytes32 g, bytes32 y) public view returns(bytes32, address) {
+    function getMostRatedByGenre(bytes32 g, bytes32 y) public view
+    returns(bytes32, address) {
         int maxRate = -1;
         bytes32 maxName;
         address maxAddress;
@@ -500,7 +520,8 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getMostRatedByAuthor(address a, bytes32 y) public view returns(bytes32, address) {
+    function getMostRatedByAuthor(address a, bytes32 y) public view
+    returns(bytes32, address) {
         int maxRate = -1;
         bytes32 maxName;
         address maxAddress;
@@ -536,7 +557,8 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: small.
      */
-    function hasAccess(address u, address x) public view exists(x) returns(bool) {
+    function hasAccess(address u, address x) public view exists(x)
+    returns(bool) {
         // lazy or, premium first because we suppose they consume more content
         // than standard users
         return isPremium(u) || accessibleContent[u][x];
