@@ -6,20 +6,15 @@ contract GenericContentManagementContract is BaseContentManagementContract {
 
     /* MODIFIERS */
 
-    modifier notNull(bytes32 argument) {
-        require(argument[0] != 0, "The argument can not be null.");
-        _;
-    }
-
     modifier notEmpty(bytes argument) {
-        require(argument.length != 0, "The argument can not be empty.");
+        require(argument.length != 0);
         _;
     }
 
     modifier validAddress(address addr) {
         uint size;
         assembly { size := extcodesize(addr) }
-        require(size > 0, "The address is not valid.");
+        require(size > 0);
         _;
     }
 
@@ -29,16 +24,24 @@ contract GenericContentManagementContract is BaseContentManagementContract {
     /** Used by the author to set the name.
      * Can be called only one time.
      */
-    function setName(bytes32 n) public onlyOwner notNull(n) {
-        require(name[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
+    function setName(bytes32 n) public onlyOwner {
+        require(name[0] == 0);
         name = n;
     }
 
     /** Used by the author to set the genre.
      * Can be called only one time, but its call is not mandatory (the content can not have a genre).
      */
-    function setGenre(bytes32 g) public onlyOwner notNull(g) {
-        require(genre[0] == 0, "The name can not be overwritten. Use the suicide function to delete this content and create a new one.");
+    function setGenre(bytes32 g) public onlyOwner {
+        require(genre[0] == 0);
         genre = g;
+    }
+
+    /** Used by the author to set the content price.
+     * Can be called only one time.
+     */
+    function setPrice(uint p) public onlyOwner {
+        require(price == 0);
+        price = p;
     }
 }
