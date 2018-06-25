@@ -2,6 +2,8 @@ const fs = require('fs');
 const solc = require('solc');
 const Web3 = require('web3');
 
+const contractsPath = "../contracts/";
+
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
 const contentsNumber = 20;
@@ -36,7 +38,8 @@ function connect() {
 function compileContract(filename = "Contract.sol") {
   return new Promise(resolve => {
     // Compile the source code
-    const outputContractName = filename+":"+filename.replace(".sol", "");
+    const outputContractName = contractsPath + filename+":"+filename.replace(".sol", "");
+    filename = contractsPath + filename;
     const input = fs.readFileSync(filename);
     function findImports(path) {
       return { contents: fs.readFileSync(path).toString() }
@@ -355,7 +358,6 @@ function grantAccessTest(contentsList = []) {
  */
 function consumeContent(contentAddress, account = web3.eth.accounts[0]) {
   if (!contentAddress) throw "You must specify the content.";
-  //TODO: receive the content
   return ContentContract.at(contentAddress).consumeContent(getParams(account));
 }
 
