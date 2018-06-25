@@ -4,7 +4,7 @@ const Web3 = require('web3');
 
 const provider = "http://localhost:8545";
 const genres = ["adventure", "fantasy", "romance", "horror"];
-const contentsNumber = 25;
+const contentsNumber = 20;
 
 let web3;
 let catalogContract;
@@ -93,6 +93,7 @@ function generateContents(num = 0) {
   for (let i = 0; i < num; i++)
     contents[i] = {
       name: web3.fromUtf8("title"+i),
+      content: web3.fromUtf8("This is content "+i),
       genre: web3.fromUtf8(genres[rand(genres.length-1)])
     };
   return contents;
@@ -138,12 +139,32 @@ async function deployContentsContract(num) {
   for (let i = 0; i < num; i++) {
     const owner = contentContracts[i].author();
     contentContracts[i].setName(contents[i].name, getParams(owner));
+    contentContracts[i].setContent(contents[i].content, getParams(owner));
     contentContracts[i].setGenre(contents[i].genre, getParams(owner));
     contentContracts[i].publish(catalogContract.address, getParams(owner));
     // exclude the last one because it will deleted
     if (i < num - 1 && contents[i].genre === web3.fromUtf8(genres[0])) latestByGenre0 = contentContracts[i];
   }
   return contentContracts;
+}
+
+async function deployContent(author = web3.eth.accounts[0]) {
+  // compile the contract
+  const compiledContract = await compileContract('GenericContentManagementContract.sol');
+  ContentContract = web3.eth.contract(JSON.parse(compiledContract.interface));
+
+  let contract;
+  await deployContract(compiledContract, author)
+    .then(contractInstance => {
+      contract = contractInstance;
+    });
+
+  const owner = contract.author();
+  contract.setName(web3.fromUtf8("0"), getParams(owner));
+  contract.setGenre(web3.fromUtf8("0"), getParams(owner));
+  contract.publish(catalogContract.address, getParams(owner));
+
+  return contract;
 }
 
 /**
@@ -279,6 +300,18 @@ function grantAccess(contentAddress, user = web3.eth.accounts[0]) {
   catalogContract.getContent(contentAddress, getParams(user, contentCost));
 }
 
+function sleep() {
+  console.log("SLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEP" +
+    "SLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEP" +
+    "SLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEPSLEEEEEEP");
+  const millis = 10000;
+  const date = new Date();
+  let curDate = null;
+  do { curDate = new Date(); }
+  while(curDate-date < millis);
+  console.log("STOP SLEEP");
+}
+
 /**
  * Small test of the functions to buy and gift content.
  * Are needed at least 3 accounts in web3.eth.accounts and at least 3 contents.
@@ -322,6 +355,7 @@ function grantAccessTest(contentsList = []) {
  */
 function consumeContent(contentAddress, account = web3.eth.accounts[0]) {
   if (!contentAddress) throw "You must specify the content.";
+  //TODO: receive the content
   return ContentContract.at(contentAddress).consumeContent(getParams(account));
 }
 
@@ -339,8 +373,7 @@ function smallTests(contentsList) {
   const accessibleContents = grantAccessTest(contentsList);
   // consume the first content and check that is no more consumable
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
-  console.log(" - "+accessibleContents[0].address);
-  consumeContent(accessibleContents[0].address, web3.eth.accounts[0]);
+  console.log(" - "+consumeContent(accessibleContents[0].address, web3.eth.accounts[0]));
   if (catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[0].address))
     throw "The content still consumable: something went wrong.";
   else console.log("The content is no more consumable: OK.");
@@ -358,8 +391,7 @@ function smallTests(contentsList) {
   // consume the second content and check that it still consumable
   // (should be, because Premium account should not consume previously bought content)
   console.log("\nConsuming the first content: "+accessibleContents[0].name);
-  console.log(" - "+accessibleContents[1].address);
-  consumeContent(accessibleContents[1].address, web3.eth.accounts[0]);
+  console.log(" - "+consumeContent(accessibleContents[1].address, web3.eth.accounts[0]));
   if (!catalogContract.hasAccess(web3.eth.accounts[0], accessibleContents[1].address))
     throw "The content is no more consumable: something went wrong.";
   else console.log("The content still consumable: OK.");
@@ -397,6 +429,18 @@ function bigTests(contentsList) {
     "contract balance: "+web3.eth.getBalance(catalogContract.address));
 }
 
+function payAfterTest() {
+
+  const account = web3.eth.accounts[web3.eth.accounts.length - 1];
+  for (let i = 0; i < 10; i++) {
+    if (!catalogContract.hasAccess(account, latestByGenre0.address))
+      grantAccess(latestByGenre0.address, account);
+    consumeContent(latestByGenre0.address, account);
+  }
+  const after = catalogContract.getMostPopularByGenre(web3.fromUtf8(genres[0]));
+  console.log(" - after: "+web3.toUtf8(after[0])+": "+after[1]);
+}
+
 /**
  * Main function of the program.
  * @returns {Promise<void>} because the function is async.
@@ -406,6 +450,38 @@ async function main() {
   // deploy the Catalog
   console.log("Deploying catalog...");
   catalogContract = await compileAndDeployContract('CatalogContract.sol');
+
+  const content1 = await deployContent();
+  const content2 = await deployContent(web3.eth.accounts[1]);
+  const content3 = await deployContent();
+  const content4 = await deployContent(web3.eth.accounts[1]);
+
+  for (let i = 0; i < 1; i++) {
+    grantAccess(content1.address);
+    consumeContent(content1.address);
+
+    /*grantAccess(content2.address);
+    consumeContent(content2.address);
+
+    grantAccess(content3.address);
+    consumeContent(content3.address);
+
+    grantAccess(content4.address);
+    consumeContent(content4.address);*/
+  }
+
+  const premiumCost = catalogContract.premiumCost();
+  catalogContract.buyPremium(getParams(web3.eth.accounts[0], premiumCost));
+
+  catalogContract._suicide(getParams(catalogContract.owner()));
+  sleep();
+
+  //content1._suicide(getParams(content1.author()));
+  //content2._suicide(getParams(content2.author()));
+
+
+  sleep();
+
 
   // deploy contentsNumber contract from different accounts
   console.log("\nDeploying "+contentsNumber+" contents...");
@@ -422,8 +498,8 @@ async function main() {
 
   // check the suicide function of a content
   console.log("\nTesting the suicide function of a content: we have called the suicide function on the last item.");
-  contentContracts[contentContracts.length - 1]._suicide(
-    getParams(contentContracts[contentContracts.length - 1].author()));
+  contentContracts[contentContracts.length - 2]._suicide(
+    getParams(contentContracts[contentContracts.length - 2].author()));
   console.log("getNewContentsList: you should see a list very similar to the preceding one, " +
     "but without the first element.");
   printContentsList(parseContentsList(catalogContract.getNewContentsList(10)));
@@ -456,3 +532,9 @@ async function main() {
 
 // noinspection JSIgnoredPromiseFromCall
 main();
+
+/*main()
+  .catch(err => {
+    console.error("ERROR: "+err);
+    process.exit(1);
+  });*/
