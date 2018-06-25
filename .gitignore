@@ -5,12 +5,17 @@
 # Mac OS
 .DS_Store
 
-# Node.js
-node_modules
-.node-xmlhttprequest-*
-
 # Java
 out
 
 # OTHER
-DAPP/src/com/aldodaquino/cobra/
+# web3 library
+DAPP/lib/
+# java contracts
+DAPP/src/com/aldodaquino/cobra
+# geth account keyfile
+wallet
+
+
+
+geth-ropsten.sh
