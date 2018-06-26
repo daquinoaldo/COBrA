@@ -29,12 +29,12 @@ public class Wallet {
             String walletPath;
 
             if (files == null || files.length == 0) {  // no wallets
-                String fileName = null;
+                String fileName;
                 fileName = WalletUtils.generateFullNewWalletFile(WALLET_PW, folder);
                 walletPath = WALLET_PATH + "/" + fileName;
                 System.out.println("com.aldodaquino.cobra.main.Wallet created in " + walletPath);
             }
-            else walletPath = files[0].getName();
+            else walletPath = files[0].getAbsolutePath();
 
             // load credentials
             credentials = WalletUtils.loadCredentials(WALLET_PW, walletPath);
