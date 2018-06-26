@@ -20,7 +20,7 @@ public class HttpRequestHelper {
         return parseQuery(query);
     }
 
-    public static Map<String, Object> parseQuery(String query) throws UnsupportedEncodingException {
+    private static Map<String, Object> parseQuery(String query) throws UnsupportedEncodingException {
         if (query == null) throw new IllegalArgumentException("Invalid query: null.");
 
         // HashMap to be filled with all parameters in the query
@@ -41,10 +41,15 @@ public class HttpRequestHelper {
         return parameters;
     }
 
-    public static void sendResponse(HttpExchange request, String response) throws IOException {
-        request.sendResponseHeaders(200, response.length());
+    public static void sendResponse(HttpExchange request, String response, int code) throws IOException {
+        request.sendResponseHeaders(code, response.length());
         OutputStream os = request.getResponseBody();
         os.write(response.getBytes());
         os.close();
     }
+
+    public static void sendResponse(HttpExchange request, String response) throws IOException {
+        sendResponse(request, response, 200);
+    }
+
 }
