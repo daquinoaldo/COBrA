@@ -1,4 +1,6 @@
-import com.aldodaquino.cobra.CatalogContract;
+package com.aldodaquino.cobra.main;
+
+import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;

@@ -1,3 +1,5 @@
+package com.aldodaquino.cobra.main;
+
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -30,7 +32,7 @@ public class Wallet {
                 String fileName = null;
                 fileName = WalletUtils.generateFullNewWalletFile(WALLET_PW, folder);
                 walletPath = WALLET_PATH + "/" + fileName;
-                System.out.println("Wallet created in " + walletPath);
+                System.out.println("com.aldodaquino.cobra.main.Wallet created in " + walletPath);
             }
             else walletPath = files[0].getName();
 

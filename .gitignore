@@ -12,7 +12,7 @@ out
 # web3 library
 DAPP/lib/
 # java contracts
-DAPP/src/com/aldodaquino/cobra
+DAPP/src/com/aldodaquino/cobra/contracts
 # geth account keyfile
 wallet
 
