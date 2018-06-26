@@ -38,8 +38,8 @@ contract CatalogContract {
         uint enjoyNum;
         uint priceFairnessSum;
         uint priceFairnessNum;
-        uint contentSum;
-        uint contentNum;
+        uint contentMeaningSum;
+        uint contentMeaningNum;
     }
 
     struct author {
@@ -54,7 +54,7 @@ contract CatalogContract {
     mapping (address => mapping (address => bool)) private accessibleContent;
     address[] contentsList;  // list of all contents
     // map content addresses into contents
-    mapping (address => content) contents;
+    mapping (address => content) private contents;
     // map a user into the content that he can vote
     mapping (address => mapping (address => bool)) private pendingFeedback;
 
@@ -192,8 +192,8 @@ contract CatalogContract {
             contents[c].priceFairnessNum++;
         }
         if (y == "content") {
-            contents[c].contentSum += r;
-            contents[c].contentNum++;
+            contents[c].contentMeaningSum += r;
+            contents[c].contentMeaningNum++;
         }
         pendingFeedback[msg.sender][c] = false;
     }
@@ -210,12 +210,12 @@ contract CatalogContract {
         uint uncollectedViews = c.uncollectedViews;
         require(uncollectedViews >= payAfter);
         contents[x].uncollectedViews = 0;
-        uint avarage_rate = (c.enjoySum / c.enjoyNum +
+        uint average_rate = (c.enjoySum / c.enjoyNum +
         c.priceFairnessSum / c.priceFairnessNum +
-        c.contentSum / c.contentNum) / 3;
-        /*uint avarage_rate = (c.enjoySum + c.priceFairnessSum + c.contentSum) /
+        c.contentMeaningSum / c.contentMeaningNum) / 3;
+        /*uint average_rate = (c.enjoySum + c.priceFairnessSum + c.contentSum) /
         (c.enjoyNum + c.priceFairnessNum + c.contentNum);*/
-        uint amount = c.price * uncollectedViews * avarage_rate / 5;
+        uint amount = c.price * uncollectedViews * average_rate / 5;
         balance -= amount;
         msg.sender.transfer(amount);
     }
@@ -340,6 +340,81 @@ contract CatalogContract {
         return (names, addresses);
     }
 
+    /** Returns the list of contents with all information.
+     * @return (address[], bytes32[], address[], bytes32[], uint[], uint[], uint[], uint[], uint[]). In the position n we got in
+     * order address, name, author, genre, price, views, enjoy rating, value for money rating and content meaning rating
+     * of the content n.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    /*function getFullContentsList() public view
+    returns(address[], bytes32[], address[], bytes32[], uint[], uint[], uint[], uint[], uint[]) {
+        bytes32[] memory name = new bytes32[](contentsList.length);
+        address[] memory authorAddr = new address[](contentsList.length);
+        bytes32[] memory genre = new bytes32[](contentsList.length);
+        uint[] memory price = new uint[](contentsList.length);
+        uint[] memory views = new uint[](contentsList.length);
+        uint[] memory enjoy = new uint[](contentsList.length);
+        uint[] memory priceFairness = new uint[](contentsList.length);
+        uint[] memory contentMeaning = new uint[](contentsList.length);
+        for (uint i = 0; i < contentsList.length; i++) {
+            content memory c = contents[contentsList[i]];
+            name[i] = c.name;
+            authorAddr[i] = c.author;
+            genre[i] = c.genre;
+            price[i] = c.price;
+            views[i] = c.views;
+            enjoy[i] = c.enjoySum / c.enjoyNum;
+            priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
+            contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
+        }
+        return (contentsList, name, authorAddr, genre, price, views, enjoy, priceFairness, contentMeaning);
+    }*/
+
+    /** Returns the list of contents with all information.
+     * @return (address[], bytes32[], address[], bytes32[], uint[], uint[]). In the position n we got in order address,
+     * name, author, genre, price, views of the content n.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getFullContentsList() public view
+    returns(address[], bytes32[], address[], bytes32[], uint[], uint[]) {
+        bytes32[] memory name = new bytes32[](contentsList.length);
+        address[] memory authorAddr = new address[](contentsList.length);
+        bytes32[] memory genre = new bytes32[](contentsList.length);
+        uint[] memory price = new uint[](contentsList.length);
+        uint[] memory views = new uint[](contentsList.length);
+        for (uint i = 0; i < contentsList.length; i++) {
+            content memory c = contents[contentsList[i]];
+            name[i] = c.name;
+            authorAddr[i] = c.author;
+            genre[i] = c.genre;
+            price[i] = c.price;
+            views[i] = c.views;
+        }
+        return (contentsList, name, authorAddr, genre, price, views);
+    }
+
+    /** Returns ratings list of contents.
+     * @return (address[], uint[], uint[], uint[]). In the position n we got in order address, enjoy rating, value for
+     * money rating and content meaning rating of the content n.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getRatingsList() public view
+    returns(address[], uint[], uint[], uint[]) {
+        uint[] memory enjoy = new uint[](contentsList.length);
+        uint[] memory priceFairness = new uint[](contentsList.length);
+        uint[] memory contentMeaning = new uint[](contentsList.length);
+        for (uint i = 0; i < contentsList.length; i++) {
+            content memory c = contents[contentsList[i]];
+            enjoy[i] = c.enjoySum / c.enjoyNum;
+            priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
+            contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
+        }
+        return (contentsList, enjoy, priceFairness, contentMeaning);
+    }
+
     /** Get the latest release of genre g.
      * @param g the genre of which you want to get the latest content.
      * @return (bytes32, address) names and addresses of the content.
@@ -459,7 +534,7 @@ contract CatalogContract {
                 rate = c.priceFairnessSum / c.priceFairnessNum;
             }
             if (y == "content") {
-                rate = c.contentSum / c.contentSum;
+                rate = c.contentMeaningSum / c.contentMeaningSum;
             }
             if (int(rate) > maxRate) {
                 maxRate = int(rate);
@@ -497,7 +572,7 @@ contract CatalogContract {
                     rate = c.priceFairnessSum / c.priceFairnessNum;
                 }
                 if (y == "content") {
-                    rate = c.contentSum / c.contentSum;
+                    rate = c.contentMeaningSum / c.contentMeaningSum;
                 }
                 if (int(rate) > maxRate) {
                     maxRate = int(rate);
@@ -537,7 +612,7 @@ contract CatalogContract {
                     rate = c.priceFairnessSum / c.priceFairnessNum;
                 }
                 if (y == "content") {
-                    rate = c.contentSum / c.contentSum;
+                    rate = c.contentMeaningSum / c.contentMeaningNum;
                 }
                 if (int(rate) > maxRate) {
                     maxRate = int(rate);
