@@ -15,16 +15,12 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;    // average gas p
 
 public class Catalog {
 
-    private Credentials credentials;
+    private Credentials credentials = new Wallet().getCredentials();
     private CatalogContract catalog;
 
     public Catalog() {
         // connect to web3
         Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-
-        // load credentials
-        credentials = new Wallet().getCredentials();
-
         // deploy catalog
         try {
             catalog = CatalogContract.deploy(web3, credentials, GAS_PRICE, GAS_LIMIT).send();
@@ -32,6 +28,13 @@ public class Catalog {
             System.err.println("ERROR while deploying CatalogContract.sol");
             e.printStackTrace();
         }
+    }
+
+    public Catalog(String address) {
+        // connect to web3
+        Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
+        // load catalog
+        catalog = CatalogContract.load(address, web3, credentials, GAS_PRICE, GAS_LIMIT);
     }
 
     /**
@@ -47,33 +50,6 @@ public class Catalog {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public List<Content> GetAuthorContents(String author) {
-        Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>> list;
-        try {
-            // Request the list
-            list = catalog.getFullContentsList().send();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        // Parse parameters
-        List<String> addresses = list.getValue1();
-        List<byte[]> names = list.getValue2();
-        List<String> authors = list.getValue3();
-        List<byte[]> genres = list.getValue4();
-        List<BigInteger> prices = list.getValue5();
-        List<BigInteger> views = list.getValue6();
-
-        List<Content> authorContents = new ArrayList<>();
-        for (int i = 0; i < author.length(); i++)
-            if (authors.get(i).equals(author))
-                authorContents.add(
-                        new Content(addresses.get(i), names.get(i), author, genres.get(i), prices.get(i), views.get(i))
-                );
-
-        return authorContents;
     }
 
     /**
