@@ -3,14 +3,14 @@ package com.aldodaquino.cobra.main;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-public class Content {
+public class Content implements Stringifiable {
 
     private String address;
     private String name;
     private String author;
     private String genre;
     private BigInteger price;
-    private BigInteger views = null;
+    private BigInteger views;
     private int enjoy;
     private int priceFairness;
     private int contentMeaning;
@@ -88,8 +88,20 @@ public class Content {
         this.contentMeaning = contentMeaning.intValue();
     }
 
-    public String bytesToString (byte[] bytes) {
+    public String bytesToString(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    public String stringify() {
+        return "\"address\n:" + address +
+                "\"name\n:" + name +
+                "\"author\n:" + author +
+                "\"genre\n:" + genre +
+                "\"price\n:" + price +
+                "\"views\n:" + views +
+                "\"enjoy\n:" + enjoy +
+                "\"priceFairness\n:" + priceFairness +
+                "\"contentMeaning\n:" + contentMeaning;
     }
 
 }
