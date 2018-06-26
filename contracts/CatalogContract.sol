@@ -341,37 +341,6 @@ contract CatalogContract {
     }
 
     /** Returns the list of contents with all information.
-     * @return (address[], bytes32[], address[], bytes32[], uint[], uint[], uint[], uint[], uint[]). In the position n we got in
-     * order address, name, author, genre, price, views, enjoy rating, value for money rating and content meaning rating
-     * of the content n.
-     * Gas: no one pay.
-     * Burden: O(n).
-     */
-    /*function getFullContentsList() public view
-    returns(address[], bytes32[], address[], bytes32[], uint[], uint[], uint[], uint[], uint[]) {
-        bytes32[] memory name = new bytes32[](contentsList.length);
-        address[] memory authorAddr = new address[](contentsList.length);
-        bytes32[] memory genre = new bytes32[](contentsList.length);
-        uint[] memory price = new uint[](contentsList.length);
-        uint[] memory views = new uint[](contentsList.length);
-        uint[] memory enjoy = new uint[](contentsList.length);
-        uint[] memory priceFairness = new uint[](contentsList.length);
-        uint[] memory contentMeaning = new uint[](contentsList.length);
-        for (uint i = 0; i < contentsList.length; i++) {
-            content memory c = contents[contentsList[i]];
-            name[i] = c.name;
-            authorAddr[i] = c.author;
-            genre[i] = c.genre;
-            price[i] = c.price;
-            views[i] = c.views;
-            enjoy[i] = c.enjoySum / c.enjoyNum;
-            priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
-            contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
-        }
-        return (contentsList, name, authorAddr, genre, price, views, enjoy, priceFairness, contentMeaning);
-    }*/
-
-    /** Returns the list of contents with all information.
      * @return (address[], bytes32[], address[], bytes32[], uint[], uint[]). In the position n we got in order address,
      * name, author, genre, price, views of the content n.
      * Gas: no one pay.

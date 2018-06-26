@@ -10,7 +10,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * HTTP Server for the REST API
+ * HTTP Server for the REST Main
  */
 public class Main {
 
@@ -19,14 +19,14 @@ public class Main {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
 
         // set handlers
-        server.createContext("/test", new MyHandler());
+        server.createContext("/getAuthorContents", new GetAuthorContents());
 
         // start server
         server.setExecutor(null); // creates a default executor
         server.start();
     }
 
-    static class MyHandler implements HttpHandler {
+    static class GetAuthorContents implements HttpHandler {
         @Override
         public void handle(HttpExchange request) throws IOException {
             Map<String, Object> parameters = HttpRequestHelper.parseGET(request);
