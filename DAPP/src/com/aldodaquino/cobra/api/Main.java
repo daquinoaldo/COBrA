@@ -64,6 +64,9 @@ public class Main {
         return stringBuilder.toString();
     }
 
+    /**
+     * Send a JSON string containing the list of Contents of a specified author.
+     */
     private static class GetAuthorContents implements HttpHandler  {
         Catalog catalog;
         GetAuthorContents(Catalog catalog) {
@@ -86,6 +89,9 @@ public class Main {
         }
     }
 
+    /**
+     * Deploy a CatalogContract.
+     */
     private static class DeployCatalog implements HttpHandler  {
         Main main;
         DeployCatalog(Main main) {
@@ -105,7 +111,7 @@ public class Main {
             main.catalog = new Catalog(credentials);
 
             // send response
-            String response = stringifyList(authorContents);
+            String response = main.catalog.getAddress();
             HttpRequestHelper.sendResponse(request, response);
         }
     }

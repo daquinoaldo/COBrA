@@ -50,6 +50,14 @@ public class Catalog {
         }
     }
 
+    /**
+     * Returns the contract address.
+     * @return a string containing the contract address.
+     */
+    public String getAddress() {
+        return catalog.getContractAddress();
+    }
+
 
     /**
      * Return the list of all the content of a given author.
