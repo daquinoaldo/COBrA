@@ -15,9 +15,9 @@ import com.sun.net.httpserver.HttpServer;
 import org.web3j.crypto.Credentials;
 
 /**
- * HTTP Server for the REST Main
+ * HTTP Server for the REST MainAPI
  */
-public class Main {
+public class MainAPI {
 
     private static final int PORT = 8000;
     public Catalog catalog;
@@ -93,8 +93,8 @@ public class Main {
      * Deploy a CatalogContract.
      */
     private static class DeployCatalog implements HttpHandler  {
-        Main main;
-        DeployCatalog(Main main) {
+        MainAPI main;
+        DeployCatalog(MainAPI main) {
             this.main = main;
         }
 
