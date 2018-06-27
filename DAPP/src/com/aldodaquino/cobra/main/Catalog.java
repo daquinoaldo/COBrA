@@ -15,13 +15,33 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;    // average gas p
 
 public class Catalog {
 
-    private Credentials credentials = new Wallet().getCredentials();
+    private Credentials credentials;
     private CatalogContract catalog;
 
-    public Catalog() {
+    /**
+     * Load and manage an existent CatalogContract.
+     * @param credentials your account credentials.
+     * @param catalogAddress the existent catalog address on blockchain.
+     */
+    public Catalog(Credentials credentials, String catalogAddress) {
+        // save credentials
+        this.credentials = credentials;
         // connect to web3
         Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-        // deploy catalog
+        // load catalog
+        catalog = CatalogContract.load(catalogAddress, web3, credentials, GAS_PRICE, GAS_LIMIT);
+    }
+
+    /**
+     * Deploy and manage a new CatalogContract.
+     * @param credentials your account credentials.
+     */
+    public Catalog(Credentials credentials) {
+        // save credentials
+        this.credentials = credentials;
+        // connect to web3
+        Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
+        // deploy
         try {
             catalog = CatalogContract.deploy(web3, credentials, GAS_PRICE, GAS_LIMIT).send();
         } catch (Exception e) {
@@ -30,12 +50,6 @@ public class Catalog {
         }
     }
 
-    public Catalog(String address) {
-        // connect to web3
-        Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-        // load catalog
-        catalog = CatalogContract.load(address, web3, credentials, GAS_PRICE, GAS_LIMIT);
-    }
 
     /**
      * Return the list of all the content of a given author.
