@@ -642,10 +642,18 @@ contract CatalogContract {
     * @param x the content.
     */
     function grantAccess(address u, address x) private {
+        // do not manage the extra value, just require exactly what the content cost
         require(msg.value == contents[x].price);
+        // prevent double purchase of contents
         require(!accessibleContent[u][x]);
+        // the author cannot buy his contents
+        // this also ensure that an author cannot vote its content to increase the
+        // withdrawal
+        require(contents[x].author != u);
+        // grant access
         accessibleContent[u][x] = true;
         emit grantedAccess(u, x);
+        // update balance
         balance += msg.value;
     }
 }
