@@ -22,7 +22,7 @@ public class Content implements Stringifiable {
     }
 
     public Content (String address, byte[] name, String author, byte[] genre, BigInteger price, BigInteger views) {
-        new Content(address, name, author);
+        this(address, name, author);
         this.genre = bytesToString(genre);
         this.price = price;
         this.views = views;
