@@ -18,8 +18,6 @@ public class Logo extends JPanel {
     }
     
     private Logo(int iconSize) {
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
         // icon
         Image icon = Images.logo.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
         JLabel iconLabel = new JLabel(new ImageIcon(icon), JLabel.CENTER);
@@ -30,8 +28,14 @@ public class Logo extends JPanel {
         title.setFont(new Font("Arial", Font.PLAIN, iconSize/5));
         title.setHorizontalAlignment(JLabel.CENTER);
 
-        // add components
-        this.add(iconLabel);
-        this.add(title);
+        // put components in a container
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.add(iconLabel);
+        container.add(title);
+
+        // prepare this panel
+        setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(container);
     }
 }
