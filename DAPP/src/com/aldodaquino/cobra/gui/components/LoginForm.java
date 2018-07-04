@@ -30,10 +30,10 @@ public class LoginForm extends JPanel {
         JButton sendButton = ComponentFactory.newButton("Login", e -> login());
 
         // add all to the panel
-        this.add(privateKeyLabel);
-        this.add(privateKeyInput);
-        this.add(ComponentFactory.newVSpacer());
-        this.add(sendButton);
+        add(privateKeyLabel);
+        add(privateKeyInput);
+        add(ComponentFactory.newVSpacer());
+        add(sendButton);
     }
 
     /**

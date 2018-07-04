@@ -8,8 +8,8 @@ public class Dimensions {
     public static final int ICON_SIZE = 128;
 
     // spacers and separators
-    public static final Dimension V_SPACER = new Dimension(0,5);
-    public static final Dimension M_V_SPACER = new Dimension(0,15);
-    public static final Dimension BIG_V_SPACER = new Dimension(0,35);
+    public static final Dimension V_SPACER_S = new Dimension(0,5);
+    public static final Dimension V_SPACER_M = new Dimension(0,15);
+    public static final Dimension V_SPACER_L = new Dimension(0,35);
 
 }

@@ -1,5 +1,6 @@
 package com.aldodaquino.cobra.gui;
 
+import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.constants.Images;
 
 import javax.swing.*;
@@ -34,7 +35,7 @@ public class Utils {
      * Shows a dialog, running on another thread.
      * @param msg the dialog message.
      */
-    public static void showInfoDialog(String msg) {
+    public static void showMessageDialog(String msg) {
         showDialog("Info", msg, JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -56,14 +57,36 @@ public class Utils {
      * @param msg the question.
      * @return true for yes, false for no.
      */
-    public static boolean showConfirmationDialog(String msg) {
+    public static boolean showConfirmDialog(String msg) {
         return JOptionPane.showConfirmDialog(null, msg,"Warning", JOptionPane.YES_NO_OPTION) ==
                 JOptionPane.YES_OPTION;
     }
 
-
-
     /**
+     * Run a runnable asynchronously. Shows a loading panel during the loading.
+     * @param runnable to be run.
+     * @param window in which show the loading panel.
+     */
+    public static void doAsync(Runnable runnable, JFrame window) {
+        startLoading(window);
+        new Thread(() -> {
+            runnable.run();
+            stopLoading(window);
+        }).start();
+    }
+
+    private static void startLoading(JFrame window) {
+        window.setGlassPane(ComponentFactory.newSpinner());
+        window.getGlassPane().setVisible(true);
+    }
+
+    private static void stopLoading(JFrame window) {
+        window.getGlassPane().setVisible(false);
+    }
+
+
+
+    /*
      * Call the setEnabled function for each component in a container. Used by the Login and Register Panels
      * @param container for which components are to be enabled
      * @param enable true to enable, false to disable
@@ -85,7 +108,7 @@ public class Utils {
         return fileDialog(false, defaultName);
     }*/
 
-    /**
+    /*
      * Show the file selection dialog for file choosing and saving
      * @param isOpenDialog if true pick a file, if false choose where to save the incoming file
      * @param filename should be null if isOpenDialog, otherwise specify the original filename of the incoming file
@@ -118,7 +141,7 @@ public class Utils {
             else continue;
     
             if (!isOpenDialog && selected.exists()) {
-                aFileIsSelected = showConfirmationDialog("The file will be overwritten. Are you sure?");
+                aFileIsSelected = showConfirmDialog("The file will be overwritten. Are you sure?");
             } else if (!isOpenDialog && selected.exists() && !selected.canWrite()) {
                 showErrorDialog("Can't write in the specified path. Please try again.");
             } else if (isOpenDialog && !selected.canRead()) {

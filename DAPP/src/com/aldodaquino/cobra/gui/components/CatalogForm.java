@@ -45,9 +45,9 @@ public class CatalogForm extends JPanel {
         deployPanel.add(deployButton);
 
         // add all to the panel
-        this.add(connectPanel);
-        this.add(ComponentFactory.newVSpacer(Dimensions.M_V_SPACER));
-        this.add(deployPanel);
+        add(connectPanel);
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M));
+        add(deployPanel);
     }
 
     /**
@@ -58,7 +58,7 @@ public class CatalogForm extends JPanel {
         String address = catalogAddressField.getText().trim();
 
         // remove "0x" from the address
-        if (address.length() > 2 && address.substring(0, 1).equals("0x"))
+        if (address.length() == 42 && address.substring(0, 2).equals("0x"))
             address = address.substring(2);
 
         // check the length  of the inputs and validate the form

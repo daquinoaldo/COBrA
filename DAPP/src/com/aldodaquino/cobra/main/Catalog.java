@@ -13,12 +13,16 @@ import java.util.List;
 public class Catalog {
 
     private Web3j web3;
-    private Credentials credentials;
-
     private BigInteger gasPrice;
     private BigInteger gasLimit;
+    private Credentials credentials;
 
     private CatalogContract catalog;
+    private String owner;
+
+    /*
+     * CONSTRUCTORS
+     */
 
     /**
      * Load and manage an existent CatalogContract.
@@ -34,6 +38,11 @@ public class Catalog {
         init(credentials);
         // load catalog
         catalog = CatalogContract.load(catalogAddress, web3, credentials, gasPrice, gasLimit);
+        try {   // save the catalog owner
+            owner = catalog.owner().send();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -45,6 +54,7 @@ public class Catalog {
         // deploy
         try {
             catalog = CatalogContract.deploy(web3, credentials, gasPrice, gasLimit).send();
+            owner = credentials.getAddress();   // who deploy the contract is the owner
         } catch (Exception e) {
             System.err.println("ERROR while deploying CatalogContract.sol");
             e.printStackTrace();
@@ -68,6 +78,10 @@ public class Catalog {
         System.out.println("Gas limit: " + gasLimit + ".");
     }
 
+    /*
+     * BASIC INFORMATION ABOUT CATALOG
+     */
+
     /**
      * Returns the contract address.
      * @return a string containing the contract address.
@@ -76,6 +90,27 @@ public class Catalog {
         return catalog.getContractAddress();
     }
 
+    /**
+     * Returns the contract owner.
+     * @return a string containing the contract owner.
+     */
+    public String getOwner() {
+        return owner;
+    }
+
+    public boolean suicide() {
+        try {
+            catalog._suicide().send();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /*
+     * CATALOG CONTRACT SPECIFIC METHODS
+     */
 
     /**
      * Return the list of all the content of a given author.
