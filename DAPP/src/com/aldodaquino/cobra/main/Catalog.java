@@ -10,12 +10,14 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.web3j.tx.Transfer.GAS_LIMIT;  // transaction gas limit
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;    // average gas price
-
 public class Catalog {
 
+    private Web3j web3;
     private Credentials credentials;
+
+    private BigInteger gasPrice;
+    private BigInteger gasLimit;
+
     private CatalogContract catalog;
 
     /**
@@ -24,12 +26,14 @@ public class Catalog {
      * @param catalogAddress the existent catalog address on blockchain.
      */
     public Catalog(Credentials credentials, String catalogAddress) {
-        // save credentials
-        this.credentials = credentials;
-        // connect to web3
-        Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
+        // check the address
+        if (catalogAddress.length() == 42 && catalogAddress.substring(0, 2).equals("0x"))
+            catalogAddress = catalogAddress.substring(2);
+        if (catalogAddress.length() != 40) throw new IllegalArgumentException("Invalid address.");
+
+        init(credentials);
         // load catalog
-        catalog = CatalogContract.load(catalogAddress, web3, credentials, GAS_PRICE, GAS_LIMIT);
+        catalog = CatalogContract.load(catalogAddress, web3, credentials, gasPrice, gasLimit);
     }
 
     /**
@@ -37,17 +41,31 @@ public class Catalog {
      * @param credentials your account credentials.
      */
     public Catalog(Credentials credentials) {
-        // save credentials
-        this.credentials = credentials;
-        // connect to web3
-        Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
+        init(credentials);
         // deploy
         try {
-            catalog = CatalogContract.deploy(web3, credentials, GAS_PRICE, GAS_LIMIT).send();
+            catalog = CatalogContract.deploy(web3, credentials, gasPrice, gasLimit).send();
         } catch (Exception e) {
             System.err.println("ERROR while deploying CatalogContract.sol");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Init the object, called by constructors.
+     * @param credentials passed to constructor.
+     */
+    private void init(Credentials credentials) {
+        if (credentials == null) throw new IllegalArgumentException("Credentials cannot be null.");
+        // save credentials
+        this.credentials = credentials;
+        // connect to web3
+        web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
+        // get gas information
+        gasPrice = Utils.getGasPrice(web3);
+        gasLimit = Utils.getGasLimit(web3);
+        System.out.println("Gas price: " + gasPrice + ".");
+        System.out.println("Gas limit: " + gasLimit + ".");
     }
 
     /**
