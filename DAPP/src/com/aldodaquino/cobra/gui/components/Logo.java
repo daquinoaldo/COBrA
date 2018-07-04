@@ -25,8 +25,15 @@ public class Logo extends JPanel {
         // title
         JLabel title = new JLabel(Strings.appName);
         title.setForeground(Colors.logo);
-        title.setFont(new Font("Arial", Font.PLAIN, iconSize/5));
         title.setHorizontalAlignment(JLabel.CENTER);
+        // find out how much the font can grow in width and calculate the corresponding font size
+        Font labelFont = title.getFont();
+        String labelText = title.getText();
+        int stringWidth = title.getFontMetrics(labelFont).stringWidth(labelText);
+        double widthRatio = (double)iconSize / (double)stringWidth;
+        int newFontSize = (int)(labelFont.getSize() * widthRatio);
+        // set the new font size
+        title.setFont(new Font(title.getFont().getName(), Font.PLAIN, newFontSize));
 
         // put components in a container
         JPanel container = new JPanel();
