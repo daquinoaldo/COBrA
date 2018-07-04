@@ -1,7 +1,7 @@
 package com.aldodaquino.cobra.gui;
 
 import com.aldodaquino.cobra.gui.constants.Strings;
-import com.aldodaquino.cobra.gui.panels.LoginPanel;
+import com.aldodaquino.cobra.gui.panels.StarterPanel;
 
 import javax.swing.*;
 
@@ -13,7 +13,7 @@ public class MainGUI {
     public static void main(String[] args) {
 
         // Show login window
-        JPanel loginPanel = new LoginPanel();
+        JPanel loginPanel = new StarterPanel();
         JFrame loginWindow = Utils.createFixedWindow(Strings.appName, loginPanel, null, true);
 
 

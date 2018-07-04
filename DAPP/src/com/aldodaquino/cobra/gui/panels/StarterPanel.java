@@ -10,7 +10,7 @@ import com.aldodaquino.cobra.main.Status;
 import javax.swing.*;
 import java.awt.*;
 
-public class LoginPanel extends JPanel {
+public class StarterPanel extends JPanel {
 
     private static final Dimension padding = new Dimension(65, 35);
 
@@ -19,7 +19,7 @@ public class LoginPanel extends JPanel {
     private JPanel loginForm;
     private JPanel catalogForm;
 
-    public LoginPanel() {
+    public StarterPanel() {
         // Init components
         JPanel logo = new Logo();
         loginForm = new LoginForm(this::loginCallback);
