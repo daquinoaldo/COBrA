@@ -1,7 +1,12 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.constants.Dimensions;
+
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 /**
@@ -31,6 +36,39 @@ public class ComponentFactory {
 
     public static Border newBorder(int width, int height) {
         return BorderFactory.createEmptyBorder(height, width,  height, width);
+    }
+
+    static Component newVSpacer() {
+        return Box.createRigidArea(Dimensions.V_SPACER);
+    }
+
+    public static Component newVSpacer(Dimension dimension) {
+        return Box.createRigidArea(dimension);
+    }
+
+    static JSeparator newHr() {
+        return new JSeparator(SwingConstants.HORIZONTAL);
+    }
+
+    static JPanel newHr(String title) {
+        JPanel panel = new JPanel();
+        TitledBorder titledBorder = BorderFactory.createTitledBorder(title);
+        titledBorder.setTitleJustification(TitledBorder.CENTER);
+
+        MatteBorder mb = new MatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY);
+        TitledBorder tb = new TitledBorder(mb, title, TitledBorder.CENTER, TitledBorder.DEFAULT_POSITION, null, Color.LIGHT_GRAY);
+
+        panel.setBorder(tb);
+        return panel;
+    }
+
+    static JPanel newTitledBorderPanel(String title) {
+        JPanel panel = new JPanel();
+        TitledBorder titledBorder = BorderFactory.createTitledBorder(title);
+        titledBorder.setTitleJustification(TitledBorder.CENTER);
+        panel.setBorder(titledBorder);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        return panel;
     }
 
 

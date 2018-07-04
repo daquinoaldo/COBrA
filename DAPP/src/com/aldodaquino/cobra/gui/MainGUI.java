@@ -8,14 +8,13 @@ import javax.swing.*;
 /**
  * The GUI Main. Starts the GUI with the login panel.
  */
-class MainGUI {
+public class MainGUI {
     
     public static void main(String[] args) {
+
         // Show login window
         JPanel loginPanel = new LoginPanel();
         JFrame loginWindow = Utils.createFixedWindow(Strings.appName, loginPanel, null, true);
-
-
 
 
         /*User.addLoginListener(isLoggedIn -> {
