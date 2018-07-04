@@ -23,7 +23,6 @@ public class CatalogForm extends JPanel {
 
         // Labels
         JLabel catalogAddressLabel = new JLabel("Catalog address:");
-        JLabel orLabel = new JLabel("----- OR -----");
 
         // catalog address field: on enter connect
         catalogAddressField = ComponentFactory.newTextField(e -> connect());
