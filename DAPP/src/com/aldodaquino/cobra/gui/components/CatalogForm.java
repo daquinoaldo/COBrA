@@ -57,12 +57,12 @@ public class CatalogForm extends JPanel {
         // get input data
         String address = catalogAddressField.getText().trim();
 
-        // remove "0x" from the address
-        if (address.length() == 42 && address.substring(0, 2).equals("0x"))
-            address = address.substring(2);
+        // add "0x" to the address if not present
+        if (address.length() == 40)
+            address = "0x" + address;
 
         // check the length  of the inputs and validate the form
-        if (address.length() == 40)
+        if (address.length() == 42)
             connectCallback.accept(address);
         else Utils.showErrorDialog("Check the values entered in the fields.");
     }

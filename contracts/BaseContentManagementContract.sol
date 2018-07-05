@@ -13,7 +13,7 @@ contract BaseContentManagementContract {
 
     // Runtime
     address public catalog;
-    address public author;
+    address public owner;
     bytes32 public name;
     bytes32 public genre;
     uint public price = 0; // is assumed that the content can be free, and so the price is 0.
@@ -30,7 +30,7 @@ contract BaseContentManagementContract {
 
     /* MODIFIERS */
     modifier onlyOwner() {
-        require(msg.sender == author);
+        require(msg.sender == owner);
         _;
     }
 
@@ -38,7 +38,7 @@ contract BaseContentManagementContract {
     /* FUNCTIONS */
     /** Constructor */
     constructor() public {
-        author = msg.sender;
+        owner = msg.sender;
     }
 
     /** Fallback function */
@@ -53,7 +53,7 @@ contract BaseContentManagementContract {
         // emit an event
         emit ContentDeleted();
         // if there is some wei send it to the author
-        selfdestruct(author);
+        selfdestruct(owner);
     }
 
     /** Suicide function, can be called only by the owner */
@@ -62,7 +62,7 @@ contract BaseContentManagementContract {
         // emit an event
         emit ContentDeleted();
         // if there is some wei send it to the author
-        selfdestruct(author);
+        selfdestruct(owner);
     }
 
     /** Used by the customers to consume this content after requesting the access.

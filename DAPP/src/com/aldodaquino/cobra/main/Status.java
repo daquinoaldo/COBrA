@@ -2,13 +2,15 @@ package com.aldodaquino.cobra.main;
 
 import org.web3j.crypto.Credentials;
 
+import java.math.BigInteger;
+
 public class Status {
 
     public static final int ROLE_CUSTOMER = 0;
     public static final int ROLE_AUTHOR = 1;
 
     private Credentials credentials;
-    private Catalog catalog;
+    private CatalogManager catalogManager;
     private int role;
 
     public void login (String privateKey) {
@@ -17,32 +19,36 @@ public class Status {
         credentials = Credentials.create(privateKey);
     }
 
-    public void connect(String catalogAddress) {
+    public void connectCatalog(String catalogAddress) {
         if (credentials == null)
             throw new UnsupportedOperationException("You must be logged in to connect to a catalog.");
-        catalog = new Catalog(credentials, catalogAddress);
+        catalogManager = new CatalogManager(credentials, catalogAddress);
     }
 
-    public void disconnect() {
-        catalog = null;
+    public void disconnectCatalog() {
+        catalogManager = null;
     }
 
-    public void deploy() {
+    public void deployCatalog() {
         if (credentials == null)
             throw new UnsupportedOperationException("You must be logged in to deploy a new catalog.");
-        catalog = new Catalog(credentials);
+        catalogManager = new CatalogManager(credentials);
+    }
+
+    public String getUserAddress() {
+        if (credentials == null)
+            throw new UnsupportedOperationException("You must be logged in.");
+        return credentials.getAddress();
     }
 
     public boolean isCatalogOwner() {
-        if (credentials == null)
-            throw new UnsupportedOperationException("You must be logged in.");
-        if (catalog == null)
+        if (catalogManager == null)
             throw new UnsupportedOperationException("Not connected to a catalog.");
-        return catalog.getOwner().equals(credentials.getAddress());
+        return catalogManager.getOwner().equals(getUserAddress());
     }
 
-    public Catalog getCatalog() {
-        return catalog;
+    public CatalogManager getCatalogManager() {
+        return catalogManager;
     }
 
     public void setRole(int role) {
@@ -51,5 +57,11 @@ public class Status {
 
     public int getRole() {
         return role;
+    }
+
+    public void deployContent(String name, String genre, BigInteger price) {
+        if (credentials == null)
+            throw new UnsupportedOperationException("You must be logged in to deploy a new catalog.");
+        new ContentManager(credentials, catalogManager.getAddress(), name, genre, price);
     }
 }

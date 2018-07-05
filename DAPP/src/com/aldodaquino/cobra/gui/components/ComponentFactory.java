@@ -14,7 +14,7 @@ import java.awt.event.ActionListener;
  */
 public class ComponentFactory {
 
-    static JButton newButton(String text, ActionListener e) {
+    public static JButton newButton(String text, ActionListener e) {
         JButton button = new JButton(text);
         button.addActionListener(e);
         return button;

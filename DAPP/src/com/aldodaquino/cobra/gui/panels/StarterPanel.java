@@ -6,19 +6,16 @@ import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.main.Status;
 
 import javax.swing.*;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.util.function.Consumer;
 
-public class StarterPanel extends JPanel {
+public class StarterPanel extends UpgradablePanel {
 
     private static final Dimension padding = new Dimension(65, 35);
 
     private Status status = new Status();
-    Consumer<Status> whenDone;
+    private Consumer<Status> whenDone;
 
-    private JFrame window;
     private JPanel loginForm;
     private JPanel catalogForm;
     private JPanel roleForm;
@@ -54,24 +51,6 @@ public class StarterPanel extends JPanel {
         c13.gridx = 1;
         c13.gridy = 3;
         add(loginForm, c13);
-
-        // set listener
-        this.addAncestorListener(new AncestorListener() {
-            @Override
-            public void ancestorAdded(AncestorEvent event) {
-                Component ancestor = event.getAncestor();
-                if (ancestor.getClass() == JFrame.class)
-                    window = (JFrame) ancestor;
-            }
-            @Override
-            public void ancestorRemoved(AncestorEvent event) {
-                window = null;
-            }
-            @Override
-            public void ancestorMoved(AncestorEvent event) {
-                ancestorAdded(event);
-            }
-        });
     }
 
     /* CALLBACKS */
@@ -86,14 +65,14 @@ public class StarterPanel extends JPanel {
 
     private void connectCallback(String catalogAddress) {
         Utils.doAsync(() -> {
-            status.connect(catalogAddress);
+            status.connectCatalog(catalogAddress);
             postConnect();
         }, window);
     }
 
     private void deployCallback() {
         Utils.doAsync(() -> {
-            status.deploy();
+            status.deployCatalog();
             postConnect();
         }, window);
     }
@@ -105,14 +84,14 @@ public class StarterPanel extends JPanel {
     }
 
     private void disconnectCallback() {
-        status.disconnect();
+        status.disconnectCatalog();
         replaceComponent(roleForm, catalogForm);
     }
 
     private void deleteCallback() {
         if (!Utils.showConfirmDialog("Do you really want to delete this catalog?")) return;
         Utils.doAsync(() -> {
-            if (status.getCatalog().suicide()) {
+            if (status.getCatalogManager().suicide()) {
                 Utils.showMessageDialog("Catalog deleted.");
                 disconnectCallback();
             } else Utils.showErrorDialog("UNKNOWN ERROR: the catalog is not deleted.");
@@ -136,5 +115,6 @@ public class StarterPanel extends JPanel {
         window.revalidate();
         window.repaint();
         window.pack();
+        window.setLocationRelativeTo(null);
     }
 }

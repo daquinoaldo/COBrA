@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 
 contract BaseContentManagementContract {
-    address public author;
+    address public owner;
     bytes32 public name;
     bytes32 public genre;
     uint public price;
@@ -80,7 +80,7 @@ contract CatalogContract {
 
     modifier exists(address c) {
         require(contents[c].name != "" &&
-        BaseContentManagementContract(c).author() != 0);
+        BaseContentManagementContract(c).owner() != 0);
         _;
     }
 
@@ -102,9 +102,9 @@ contract CatalogContract {
         for (uint i = 0; i < contentsList.length; i++) {
             BaseContentManagementContract cc =
             BaseContentManagementContract(contentsList[i]);
-            if (!authors[cc.author()].alreadyFound) {
-                authors[cc.author()].alreadyFound = true;
-                authorsList.push(cc.author());
+            if (!authors[cc.owner()].alreadyFound) {
+                authors[cc.owner()].alreadyFound = true;
+                authorsList.push(cc.owner());
             }
             // Murder all the contents in the catalog: this will free up space
             // in the blockchain and create negative gas to consume less in this
@@ -227,7 +227,7 @@ contract CatalogContract {
     function addMe() public {
         BaseContentManagementContract cc =
         BaseContentManagementContract(msg.sender);
-        contents[cc] = content(cc.name(), cc.author(), cc.genre(), cc.price(),
+        contents[cc] = content(cc.name(), cc.owner(), cc.genre(), cc.price(),
             0, 0, 0, 0, 0, 0, 0, 0);
         contentsList.push(cc);
         emit newContentAvailable(cc.name(), cc);

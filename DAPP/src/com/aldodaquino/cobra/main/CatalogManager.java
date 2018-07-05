@@ -2,110 +2,37 @@ package com.aldodaquino.cobra.main;
 
 import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple6;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Catalog {
-
-    private Web3j web3;
-    private BigInteger gasPrice;
-    private BigInteger gasLimit;
-    private Credentials credentials;
+public class CatalogManager extends ContractManager {
 
     private CatalogContract catalog;
-    private String owner;
 
     /*
      * CONSTRUCTORS
      */
 
     /**
-     * Load and manage an existent CatalogContract.
-     * @param credentials your account credentials.
-     * @param catalogAddress the existent catalog address on blockchain.
-     */
-    public Catalog(Credentials credentials, String catalogAddress) {
-        // check the address
-        if (catalogAddress.length() == 42 && catalogAddress.substring(0, 2).equals("0x"))
-            catalogAddress = catalogAddress.substring(2);
-        if (catalogAddress.length() != 40) throw new IllegalArgumentException("Invalid address.");
-
-        init(credentials);
-        // load catalog
-        catalog = CatalogContract.load(catalogAddress, web3, credentials, gasPrice, gasLimit);
-        try {   // save the catalog owner
-            owner = catalog.owner().send();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Deploy and manage a new CatalogContract.
+     * Deploy and manage a new catalog contract.
      * @param credentials your account credentials.
      */
-    public Catalog(Credentials credentials) {
-        init(credentials);
-        // deploy
-        try {
-            catalog = CatalogContract.deploy(web3, credentials, gasPrice, gasLimit).send();
-            owner = credentials.getAddress();   // who deploy the contract is the owner
-        } catch (Exception e) {
-            System.err.println("ERROR while deploying CatalogContract.sol");
-            e.printStackTrace();
-        }
+    public CatalogManager(Credentials credentials) {
+        super(credentials);
+        catalog = (CatalogContract) deploy(CatalogContract.class);
     }
 
     /**
-     * Init the object, called by constructors.
-     * @param credentials passed to constructor.
+     * Load and manage an existent catalog contract.
+     * @param credentials your account credentials.
+     * @param contractAddress the existent contract address on blockchain.
      */
-    private void init(Credentials credentials) {
-        if (credentials == null) throw new IllegalArgumentException("Credentials cannot be null.");
-        // save credentials
-        this.credentials = credentials;
-        // connect to web3
-        web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-        // get gas information
-        gasPrice = Utils.getGasPrice(web3);
-        gasLimit = Utils.getGasLimit(web3);
-        System.out.println("Gas price: " + gasPrice + ".");
-        System.out.println("Gas limit: " + gasLimit + ".");
-    }
-
-    /*
-     * BASIC INFORMATION ABOUT CATALOG
-     */
-
-    /**
-     * Returns the contract address.
-     * @return a string containing the contract address.
-     */
-    public String getAddress() {
-        return catalog.getContractAddress();
-    }
-
-    /**
-     * Returns the contract owner.
-     * @return a string containing the contract owner.
-     */
-    public String getOwner() {
-        return owner;
-    }
-
-    public boolean suicide() {
-        try {
-            catalog._suicide().send();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public CatalogManager(Credentials credentials, String contractAddress) {
+        super(credentials);
+        catalog = (CatalogContract) load(CatalogContract.class, contractAddress);
     }
 
     /*
@@ -124,6 +51,19 @@ public class Catalog {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    /* Authors method */
+
+    public boolean withdraw(String address) {
+        try {
+            catalog.collectPayout(address).send();
+            // TODO: how much I have withdraw?
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

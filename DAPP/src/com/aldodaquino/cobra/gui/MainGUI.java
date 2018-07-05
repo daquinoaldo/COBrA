@@ -1,6 +1,8 @@
 package com.aldodaquino.cobra.gui;
 
+import com.aldodaquino.cobra.gui.constants.Images;
 import com.aldodaquino.cobra.gui.constants.Strings;
+import com.aldodaquino.cobra.gui.panels.AuthorPanel;
 import com.aldodaquino.cobra.gui.panels.StarterPanel;
 import com.aldodaquino.cobra.main.Status;
 
@@ -11,17 +13,49 @@ import javax.swing.*;
  */
 public class MainGUI {
 
-    private static JFrame starterWindow;
+    private static JFrame window;
 
-    private static void showMainWindow(Status status) {
-        starterWindow.dispose();
+    private static void showMainPanel(Status status) {
+        JPanel newPanel;
+
+        switch (status.getRole()) {
+            case (Status.ROLE_CUSTOMER):
+                newPanel = new AuthorPanel(status);
+                break;
+            case (Status.ROLE_AUTHOR):
+                newPanel = new AuthorPanel(status);
+                break;
+            default:
+                throw new IllegalArgumentException("Status role property has an invalid value. " +
+                        "Should be one of the Status.ROLE_X constants.");
+        }
+        setContent(newPanel);
     }
     
     public static void main(String[] args) {
 
-        // Show login window
-        JPanel starterPanel = new StarterPanel(MainGUI::showMainWindow);
-        starterWindow = Utils.createFixedWindow(Strings.appName, starterPanel, null, true);
+        // Create the window
+        window = new JFrame(Strings.appName);                               // set the app title
+        window.setIconImage(Images.logo.getImage());                        // set logo as application icon
+        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);     // exit program when window gets closed
 
+        // Create the starter panel
+        JPanel starterPanel = new StarterPanel(MainGUI::showMainPanel);
+
+        // Add the panel to the window and make the window fit the content
+        window.setContentPane(starterPanel);    // put a panel inside the window
+        window.pack();                          // resize the window based on content size
+        window.setLocationRelativeTo(null);     // center the window
+        window.setVisible(true);                // show it
+
+    }
+
+    private static void setContent(JPanel replacement) {
+        //window.removeAll();
+        window.setContentPane(replacement);
+        window.revalidate();
+        window.repaint();
+        window.pack();
+        window.setLocationRelativeTo(null);
     }
 }

@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 
-import com.aldodaquino.cobra.main.Catalog;
+import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 import com.aldodaquino.cobra.main.Stringifiable;
 import com.aldodaquino.javautils.HttpRequestHelper;
@@ -20,7 +20,7 @@ import org.web3j.crypto.Credentials;
 public class MainAPI {
 
     private static final int PORT = 8000;
-    public Catalog catalog;
+    public CatalogManager catalogManager;
 
     /**
      * Main method.
@@ -29,21 +29,21 @@ public class MainAPI {
      * @throws IOException if the web server cannot be created on the specified port
      */
     public static void main(String[] args) throws IOException {
-        Catalog catalog;
+        CatalogManager catalogManager;
 
         // Get an existent catalog from address or create a new one
         if (args.length == 0) throw new IllegalArgumentException(
                 "Usage: args[0] private key, args[1], optional, an existent CatalogContract address.");
         Credentials credentials = Credentials.create(args[0]);
         if (args.length > 1)
-            catalog = new Catalog(credentials, args[1]);
-        else catalog = new Catalog(credentials);
+            catalogManager = new CatalogManager(credentials, args[1]);
+        else catalogManager = new CatalogManager(credentials);
 
         // create server
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
         // set handlers
-        server.createContext("/getAuthorContents", new GetAuthorContents(catalog));
+        server.createContext("/getAuthorContents", new GetAuthorContents(catalogManager));
 
         // start server
         server.setExecutor(null); // creates a default executor
@@ -68,9 +68,9 @@ public class MainAPI {
      * Send a JSON string containing the list of Contents of a specified author.
      */
     private static class GetAuthorContents implements HttpHandler  {
-        Catalog catalog;
-        GetAuthorContents(Catalog catalog) {
-            this.catalog = catalog;
+        CatalogManager catalogManager;
+        GetAuthorContents(CatalogManager catalogManager) {
+            this.catalogManager = catalogManager;
         }
 
         @Override
@@ -81,7 +81,7 @@ public class MainAPI {
             if (author == null) HttpRequestHelper.sendResponse(request, "ERROR: author address not specified.", 400);
 
             // get the list of content
-            List<Content> authorContents = catalog.getAuthorContents(author);
+            List<Content> authorContents = catalogManager.getAuthorContents(author);
 
             // send response
             String response = stringifyList(authorContents);
@@ -108,10 +108,10 @@ public class MainAPI {
 
             // get the list of content
             Credentials credentials = Credentials.create(address);
-            main.catalog = new Catalog(credentials);
+            main.catalogManager = new CatalogManager(credentials);
 
             // send response
-            String response = main.catalog.getAddress();
+            String response = main.catalogManager.getAddress();
             HttpRequestHelper.sendResponse(request, response);
         }
     }
