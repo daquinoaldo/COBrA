@@ -4,23 +4,6 @@ import "./BaseContentManagementContract.sol";
 
 contract GenericContentManagementContract is BaseContentManagementContract {
 
-    /* MODIFIERS */
-
-    modifier notEmpty(bytes argument) {
-        require(argument.length != 0);
-        _;
-    }
-
-    modifier validAddress(address addr) {
-        uint size;
-        assembly { size := extcodesize(addr) }
-        require(size > 0);
-        _;
-    }
-
-
-    /* FUNCTIONS */
-
     /** Used by the author to set the name.
      * Can be called only one time.
      */
