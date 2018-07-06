@@ -1,6 +1,7 @@
 package com.aldodaquino.cobra.gui;
 
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
+import com.aldodaquino.cobra.gui.constants.Images;
 
 import javax.swing.*;
 
@@ -8,6 +9,25 @@ import javax.swing.*;
  * Utilities for the gui
  */
 public class Utils {
+
+    /**
+     * Create and show a new centered Window with fixed dimensions and not resizable.
+     * @param title of the Window.
+     * @param panel to show in the Window body.
+     * @param exitOnClose if true exit the Client when the Window is close.
+     * @return the generated JFrame.
+     */
+    public static JFrame createFixedWindow(String title, JPanel panel, boolean exitOnClose) {
+        JFrame window = new JFrame(title);                                  // create a window
+        window.setIconImage(Images.logo.getImage());                         // set logo as application icon
+        window.setContentPane(panel);                                       // put a panel inside the window
+        window.pack();                               // resize the window based on content size
+        window.setLocationRelativeTo(null);                                 // center the window
+        if (exitOnClose)
+            window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); // exit program when window gets closed
+        window.setVisible(true);                                            // show it
+        return window;
+    }
 
     /**
      * Shows a dialog, running on another thread.

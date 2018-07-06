@@ -20,7 +20,7 @@ public class ComponentFactory {
         return button;
     }
 
-    static JTextField newTextField(ActionListener e) {
+    public static JTextField newTextField(ActionListener e) {
         return newField(e, false);
     }
 
@@ -38,7 +38,7 @@ public class ComponentFactory {
         return BorderFactory.createEmptyBorder(height, width,  height, width);
     }
 
-    static Component newVSpacer() {
+    public static Component newVSpacer() {
         return Box.createRigidArea(Dimensions.V_SPACER_S);
     }
 

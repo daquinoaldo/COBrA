@@ -12,14 +12,14 @@ import java.math.BigInteger;
 
 class ContractManager {
 
-    protected Web3j web3;
-    protected BigInteger gasPrice;
-    protected BigInteger gasLimit;
-    protected Credentials credentials;
+    private Web3j web3;
+    private BigInteger gasPrice;
+    private BigInteger gasLimit;
+    private Credentials credentials;
 
     private Contract contract;
     private Class<? extends Contract> contractClass;
-    protected String owner;
+    private String owner;
 
     /*
      * CONSTRUCTORS

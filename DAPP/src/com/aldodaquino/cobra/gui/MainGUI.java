@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui;
 
-import com.aldodaquino.cobra.gui.constants.Images;
 import com.aldodaquino.cobra.gui.constants.Strings;
 import com.aldodaquino.cobra.gui.panels.AuthorPanel;
 import com.aldodaquino.cobra.gui.panels.StarterPanel;
@@ -31,22 +30,21 @@ public class MainGUI {
         }
         setContent(newPanel);
     }
-    
-    public static void main(String[] args) {
 
-        // Create the window
-        window = new JFrame(Strings.appName);                               // set the app title
-        window.setIconImage(Images.logo.getImage());                        // set logo as application icon
-        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);     // exit program when window gets closed
+    public static void main(String[] args) {
 
         // Create the starter panel
         JPanel starterPanel = new StarterPanel(MainGUI::showMainPanel);
 
-        // Add the panel to the window and make the window fit the content
+        // Create the window
+        window = Utils.createFixedWindow(Strings.appName, starterPanel, true);
+        /*window = new JFrame(Strings.appName);                               // set the app title
+        window.setIconImage(Images.logo.getImage());                        // set logo as application icon
+        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);     // exit program when window gets closed
         window.setContentPane(starterPanel);    // put a panel inside the window
         window.pack();                          // resize the window based on content size
         window.setLocationRelativeTo(null);     // center the window
-        window.setVisible(true);                // show it
+        window.setVisible(true);                // show it*/
 
     }
 

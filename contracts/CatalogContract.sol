@@ -198,6 +198,30 @@ contract CatalogContract {
         pendingFeedback[msg.sender][c] = false;
     }
 
+    /** Used to know the reached payout of a content.
+     * @param x the content.
+     * @return the reached payout
+     * or 0 if the content does not have received enought views.
+     * Gas: the author (who receives money) pays.
+     */
+    function payoutAvailable(address x) public view returns(uint) {
+        content memory c = contents[x];
+        uint uncollectedViews = c.uncollectedViews;
+        if (uncollectedViews < payAfter) return 0;
+        uint enjoyRate = 0;
+        uint priceFairnessRate = 0;
+        uint contentMeaningRate = 0;
+        if (c.enjoyNum != 0) enjoyRate = c.enjoySum / c.enjoyNum;
+        if (c.priceFairnessNum != 0)
+            priceFairnessRate = c.priceFairnessSum / c.priceFairnessNum;
+        if (c.contentMeaningNum != 0)
+            contentMeaningRate = c.contentMeaningSum / c.contentMeaningNum;
+        uint average_rate = (enjoyRate + priceFairnessRate +
+        contentMeaningRate) / 3;
+        uint amount = c.price * uncollectedViews * average_rate / 5;
+        return amount;
+    }
+
     /** Used by the authors to collect their reached payout.
      * The content must has been visited at least payAfter times.
      * @param x the content.
@@ -205,6 +229,14 @@ contract CatalogContract {
      * Gas: the author (who receives money) pays.
      */
     function collectPayout(address x) public {
+        require (contents[x].author == msg.sender);
+        uint amount = payoutAvailable(x);
+        require(amount > 0);
+        contents[x].uncollectedViews = 0;
+        balance -= amount;
+        msg.sender.transfer(amount);
+    }
+    /*function collectPayout(address x) public {
         content memory c = contents[x];
         require (c.author == msg.sender);
         uint uncollectedViews = c.uncollectedViews;
@@ -223,7 +255,7 @@ contract CatalogContract {
         uint amount = c.price * uncollectedViews * average_rate / 5;
         balance -= amount;
         msg.sender.transfer(amount);
-    }
+    }*/
 
     /** Called from a ContentManagementContract.
      * Adds the content to the catalog.

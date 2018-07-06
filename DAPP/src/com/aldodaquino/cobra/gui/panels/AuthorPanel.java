@@ -16,6 +16,7 @@ public class AuthorPanel extends UpgradablePanel {
     private final CatalogManager catalogManager;
 
     private final JScrollPane tableContainer;
+    private JTable table;
 
     public AuthorPanel(Status status) {
         this.status = status;
@@ -29,14 +30,25 @@ public class AuthorPanel extends UpgradablePanel {
         JPanel buttonsPad = new JPanel();
         buttonsPad.setLayout(new BoxLayout(buttonsPad, BoxLayout.X_AXIS));
         JButton deployButton = ComponentFactory.newButton("Deploy a new content", e -> deployContent());
-        JButton updateButton = ComponentFactory.newButton("Update", e -> updateTable());
+        JButton updateButton = ComponentFactory.newButton("Update table", e -> updateTable());
+        JButton withdraw = ComponentFactory.newButton("Withdraw selected", e -> withdrawSelected());
         buttonsPad.add(deployButton);
         buttonsPad.add(updateButton);
+        buttonsPad.add(withdraw);
 
         // assemble the panel
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(tableContainer);
         add(buttonsPad);
+    }
+
+    private void deployContent() {
+        JPanel deployContentPanel = new DeployContentPanel((String name, String genre, BigInteger price) ->
+                Utils.doAsync(() -> {
+                    status.deployContent(name, genre, price);
+                    updateTable();
+                }, window));
+        Utils.createFixedWindow("Deploy new content", deployContentPanel, false);
     }
 
     private void updateTable() {
@@ -45,7 +57,7 @@ public class AuthorPanel extends UpgradablePanel {
 
         // prepare the table headers and rows
         String[] colNames = {"Address", "Name", "Genre", "Views", "Enjoy", "Price fairness", "Content meaning",
-                "Collect payout"};
+                "Price"};
         Object[][] rows = new Object[contents.size()][colNames.length];
         for (int i = 0; i < contents.size(); i++) {
             String address = contents.get(i).address;
@@ -56,31 +68,22 @@ public class AuthorPanel extends UpgradablePanel {
             rows[i][4] = contents.get(i).enjoy;
             rows[i][5] = contents.get(i).priceFairness;
             rows[i][6] = contents.get(i).contentMeaning;
-            rows[i][7] = new WithdrawButton(address);
+            rows[i][7] = contents.get(i).price;
         }
 
-        // add the table to the table container
-        tableContainer.setViewportView(new JTable(rows, colNames));
+        // prepare the table and add it to the container
+        table = new JTable(rows, colNames);
+        tableContainer.setViewportView(table);
         validate();
         repaint();
     }
 
-    private void deployContent() {
-        Utils.doAsync(() -> {
-            status.deployContent("name", "genre", new BigInteger("0"));
-            updateTable();
-        }, window);
+    private void withdrawSelected() {
+        String address = table.getValueAt(table.getSelectedRow(), 0).toString();
+        BigInteger amount = catalogManager.withdraw(address);
+        if (amount.equals(BigInteger.ZERO))
+            Utils.showErrorDialog("There is no payout available for this contract.");
+        else Utils.showMessageDialog(amount + " wei collected.");
     }
 
-    private class WithdrawButton extends JButton {
-        private final String address;
-        WithdrawButton(String address) {
-            super("withdraw");
-            this.address = address;
-            addActionListener(e -> withdraw());
-        }
-        private void withdraw() {
-            catalogManager.withdraw(address);
-        }
-    }
 }

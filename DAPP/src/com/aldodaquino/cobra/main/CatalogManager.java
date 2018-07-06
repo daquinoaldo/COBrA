@@ -57,14 +57,15 @@ public class CatalogManager extends ContractManager {
 
     /* Authors method */
 
-    public boolean withdraw(String address) {
+    public BigInteger withdraw(String address) {
         try {
-            catalog.collectPayout(address).send();
-            // TODO: how much I have withdraw?
-            return true;
+            BigInteger amount = catalog.payoutAvailable(address).send();
+            if (!amount.equals(BigInteger.ZERO))
+                catalog.collectPayout(address).send();
+            return amount;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return BigInteger.ZERO;
         }
     }
 
