@@ -210,11 +210,16 @@ contract CatalogContract {
         uint uncollectedViews = c.uncollectedViews;
         require(uncollectedViews >= payAfter);
         contents[x].uncollectedViews = 0;
-        uint average_rate = (c.enjoySum / c.enjoyNum +
-        c.priceFairnessSum / c.priceFairnessNum +
-        c.contentMeaningSum / c.contentMeaningNum) / 3;
-        /*uint average_rate = (c.enjoySum + c.priceFairnessSum + c.contentSum) /
-        (c.enjoyNum + c.priceFairnessNum + c.contentNum);*/
+        uint enjoyRate = 0;
+        uint priceFairnessRate = 0;
+        uint contentMeaningRate = 0;
+        if (c.enjoyNum != 0) enjoyRate = c.enjoySum / c.enjoyNum;
+        if (c.priceFairnessNum != 0)
+            priceFairnessRate = c.priceFairnessSum / c.priceFairnessNum;
+        if (c.contentMeaningNum != 0)
+            contentMeaningRate = c.contentMeaningSum / c.contentMeaningNum;
+        uint average_rate = (enjoyRate + priceFairnessRate +
+        contentMeaningRate) / 3;
         uint amount = c.price * uncollectedViews * average_rate / 5;
         balance -= amount;
         msg.sender.transfer(amount);
@@ -377,9 +382,12 @@ contract CatalogContract {
         uint[] memory contentMeaning = new uint[](contentsList.length);
         for (uint i = 0; i < contentsList.length; i++) {
             content memory c = contents[contentsList[i]];
-            enjoy[i] = c.enjoySum / c.enjoyNum;
-            priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
-            contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
+            if (c.enjoyNum != 0)
+                enjoy[i] = c.enjoySum / c.enjoyNum;
+            if (c.priceFairnessNum != 0)
+                priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
+            if (c.contentMeaningNum != 0)
+                contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
         }
         return (contentsList, enjoy, priceFairness, contentMeaning);
     }
@@ -496,14 +504,14 @@ contract CatalogContract {
             address addr = contentsList[i];
             content memory c = contents[addr];
             uint rate = 0;
-            if (y == "enjoy") {
+            if (y == "enjoy" && c.enjoyNum != 0) {
                 rate = c.enjoySum / c.enjoyNum;
             }
-            if (y == "value for money") {
+            if (y == "value for money" && c.priceFairnessNum != 0) {
                 rate = c.priceFairnessSum / c.priceFairnessNum;
             }
-            if (y == "content") {
-                rate = c.contentMeaningSum / c.contentMeaningSum;
+            if (y == "content" && c.contentMeaningNum != 0) {
+                rate = c.contentMeaningSum / c.contentMeaningNum;
             }
             if (int(rate) > maxRate) {
                 maxRate = int(rate);
@@ -534,14 +542,14 @@ contract CatalogContract {
             content memory c = contents[addr];
             if (c.genre == g) {
                 uint rate = 0;
-                if (y == "enjoy") {
+                if (y == "enjoy" && c.enjoyNum != 0) {
                     rate = c.enjoySum / c.enjoyNum;
                 }
-                if (y == "value for money") {
+                if (y == "value for money" && c.priceFairnessNum != 0) {
                     rate = c.priceFairnessSum / c.priceFairnessNum;
                 }
-                if (y == "content") {
-                    rate = c.contentMeaningSum / c.contentMeaningSum;
+                if (y == "content" && c.contentMeaningNum != 0) {
+                    rate = c.contentMeaningSum / c.contentMeaningNum;
                 }
                 if (int(rate) > maxRate) {
                     maxRate = int(rate);
@@ -574,13 +582,13 @@ contract CatalogContract {
             content memory c = contents[addr];
             if (c.author == a) {
                 uint rate = 0;
-                if (y == "enjoy") {
+                if (y == "enjoy" && c.enjoyNum != 0) {
                     rate = c.enjoySum / c.enjoyNum;
                 }
-                if (y == "value for money") {
+                if (y == "value for money" && c.priceFairnessNum != 0) {
                     rate = c.priceFairnessSum / c.priceFairnessNum;
                 }
-                if (y == "content") {
+                if (y == "content" && c.contentMeaningNum != 0) {
                     rate = c.contentMeaningSum / c.contentMeaningNum;
                 }
                 if (int(rate) > maxRate) {
