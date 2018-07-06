@@ -13,14 +13,14 @@ public class StarterPanel extends UpgradablePanel {
 
     private static final Dimension padding = new Dimension(65, 35);
 
-    private Status status = new Status();
-    private Consumer<Status> whenDone;
+    private final Status status = new Status();
+    private final Consumer<Status> whenDone;
 
-    private JPanel loginForm;
+    private final JPanel loginForm;
     private JPanel catalogForm;
     private JPanel roleForm;
 
-    private GridBagConstraints c13;
+    private final GridBagConstraints c13;
 
     public StarterPanel(Consumer<Status> whenDone) {
         this.whenDone = whenDone;

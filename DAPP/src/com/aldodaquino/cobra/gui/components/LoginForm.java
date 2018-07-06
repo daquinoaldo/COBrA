@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  */
 public class LoginForm extends JPanel {
     // private key field: on enter login
-    private JTextField privateKeyInput;
+    private final JTextField privateKeyInput;
     // the callback to call if the input data are correct
     private final Consumer<String> loginCallback;
     

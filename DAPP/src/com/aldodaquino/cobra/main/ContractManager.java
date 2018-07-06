@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 
-public class ContractManager {
+class ContractManager {
 
     protected Web3j web3;
     protected BigInteger gasPrice;
@@ -78,8 +78,14 @@ public class ContractManager {
             Method load = contractClass.getMethod("load", paramsTypes);
             contract = (Contract) load.invoke(null, params);
             // Get the contract owner
-            Method owner = contractClass.getMethod("owner", paramsTypes);
-            contract = (Contract) ((RemoteCall) owner.invoke(null, params)).send();
+            Method owner = contractClass.getMethod("owner");
+            try {
+                this.owner = (String) ((RemoteCall) owner.invoke(contract)).send();
+            } catch (NullPointerException e) {
+                System.err.println("ERROR while loading " + contractClass +
+                        ". Contract " + contractAddress + " may not exists.");
+                e.printStackTrace();
+            }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             System.err.println("ERROR while loading " + contractClass + ".");
             e.printStackTrace();
@@ -102,7 +108,7 @@ public class ContractManager {
      * Returns the contract owner.
      * @return a string containing the contract owner.
      */
-    public String getOwner() {
+    String getOwner() {
         return owner;
     }
 

@@ -1,7 +1,7 @@
 # COBrA
 An Ethereum blockchain university project.
 
-Check the [assignment](docs/COBrA_assignment.pdf) for more information.
+Check the [assignment](docs/COBrA_Assignment.pdf) for more information.
 
 ## Requirements
 - [Node.js](https://nodejs.org/it/download/)

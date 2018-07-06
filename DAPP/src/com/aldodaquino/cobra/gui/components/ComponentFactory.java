@@ -46,10 +46,6 @@ public class ComponentFactory {
         return Box.createRigidArea(dimension);
     }
 
-    static JSeparator newHr() {
-        return new JSeparator(SwingConstants.HORIZONTAL);
-    }
-
     static JPanel newTitledBorderPanel(String title) {
         JPanel panel = new JPanel();
         TitledBorder titledBorder = BorderFactory.createTitledBorder(title);

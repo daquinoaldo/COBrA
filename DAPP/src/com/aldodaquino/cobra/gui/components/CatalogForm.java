@@ -11,7 +11,7 @@ import java.util.function.Consumer;
  */
 public class CatalogForm extends JPanel {
     // catalog address field
-    private JTextField catalogAddressField;
+    private final JTextField catalogAddressField;
     // the callback to call if the input data are correct
     private final Consumer<String> connectCallback;
 

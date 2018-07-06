@@ -51,7 +51,6 @@ public class MainGUI {
     }
 
     private static void setContent(JPanel replacement) {
-        //window.removeAll();
         window.setContentPane(replacement);
         window.revalidate();
         window.repaint();

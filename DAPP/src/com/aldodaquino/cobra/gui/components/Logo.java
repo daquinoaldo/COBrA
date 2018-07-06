@@ -12,14 +12,10 @@ import java.awt.*;
  * Application Logo for the Login and Registration Panels
  */
 public class Logo extends JPanel {
-
-    public Logo() {
-        this(Dimensions.ICON_SIZE);
-    }
     
-    private Logo(int iconSize) {
+    public Logo() {
         // icon
-        Image icon = Images.logo.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+        Image icon = Images.logo.getImage().getScaledInstance(Dimensions.ICON_SIZE, Dimensions.ICON_SIZE, Image.SCALE_SMOOTH);
         JLabel iconLabel = new JLabel(new ImageIcon(icon), JLabel.CENTER);
 
         // title
@@ -30,8 +26,8 @@ public class Logo extends JPanel {
         Font labelFont = title.getFont();
         String labelText = title.getText();
         int stringWidth = title.getFontMetrics(labelFont).stringWidth(labelText);
-        double widthRatio = (double)iconSize / (double)stringWidth;
-        int newFontSize = (int)(labelFont.getSize() * widthRatio);
+        double widthRatio = (double) Dimensions.ICON_SIZE / (double)stringWidth;
+        int newFontSize = (int) (labelFont.getSize() * widthRatio);
         // set the new font size
         title.setFont(new Font(title.getFont().getName(), Font.PLAIN, newFontSize));
 

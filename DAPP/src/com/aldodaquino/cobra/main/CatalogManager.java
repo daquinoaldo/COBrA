@@ -2,6 +2,7 @@ package com.aldodaquino.cobra.main;
 
 import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
+import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
 
 import java.math.BigInteger;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class CatalogManager extends ContractManager {
 
-    private CatalogContract catalog;
+    private final CatalogContract catalog;
 
     /*
      * CONSTRUCTORS
@@ -78,19 +79,27 @@ public class CatalogManager extends ContractManager {
         List<byte[]> genres;
         List<BigInteger> prices;
         List<BigInteger> views;
+        List<BigInteger> enjoyRatings;
+        List<BigInteger> priceFairnessRatings;
+        List<BigInteger> contentMeaningRatings;
 
         ContentList() throws Exception {
             // Query the CatalogContract for the list
-            Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>> list;
-            list = catalog.getFullContentsList().send();
+            Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>>
+                    fullContentList = catalog.getFullContentsList().send();
+            Tuple4<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>>
+                    ratingsList = catalog.getRatingsList().send();
 
             // Parse parameters
-            addresses = list.getValue1();
-            names = list.getValue2();
-            authors = list.getValue3();
-            genres = list.getValue4();
-            prices = list.getValue5();
-            views = list.getValue6();
+            addresses = fullContentList.getValue1();
+            names = fullContentList.getValue2();
+            authors = fullContentList.getValue3();
+            genres = fullContentList.getValue4();
+            prices = fullContentList.getValue5();
+            views = fullContentList.getValue6();
+            enjoyRatings = ratingsList.getValue2();
+            priceFairnessRatings = ratingsList.getValue3();
+            contentMeaningRatings = ratingsList.getValue4();
         }
 
         /**
@@ -106,8 +115,16 @@ public class CatalogManager extends ContractManager {
             for (int i = 0; i < addresses.size(); i++)
                 // if the where list is null do not filter
                 if (filterBy == null || filterBy.get(i).equals(filterValue))
-                    contentsList.add(new Content(addresses.get(i), names.get(i), authors.get(i), genres.get(i),
-                            prices.get(i), views.get(i)));
+                    contentsList.add(new Content(
+                            addresses.get(i),
+                            names.get(i),
+                            authors.get(i),
+                            genres.get(i),
+                            prices.get(i), views.get(i),
+                            enjoyRatings.get(i),
+                            priceFairnessRatings.get(i),
+                            contentMeaningRatings.get(i)
+                            ));
             return contentsList;
         }
 
