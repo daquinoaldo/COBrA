@@ -2,6 +2,7 @@ package com.aldodaquino.cobra.gui;
 
 import com.aldodaquino.cobra.gui.constants.Strings;
 import com.aldodaquino.cobra.gui.panels.AuthorPanel;
+import com.aldodaquino.cobra.gui.panels.CustomerPanel;
 import com.aldodaquino.cobra.gui.panels.StarterPanel;
 import com.aldodaquino.cobra.main.Status;
 
@@ -19,7 +20,7 @@ public class MainGUI {
 
         switch (status.getRole()) {
             case (Status.ROLE_CUSTOMER):
-                newPanel = new AuthorPanel(status);
+                newPanel = new CustomerPanel(status);
                 break;
             case (Status.ROLE_AUTHOR):
                 newPanel = new AuthorPanel(status);

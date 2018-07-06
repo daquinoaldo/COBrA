@@ -41,18 +41,22 @@ public class CatalogManager extends ContractManager {
      */
 
     /**
+     * Returns a list of all contents in the Catalog.
+     * @return a list of Content objects.
+     */
+    public List<Content> getContents() {
+        ContentList contentList = new ContentList();
+        return contentList.getFilteredContentsList(null, null);
+    }
+
+    /**
      * Return the list of all the content of a given author.
      * @param author the authors address.
      * @return a list of Content objects.
      */
     public List<Content> getAuthorContents(String author) {
-        try {
-            ContentList contentList = new ContentList();
-            return contentList.getFilteredContentsList(contentList.authors, author);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        ContentList contentList = new ContentList();
+        return contentList.getFilteredContentsList(contentList.authors, author);
     }
 
     /* Authors method */
@@ -84,23 +88,27 @@ public class CatalogManager extends ContractManager {
         List<BigInteger> priceFairnessRatings;
         List<BigInteger> contentMeaningRatings;
 
-        ContentList() throws Exception {
-            // Query the CatalogContract for the list
-            Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>>
-                    fullContentList = catalog.getFullContentsList().send();
-            Tuple4<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>>
-                    ratingsList = catalog.getRatingsList().send();
+        ContentList() {
+            try {
+                // Query the CatalogContract for the list
+                Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>>
+                        fullContentList = catalog.getFullContentsList().send();
+                Tuple4<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>>
+                        ratingsList = catalog.getRatingsList().send();
 
-            // Parse parameters
-            addresses = fullContentList.getValue1();
-            names = fullContentList.getValue2();
-            authors = fullContentList.getValue3();
-            genres = fullContentList.getValue4();
-            prices = fullContentList.getValue5();
-            views = fullContentList.getValue6();
-            enjoyRatings = ratingsList.getValue2();
-            priceFairnessRatings = ratingsList.getValue3();
-            contentMeaningRatings = ratingsList.getValue4();
+                // Parse parameters
+                addresses = fullContentList.getValue1();
+                names = fullContentList.getValue2();
+                authors = fullContentList.getValue3();
+                genres = fullContentList.getValue4();
+                prices = fullContentList.getValue5();
+                views = fullContentList.getValue6();
+                enjoyRatings = ratingsList.getValue2();
+                priceFairnessRatings = ratingsList.getValue3();
+                contentMeaningRatings = ratingsList.getValue4();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         /**
@@ -127,14 +135,6 @@ public class CatalogManager extends ContractManager {
                             contentMeaningRatings.get(i)
                             ));
             return contentsList;
-        }
-
-        /**
-         * Returns a list of all contents in the Catalog.
-         * @return a list of Content objects.
-         */
-        List<Content> getFullContentsList() {
-            return getFilteredContentsList(null, null);
         }
     }
 

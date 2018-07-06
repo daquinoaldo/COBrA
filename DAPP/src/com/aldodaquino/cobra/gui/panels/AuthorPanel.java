@@ -2,6 +2,7 @@ package com.aldodaquino.cobra.gui.panels;
 
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
+import com.aldodaquino.cobra.gui.components.ContentTable;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 import com.aldodaquino.cobra.main.Status;
@@ -52,30 +53,9 @@ public class AuthorPanel extends UpgradablePanel {
     }
 
     private void updateTable() {
-        // get the content list
         List<Content> contents = catalogManager.getAuthorContents(status.getUserAddress());
-
-        // prepare the table headers and rows
-        String[] colNames = {"Address", "Name", "Genre", "Views", "Enjoy", "Price fairness", "Content meaning",
-                "Price"};
-        Object[][] rows = new Object[contents.size()][colNames.length];
-        for (int i = 0; i < contents.size(); i++) {
-            String address = contents.get(i).address;
-            rows[i][0] = address;
-            rows[i][1] = contents.get(i).name;
-            rows[i][2] = contents.get(i).genre;
-            rows[i][3] = contents.get(i).views;
-            rows[i][4] = contents.get(i).enjoy;
-            rows[i][5] = contents.get(i).priceFairness;
-            rows[i][6] = contents.get(i).contentMeaning;
-            rows[i][7] = contents.get(i).price;
-        }
-
-        // prepare the table and add it to the container
-        table = new JTable(rows, colNames);
+        table = new ContentTable(contents);
         tableContainer.setViewportView(table);
-        validate();
-        repaint();
     }
 
     private void withdrawSelected() {
