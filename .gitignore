@@ -5,7 +5,7 @@
 # Mac OS
 .DS_Store
 
-# Java
+# Compiled output
 out
 
 # OTHER
@@ -13,9 +13,6 @@ out
 DAPP/lib/
 # java contracts
 DAPP/src/com/aldodaquino/cobra/contracts
-# geth account keyfile
-wallet
-
 
 
 geth-ropsten.sh

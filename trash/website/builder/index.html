@@ -1,0 +1,42 @@
+<html>
+<head>
+    <title>Pier</title>
+</head>
+<body>
+
+<a href="#" onclick="logMeOut()">Logout</a>
+
+<h1 id="welcome_message">Welcome back!</h1>
+
+<h2>Your websites</h2>
+<table id="websites_table">
+    <tr>
+        <th>ID</th>
+        <th>Domain</th>
+        <th>Webserver</th>
+        <th>PHP</th>
+        <th>MySQL</th>
+        <th>Manage</th>
+    </tr>
+</table>
+<br><br>
+<a href="manage-website.html">Add new website</a>
+
+<h2>Important notice</h2>
+<p>In order for your site to be visible with the associated domain you need to point your domain at ip address
+    123.456.78.90 or set pier.aldodaquino.com as CNAME</p>
+
+<h2>FTP access</h2>
+<p>You can manage the files of your sites on your FTP account.
+    You can access it on ftp.pier.aldodaquino.com on the default port 21.
+    Username and password are the same ones you use to access this control panel.</p>
+
+<h2>MySQL</h2>
+<p>You can to your database at mysql.pier.aldodaquino.com on the default port 3306.
+    Username and password are the same ones you use to access this control panel.
+    Database name is the same of the site name and is "site" followed by the site ID, like site123.</p>
+
+<script type="text/javascript" src="js/functions.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+</body>
+</html>
