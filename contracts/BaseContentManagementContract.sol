@@ -22,10 +22,9 @@ contract BaseContentManagementContract {
 
 
     /* EVENTS */
-    event FallbackFunctionCall(string message, bytes data);
     event ContentPublished();
     event ContentDeleted();
-    event contentConsumed(address user);
+    event ContentConsumed(address user);
 
 
     /* MODIFIERS */
@@ -72,7 +71,7 @@ contract BaseContentManagementContract {
         require(published);
         require(catalogContract.hasAccess(msg.sender, this));
         catalogContract.consumeContent(msg.sender);
-        emit contentConsumed(msg.sender);
+        emit ContentConsumed(msg.sender);
     }
 
     /** Used by the author to publish the content.

@@ -64,12 +64,11 @@ contract CatalogContract {
 
 
     /* EVENTS */
-    event FallbackFunctionCall(string message, bytes data);
     event CatalogClosed();
-    event grantedAccess(address user, address content);
-    event paymentAvailable(address content);
-    event becomesPremium(address user);
-    event newContentAvailable(bytes32 name, address addr);
+    event GrantedAccess(address user, address content);
+    event PaymentAvailable(address content);
+    event BecomesPremium(address user);
+    event NewContentAvailable(bytes32 name, address addr);
 
 
     /* MODIFIERS */
@@ -267,7 +266,7 @@ contract CatalogContract {
         contents[cc] = content(cc.name(), cc.owner(), cc.genre(), cc.price(),
             0, 0, 0, 0, 0, 0, 0, 0);
         contentsList.push(cc);
-        emit newContentAvailable(cc.name(), cc);
+        emit NewContentAvailable(cc.name(), cc);
     }
 
     /** Notice the catalog that the user u has consumed the content x.
@@ -290,7 +289,7 @@ contract CatalogContract {
          * not to spam too much. Can be changed in >= if this contract is
          * deployed in a dedicated blockchain. */
         if (contents[msg.sender].uncollectedViews == payAfter) {
-            emit paymentAvailable(msg.sender);
+            emit PaymentAvailable(msg.sender);
         }
     }
 
@@ -673,7 +672,7 @@ contract CatalogContract {
         // Increment the user expiration time
         // (if he is already premium will be premium longer)
         premiumUsers[u] += premiumTime;
-        emit becomesPremium(u);
+        emit BecomesPremium(u);
         balance += msg.value;
     }
 
@@ -692,7 +691,7 @@ contract CatalogContract {
         require(contents[x].author != u);
         // grant access
         accessibleContent[u][x] = true;
-        emit grantedAccess(u, x);
+        emit GrantedAccess(u, x);
         // update balance
         balance += msg.value;
     }
