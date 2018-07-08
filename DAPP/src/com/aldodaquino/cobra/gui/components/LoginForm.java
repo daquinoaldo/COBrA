@@ -18,7 +18,7 @@ public class LoginForm extends JPanel {
         this.loginCallback = loginCallback;
 
         // set layout (vertical)
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // label over the input fields
         JLabel privateKeyLabel = new JLabel("Private key:");

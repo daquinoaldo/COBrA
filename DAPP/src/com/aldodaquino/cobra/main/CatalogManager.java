@@ -40,6 +40,84 @@ public class CatalogManager extends ContractManager {
      * CATALOG CONTRACT SPECIFIC METHODS
      */
 
+    /* Catalog interaction methods */
+
+    /**
+     * Buy a content.
+     * @param address the content address.
+     * @return a boolean representing the operation outcome.
+     */
+    public boolean buyContent(String address) {
+        try {
+            BigInteger contentCost = catalog.contentCost().send();
+            return catalog.getContent(address, contentCost).send().isStatusOK();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Gift a content to another user.
+     * @param address the content address.
+     * @param user the user address.
+     * @return a boolean representing the operation outcome.
+     */
+    public boolean giftContent(String address, String user) {
+        try {
+            BigInteger contentCost = catalog.contentCost().send();
+            return catalog.giftContent(address, user, contentCost).send().isStatusOK();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Buy a premium subscription.
+     * @return a boolean representing the operation outcome.
+     */
+    public boolean buyPremium() {
+        try {
+            BigInteger premiumCost = catalog.premiumCost().send();
+            return catalog.buyPremium(premiumCost).send().isStatusOK();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Gift a premium subscription to another user.
+     * @param user the user address.
+     * @return a boolean representing the operation outcome.
+     */
+    public boolean giftPremium(String user) {
+        try {
+            BigInteger contentCost = catalog.premiumCost().send();
+            return catalog.giftPremium(user, contentCost).send().isStatusOK();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Return true if the user has an active premium subscription.
+     * @param user the user address.
+     * @return a boolean representing the operation outcome.
+     */
+    public boolean isPremium(String user) {
+        try {
+            return catalog.isPremium(user).send();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /* Getters for lists, statistics and charts */
+
     /**
      * Returns a list of all contents in the Catalog.
      * @return a list of Content objects.

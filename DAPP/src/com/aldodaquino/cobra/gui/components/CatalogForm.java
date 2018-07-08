@@ -19,7 +19,7 @@ public class CatalogForm extends JPanel {
         this.connectCallback = connectCallback;
 
         // set layout (vertical)
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Labels
         JLabel catalogAddressLabel = new JLabel("Catalog address:");

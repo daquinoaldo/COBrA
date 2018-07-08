@@ -60,28 +60,6 @@ public class Utils {
                 JOptionPane.YES_OPTION;
     }
 
-    /**
-     * Run a runnable asynchronously. Shows a loading panel during the loading.
-     * @param runnable to be run.
-     * @param window in which show the loading panel.
-     */
-    public static void doAsync(Runnable runnable, JFrame window) {
-        startLoading(window);
-        new Thread(() -> {
-            runnable.run();
-            stopLoading(window);
-        }).start();
-    }
-
-    private static void startLoading(JFrame window) {
-        window.setGlassPane(ComponentFactory.newSpinner());
-        window.getGlassPane().setVisible(true);
-    }
-
-    private static void stopLoading(JFrame window) {
-        window.getGlassPane().setVisible(false);
-    }
-
 
 
     /*

@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.constants.Colors;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.gui.constants.Images;
 import com.aldodaquino.cobra.gui.constants.Strings;
@@ -20,7 +19,7 @@ public class Logo extends JPanel {
 
         // title
         JLabel title = new JLabel(Strings.appName);
-        title.setForeground(Colors.logo);
+        title.setForeground(Color.BLACK);
         title.setHorizontalAlignment(JLabel.CENTER);
         // find out how much the font can grow in width and calculate the corresponding font size
         Font labelFont = title.getFont();

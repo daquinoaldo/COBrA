@@ -19,7 +19,7 @@ public class RoleForm extends JPanel {
                     Runnable deleteCallback) {
 
         // set layout (vertical)
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Labels
         JLabel title = new JLabel("What do you want to do?");

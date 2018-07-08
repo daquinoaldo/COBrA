@@ -39,13 +39,6 @@ public class MainGUI {
 
         // Create the window
         window = Utils.createFixedWindow(Strings.appName, starterPanel, true);
-        /*window = new JFrame(Strings.appName);                               // set the app title
-        window.setIconImage(Images.logo.getImage());                        // set logo as application icon
-        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);     // exit program when window gets closed
-        window.setContentPane(starterPanel);    // put a panel inside the window
-        window.pack();                          // resize the window based on content size
-        window.setLocationRelativeTo(null);     // center the window
-        window.setVisible(true);                // show it*/
 
     }
 

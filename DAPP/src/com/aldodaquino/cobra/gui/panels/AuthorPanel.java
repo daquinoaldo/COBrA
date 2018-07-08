@@ -1,6 +1,7 @@
 package com.aldodaquino.cobra.gui.panels;
 
 import com.aldodaquino.cobra.gui.Utils;
+import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.components.ContentTable;
 import com.aldodaquino.cobra.main.CatalogManager;
@@ -11,7 +12,7 @@ import java.math.BigInteger;
 import java.util.List;
 import javax.swing.*;
 
-public class AuthorPanel extends UpgradablePanel {
+public class AuthorPanel extends AsyncPanel {
 
     private final Status status;
     private final CatalogManager catalogManager;
@@ -25,17 +26,19 @@ public class AuthorPanel extends UpgradablePanel {
 
         // table container
         tableContainer = new JScrollPane();
-        updateTable();
+        List<Content> contents = catalogManager.getContents();
+        table = new ContentTable(contents);
+        tableContainer.setViewportView(table);
 
         // buttons
         JPanel buttonsPad = new JPanel();
         buttonsPad.setLayout(new BoxLayout(buttonsPad, BoxLayout.X_AXIS));
         JButton deployButton = ComponentFactory.newButton("Deploy a new content", e -> deployContent());
         JButton updateButton = ComponentFactory.newButton("Update table", e -> updateTable());
-        JButton withdraw = ComponentFactory.newButton("Withdraw selected", e -> withdrawSelected());
+        JButton withdrawButton = ComponentFactory.newButton("Withdraw selected", e -> withdrawSelected());
         buttonsPad.add(deployButton);
         buttonsPad.add(updateButton);
-        buttonsPad.add(withdraw);
+        buttonsPad.add(withdrawButton);
 
         // assemble the panel
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -45,25 +48,29 @@ public class AuthorPanel extends UpgradablePanel {
 
     private void deployContent() {
         JPanel deployContentPanel = new DeployContentPanel((String name, String genre, BigInteger price) ->
-                Utils.doAsync(() -> {
+                doAsync(() -> {
                     status.deployContent(name, genre, price);
                     updateTable();
-                }, window));
+                }));
         Utils.createFixedWindow("Deploy new content", deployContentPanel, false);
     }
 
     private void updateTable() {
-        List<Content> contents = catalogManager.getAuthorContents(status.getUserAddress());
-        table = new ContentTable(contents);
-        tableContainer.setViewportView(table);
+        doAsync(() -> {
+            List<Content> contents = catalogManager.getAuthorContents(status.getUserAddress());
+            table = new ContentTable(contents);
+            tableContainer.setViewportView(table);
+        });
     }
 
     private void withdrawSelected() {
-        String address = table.getValueAt(table.getSelectedRow(), 0).toString();
-        BigInteger amount = catalogManager.withdraw(address);
-        if (amount.equals(BigInteger.ZERO))
-            Utils.showErrorDialog("There is no payout available for this contract.");
-        else Utils.showMessageDialog(amount + " wei collected.");
+        doAsync(() -> {
+            String address = table.getValueAt(table.getSelectedRow(), 0).toString();
+            BigInteger amount = catalogManager.withdraw(address);
+            if (amount.equals(BigInteger.ZERO))
+                Utils.showErrorDialog("There is no payout available for this contract.");
+            else Utils.showMessageDialog(amount + " wei collected.");
+        });
     }
 
 }

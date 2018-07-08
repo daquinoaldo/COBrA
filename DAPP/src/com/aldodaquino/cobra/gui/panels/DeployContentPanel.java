@@ -1,6 +1,7 @@
 package com.aldodaquino.cobra.gui.panels;
 
 import com.aldodaquino.cobra.gui.Utils;
+import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.javautils.TriConsumer;
 
@@ -10,7 +11,7 @@ import java.math.BigInteger;
 /**
  * Login Form under the Logo in the Login Panel
  */
-class DeployContentPanel extends UpgradablePanel {
+class DeployContentPanel extends AsyncPanel {
     // fields
     private final JTextField nameField;
     private final JTextField genreField;
@@ -29,7 +30,7 @@ class DeployContentPanel extends UpgradablePanel {
         JLabel genreLabel = new JLabel("Genre:");
         JLabel priceLabel = new JLabel("Price:");
 
-        // private key field: on enter deploy
+        // input field
         priceField = ComponentFactory.newTextField(e -> deploy());
         genreField = ComponentFactory.newTextField(e -> priceField.grabFocus());
         nameField = ComponentFactory.newTextField(e -> genreField.grabFocus());
