@@ -12,9 +12,9 @@ import java.awt.*;
 public class UserInfo extends UpgradablePanel {
 
     private final Status status;
-    private String account;
+    private final String account;
     private JLabel premiumLabel;
-    private GridBagConstraints replacingPosition;
+    private final GridBagConstraints replacingPosition;
 
     public UserInfo(Status status) {
         this.status = status;

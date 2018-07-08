@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui;
 
-import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.constants.Images;
 
 import javax.swing.*;

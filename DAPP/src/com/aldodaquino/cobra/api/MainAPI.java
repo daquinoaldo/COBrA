@@ -20,7 +20,7 @@ import org.web3j.crypto.Credentials;
 public class MainAPI {
 
     private static final int PORT = 8000;
-    public CatalogManager catalogManager;
+    private CatalogManager catalogManager;
 
     /**
      * Main method.
@@ -68,7 +68,7 @@ public class MainAPI {
      * Send a JSON string containing the list of Contents of a specified author.
      */
     private static class GetAuthorContents implements HttpHandler  {
-        CatalogManager catalogManager;
+        final CatalogManager catalogManager;
         GetAuthorContents(CatalogManager catalogManager) {
             this.catalogManager = catalogManager;
         }
@@ -93,7 +93,7 @@ public class MainAPI {
      * Deploy a CatalogContract.
      */
     private static class DeployCatalog implements HttpHandler  {
-        MainAPI main;
+        final MainAPI main;
         DeployCatalog(MainAPI main) {
             this.main = main;
         }
@@ -104,7 +104,10 @@ public class MainAPI {
             // get parameters
             Map<String, Object> parameters = HttpRequestHelper.parseGET(request);
             String address = (String) parameters.get("address");
-            if (address == null) HttpRequestHelper.sendResponse(request, "ERROR: address not specified.", 400);
+            if (address == null) {
+                HttpRequestHelper.sendResponse(request, "ERROR: address not specified.", 400);
+                return;
+            }
 
             // get the list of content
             Credentials credentials = Credentials.create(address);

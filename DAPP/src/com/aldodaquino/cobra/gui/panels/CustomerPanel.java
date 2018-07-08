@@ -13,15 +13,13 @@ import java.util.List;
 
 public class CustomerPanel extends AsyncPanel {
 
-    private final Status status;
     private final CatalogManager catalogManager;
 
     private final JScrollPane tableContainer;
     private JTable table;
-    private UserInfo userInfo;
+    private final UserInfo userInfo;
 
     public CustomerPanel(Status status) {
-        this.status = status;
         this.catalogManager = status.getCatalogManager();
 
         // table container

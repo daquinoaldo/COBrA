@@ -4,11 +4,11 @@ import java.awt.*;
 
 public class UpgradablePanel extends AsyncPanel {
 
-    public UpgradablePanel() {
+    protected UpgradablePanel() {
         setLayout(new GridBagLayout());
     }
 
-    public void replaceComponent(Component toBeReplaced, Component replacement, GridBagConstraints position) {
+    protected void replaceComponent(Component toBeReplaced, Component replacement, GridBagConstraints position) {
         if (replacement == null) return;
         if(toBeReplaced != null) remove(toBeReplaced);
         add(replacement, position);
