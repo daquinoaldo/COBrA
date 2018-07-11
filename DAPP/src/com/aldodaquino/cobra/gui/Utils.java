@@ -3,6 +3,7 @@ package com.aldodaquino.cobra.gui;
 import com.aldodaquino.cobra.gui.constants.Images;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Utilities for the gui
@@ -57,6 +58,15 @@ public class Utils {
     public static boolean showConfirmDialog(String msg) {
         return JOptionPane.showConfirmDialog(null, msg,"Warning", JOptionPane.YES_NO_OPTION) ==
                 JOptionPane.YES_OPTION;
+    }
+
+    /**
+     * Set the font size of a label.
+     * @param label of which set the font size.
+     * @param fontSize the size to set.
+     */
+    public static void setFontSize(JLabel label, int fontSize) {
+        label.setFont(new Font(label.getFont().getName(), Font.PLAIN, fontSize));
     }
 
 

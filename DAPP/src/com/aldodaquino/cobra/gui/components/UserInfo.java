@@ -27,13 +27,9 @@ public class UserInfo extends UpgradablePanel {
         premiumLabel = newPremiumLabel();
         replacingPosition = UpgradablePanel.newGBC(1, 2);
 
-        // update status button
-        JButton updateButton = ComponentFactory.newButton("Update status", e -> update());
-
         // add to the panel
         add(accountLabel, UpgradablePanel.newGBC(1, 1));
         add(premiumLabel, replacingPosition);
-        add(updateButton, UpgradablePanel.newGBC(1, 3));
     }
 
     public void update() {

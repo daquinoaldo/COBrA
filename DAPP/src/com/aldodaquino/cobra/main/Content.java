@@ -14,16 +14,6 @@ public class Content implements Stringifiable {
     public final int priceFairness;
     public final int contentMeaning;
 
-
-    /*private Content(String address, byte[] name, String author, byte[] genre, BigInteger price, BigInteger views) {
-        this.address = address;
-        this.name = Utils.bytesToString(name);
-        this.author = author;
-        this.genre = Utils.bytesToString(genre);
-        this.price = price;
-        this.views = views;
-    }*/
-
     Content(String address, byte[] name, String author, byte[] genre, BigInteger price, BigInteger views,
             BigInteger enjoy, BigInteger priceFairness, BigInteger contentMeaning) {
         this.address = address;

@@ -2,12 +2,15 @@ package com.aldodaquino.cobra.main;
 
 import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
+import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CatalogManager extends ContractManager {
 
@@ -137,6 +140,155 @@ public class CatalogManager extends ContractManager {
         return contentList.getFilteredContentsList(contentList.authors, author);
     }
 
+    /**
+     * Return the n latest releases.
+     * @param n the number of item that you want in the list.
+     * @return Map<name of the content, address of the content>.
+     */
+    public Map<String, String> getNewContentsList(int n) {
+        try {
+            Tuple2<List<byte[]>, List<String>> res = catalog.getNewContentsList(new BigInteger(Integer.toString(n))).send();
+            Map<String, String> map = new HashMap<>();
+            List<byte[]> names = res.getValue1();
+            List<String> addresses = res.getValue2();
+            for (int i = 0; i < names.size(); i++)
+                map.put(Utils.bytesToString(names.get(i)), addresses.get(i));
+            return map;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the latest release.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getLatest() {
+        Map<String, String> map = getNewContentsList(1);
+        if (map == null || map.size() == 0) return null;
+        return new String[] {map.keySet().iterator().next(), map.values().iterator().next()};
+    }
+
+    /**
+     * Return the latest release for a genre.
+     * @param genre the chosen genre.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getLatestByGenre(String genre) {
+        try {
+            Tuple2<byte[], String> res = catalog.getLatestByGenre(Utils.stringToBytes(genre)).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the latest release of an author.
+     * @param author the author address.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getLatestByAuthor(String author) {
+        try {
+            Tuple2<byte[], String> res = catalog.getLatestByAuthor(author).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the most popular content.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getMostPopular() {
+        try {
+            Tuple2<byte[], String> res = catalog.getMostPopular().send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the most popular content for a genre.
+     * @param genre the chosen genre.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getMostPopularByGenre(String genre) {
+        try {
+            Tuple2<byte[], String> res = catalog.getMostPopularByGenre(Utils.stringToBytes(genre)).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the most popular content of an author.
+     * @param author the author address.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getMostPopularByAuthor(String author) {
+        try {
+            Tuple2<byte[], String> res = catalog.getMostPopularByAuthor(author).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the highest rated content.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getMostRated(String category) {
+        try {
+            Tuple2<byte[], String> res = catalog.getMostRated(Utils.stringToBytes(category)).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the highest rated content for a genre.
+     * @param genre the chosen genre.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getMostRatedByGenre(String genre, String category) {
+        try {
+            Tuple2<byte[], String> res = catalog.getMostRatedByGenre(Utils.stringToBytes(genre),
+                    Utils.stringToBytes(category)).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Return the highest rated content of an author.
+     * @param author the author address.
+     * @return String[] where the first element is the name of the content and the second is the address.
+     */
+    public String[] getMostRatedByAuthor(String author, String category) {
+        try {
+            Tuple2<byte[], String> res = catalog.getMostRatedByAuthor(author, Utils.stringToBytes(category)).send();
+            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /* Authors method */
 
     public BigInteger withdraw(String address) {
@@ -150,6 +302,7 @@ public class CatalogManager extends ContractManager {
             return BigInteger.ZERO;
         }
     }
+
 
     /**
      * Auxiliary class

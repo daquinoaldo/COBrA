@@ -17,6 +17,11 @@ contract CatalogContract {
     uint public premiumTime = 172800;       // ~ 1 month
     uint public payAfter = 10;  // views
 
+    bytes32 private enjoyS = "enjoy";
+    bytes32 private valueForMoneyS = "value for money";
+    bytes32 private contentS = "content";
+    bytes32[] public ratingCategories = [enjoyS, valueForMoneyS, contentS];
+
     // Runtime
     address public owner;
     uint private balance = 0;
@@ -235,26 +240,6 @@ contract CatalogContract {
         balance -= amount;
         msg.sender.transfer(amount);
     }
-    /*function collectPayout(address x) public {
-        content memory c = contents[x];
-        require (c.author == msg.sender);
-        uint uncollectedViews = c.uncollectedViews;
-        require(uncollectedViews >= payAfter);
-        contents[x].uncollectedViews = 0;
-        uint enjoyRate = 0;
-        uint priceFairnessRate = 0;
-        uint contentMeaningRate = 0;
-        if (c.enjoyNum != 0) enjoyRate = c.enjoySum / c.enjoyNum;
-        if (c.priceFairnessNum != 0)
-            priceFairnessRate = c.priceFairnessSum / c.priceFairnessNum;
-        if (c.contentMeaningNum != 0)
-            contentMeaningRate = c.contentMeaningSum / c.contentMeaningNum;
-        uint average_rate = (enjoyRate + priceFairnessRate +
-        contentMeaningRate) / 3;
-        uint amount = c.price * uncollectedViews * average_rate / 5;
-        balance -= amount;
-        msg.sender.transfer(amount);
-    }*/
 
     /** Called from a ContentManagementContract.
      * Adds the content to the catalog.
@@ -350,32 +335,6 @@ contract CatalogContract {
         return (names, contentsList);
     }
 
-    /** Returns the list of x newest contents.
-     * @return (string[], address[]) names and addresses ordered from the
-     * newest: each content in names is associated with its address in addresses.
-     * Gas: no one pay.
-     * Burden: O(x) ~ O(1).
-     */
-    function getNewContentsList(uint n) public view
-    returns(bytes32[], address[]) {
-        uint listLength = n;
-        // If i have less than chartListLength element in the contentsList I
-        // have to return contentsList.length elements
-        if (contentsList.length < listLength) listLength = contentsList.length;
-        // NOTE: I assume that the latest content is not the last deployed
-        // contract in the blockchain (with the highest block number), but is
-        // the last added to the catalog (that ideally is when is "published").
-        bytes32[] memory names = new bytes32[](listLength);
-        address[] memory addresses = new address[](listLength);
-        for (uint i = 0; i < listLength; i++) {
-            // add it in reverse order: the latest first
-            address a = contentsList[contentsList.length - 1 - i];
-            names[i] = contents[a].name;
-            addresses[i] = a;
-        }
-        return (names, addresses);
-    }
-
     /** Returns the list of contents with all information.
      * @return (address[], bytes32[], address[], bytes32[], uint[], uint[]). In the position n we got in order address,
      * name, author, genre, price, views of the content n.
@@ -423,6 +382,33 @@ contract CatalogContract {
         return (contentsList, enjoy, priceFairness, contentMeaning);
     }
 
+    /** Returns the list of n newest contents.
+     * @param n the number of item that you want in the list.
+     * @return (string[], address[]) names and addresses ordered from the
+     * newest: each content in names is associated with its address in addresses.
+     * Gas: no one pay.
+     * Burden: O(x) ~ O(1).
+     */
+    function getNewContentsList(uint n) public view
+    returns(bytes32[], address[]) {
+        uint listLength = n;
+        // If i have less than chartListLength element in the contentsList I
+        // have to return contentsList.length elements
+        if (contentsList.length < listLength) listLength = contentsList.length;
+        // NOTE: I assume that the latest content is not the last deployed
+        // contract in the blockchain (with the highest block number), but is
+        // the last added to the catalog (that ideally is when is "published").
+        bytes32[] memory names = new bytes32[](listLength);
+        address[] memory addresses = new address[](listLength);
+        for (uint i = 0; i < listLength; i++) {
+            // add it in reverse order: the latest first
+            address a = contentsList[contentsList.length - 1 - i];
+            names[i] = contents[a].name;
+            addresses[i] = a;
+        }
+        return (names, addresses);
+    }
+
     /** Get the latest release of genre g.
      * @param g the genre of which you want to get the latest content.
      * @return (bytes32, address) names and addresses of the content.
@@ -443,31 +429,6 @@ contract CatalogContract {
         }
         // fallback, return empty if not exist a release of g
         return("", 0);
-    }
-
-    /** Get most popular release of genre g.
-     * @param g the genre of which you want to get the most popular content.
-     * @return (string, address) name and address of the content.
-     * If there are 2 or more content with the same number of view the oldest
-     * comes first.
-     * Gas: no one pay.
-     * Burden: O(n).
-     */
-    function getMostPopularByGenre(bytes32 g) public view
-    returns(bytes32, address) {
-        int maxViews = -1;
-        bytes32 maxName;
-        address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
-            content memory c = contents[addr];
-            if (c.genre == g && int(c.views) > maxViews) {
-                maxViews = int(c.views);
-                maxName = c.name;
-                maxAddress = addr;
-            }
-        }
-        return (maxName, maxAddress);
     }
 
     /** Get the latest release of the author a.
@@ -491,6 +452,55 @@ contract CatalogContract {
         }
         // fallback, return empty if not exist a release of a
         return("", 0);
+    }
+
+    /** Get the most popular content.
+     * @return (string, address) name and address of the content.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getMostPopular() public view
+    returns(bytes32, address) {
+        int maxViews = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            if (int(c.views) > maxViews) {
+                maxViews = int(c.views);
+                maxName = c.name;
+                maxAddress = addr;
+            }
+        }
+        return (maxName, maxAddress);
+    }
+
+    /** Get the most popular release of genre g.
+     * @param g the genre of which you want to get the most popular content.
+     * @return (string, address) name and address of the content.
+     * If there are 2 or more content with the same number of view the oldest
+     * comes first.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getMostPopularByGenre(bytes32 g) public view
+    returns(bytes32, address) {
+        int maxViews = -1;
+        bytes32 maxName;
+        address maxAddress;
+        for (uint i = 0; i < contentsList.length; i++) {
+            address addr = contentsList[i];
+            content memory c = contents[addr];
+            if (c.genre == g && int(c.views) > maxViews) {
+                maxViews = int(c.views);
+                maxName = c.name;
+                maxAddress = addr;
+            }
+        }
+        return (maxName, maxAddress);
     }
 
     /** Get the most popular release of the author a.
@@ -535,14 +545,14 @@ contract CatalogContract {
             address addr = contentsList[i];
             content memory c = contents[addr];
             uint rate = 0;
-            if (y == "enjoy" && c.enjoyNum != 0) {
-                rate = c.enjoySum / c.enjoyNum;
+            if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
+                rate += c.enjoySum / c.enjoyNum;
             }
-            if (y == "value for money" && c.priceFairnessNum != 0) {
-                rate = c.priceFairnessSum / c.priceFairnessNum;
+            if ((y[0] == 0 || y == "value for money") && c.priceFairnessNum != 0) {
+                rate += c.priceFairnessSum / c.priceFairnessNum;
             }
-            if (y == "content" && c.contentMeaningNum != 0) {
-                rate = c.contentMeaningSum / c.contentMeaningNum;
+            if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
+                rate += c.contentMeaningSum / c.contentMeaningNum;
             }
             if (int(rate) > maxRate) {
                 maxRate = int(rate);
@@ -573,14 +583,14 @@ contract CatalogContract {
             content memory c = contents[addr];
             if (c.genre == g) {
                 uint rate = 0;
-                if (y == "enjoy" && c.enjoyNum != 0) {
-                    rate = c.enjoySum / c.enjoyNum;
+                if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
+                    rate += c.enjoySum / c.enjoyNum;
                 }
-                if (y == "value for money" && c.priceFairnessNum != 0) {
-                    rate = c.priceFairnessSum / c.priceFairnessNum;
+                if ((y[0] == 0 || y == "value for money") && c.priceFairnessNum != 0) {
+                    rate += c.priceFairnessSum / c.priceFairnessNum;
                 }
-                if (y == "content" && c.contentMeaningNum != 0) {
-                    rate = c.contentMeaningSum / c.contentMeaningNum;
+                if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
+                    rate += c.contentMeaningSum / c.contentMeaningNum;
                 }
                 if (int(rate) > maxRate) {
                     maxRate = int(rate);
@@ -613,14 +623,14 @@ contract CatalogContract {
             content memory c = contents[addr];
             if (c.author == a) {
                 uint rate = 0;
-                if (y == "enjoy" && c.enjoyNum != 0) {
-                    rate = c.enjoySum / c.enjoyNum;
+                if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
+                    rate += c.enjoySum / c.enjoyNum;
                 }
-                if (y == "value for money" && c.priceFairnessNum != 0) {
-                    rate = c.priceFairnessSum / c.priceFairnessNum;
+                if ((y[0] == 0 || y == "value for money") && c.priceFairnessNum != 0) {
+                    rate += c.priceFairnessSum / c.priceFairnessNum;
                 }
-                if (y == "content" && c.contentMeaningNum != 0) {
-                    rate = c.contentMeaningSum / c.contentMeaningNum;
+                if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
+                    rate += c.contentMeaningSum / c.contentMeaningNum;
                 }
                 if (int(rate) > maxRate) {
                     maxRate = int(rate);

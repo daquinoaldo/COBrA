@@ -1,5 +1,6 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.gui.constants.Images;
 import com.aldodaquino.cobra.gui.constants.Strings;
@@ -28,7 +29,7 @@ public class Logo extends JPanel {
         double widthRatio = (double) Dimensions.ICON_SIZE / (double)stringWidth;
         int newFontSize = (int) (labelFont.getSize() * widthRatio);
         // set the new font size
-        title.setFont(new Font(title.getFont().getName(), Font.PLAIN, newFontSize));
+        Utils.setFontSize(title, newFontSize);
 
         // put components in a container
         JPanel container = new JPanel();

@@ -10,7 +10,7 @@ public class UpgradablePanel extends AsyncPanel {
 
     protected void replaceComponent(Component toBeReplaced, Component replacement, GridBagConstraints position) {
         if (replacement == null) return;
-        if(toBeReplaced != null) remove(toBeReplaced);
+        if (toBeReplaced != null) remove(toBeReplaced);
         add(replacement, position);
         if (window != null) {
             window.revalidate();
@@ -19,7 +19,7 @@ public class UpgradablePanel extends AsyncPanel {
         }
     }
 
-    public static GridBagConstraints newGBC(int x, int y) {
+    protected static GridBagConstraints newGBC(int x, int y) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = x;
         gbc.gridy = y;

@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  * Login Form under the Logo in the Login Panel
  */
 public class CatalogForm extends JPanel {
-    // catalog address field
+    // catalogManager address field
     private final JTextField catalogAddressField;
     // the callback to call if the input data are correct
     private final Consumer<String> connectCallback;
@@ -24,23 +24,23 @@ public class CatalogForm extends JPanel {
         // Labels
         JLabel catalogAddressLabel = new JLabel("Catalog address:");
 
-        // catalog address field: on enter connect
+        // catalogManager address field: on enter connect
         catalogAddressField = ComponentFactory.newTextField(e -> connect());
 
         // Buttons
         JButton connectButton = ComponentFactory.newButton("Connect", e -> connect());
         JButton deployButton = ComponentFactory.newButton("Deploy", e -> deployCallback.run());
 
-        // titled border panel for catalog connection
-        JPanel connectPanel = ComponentFactory.newTitledBorderPanel("Existent catalog");
+        // titled border panel for catalogManager connection
+        JPanel connectPanel = ComponentFactory.newTitledBorderPanel("Existent catalogManager");
         connectPanel.add(ComponentFactory.newVSpacer());
         connectPanel.add(catalogAddressLabel);
         connectPanel.add(catalogAddressField);
         connectPanel.add(ComponentFactory.newVSpacer());
         connectPanel.add(connectButton);
 
-        // titled border panel for catalog connection
-        JPanel deployPanel = ComponentFactory.newTitledBorderPanel("New catalog");
+        // titled border panel for catalogManager connection
+        JPanel deployPanel = ComponentFactory.newTitledBorderPanel("New catalogManager");
         deployPanel.add(ComponentFactory.newVSpacer());
         deployPanel.add(deployButton);
 

@@ -13,7 +13,7 @@ public class RoleForm extends JPanel {
      * Constructor.
      * @param browseCallback callback for the "Browser contents" button.
      * @param manageCallback callback for the "Manage my contents" button.
-     * @param deleteCallback callback for the "Delete catalog" contents button. If null the button is not shown.
+     * @param deleteCallback callback for the "Delete catalogManager" contents button. If null the button is not shown.
      */
     public RoleForm(Runnable browseCallback, Runnable manageCallback, Runnable disconnectCallback,
                     Runnable deleteCallback) {
@@ -27,7 +27,7 @@ public class RoleForm extends JPanel {
         // Buttons
         JButton browseButton = ComponentFactory.newButton("Browse contents", e -> browseCallback.run());
         JButton manageButton = ComponentFactory.newButton("Manage my contents", e -> manageCallback.run());
-        JButton disconnectButton = ComponentFactory.newButton("Disconnect from catalog",
+        JButton disconnectButton = ComponentFactory.newButton("Disconnect from catalogManager",
                 e -> disconnectCallback.run());
 
         // add all to the panel
@@ -39,11 +39,11 @@ public class RoleForm extends JPanel {
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M));
         add(disconnectButton);
 
-        // only for catalog owner
+        // only for catalogManager owner
         if (deleteCallback != null) {
             add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
             add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L));
-            JButton deleteButton = ComponentFactory.newButton("Delete catalog", e -> deleteCallback.run());
+            JButton deleteButton = ComponentFactory.newButton("Delete catalogManager", e -> deleteCallback.run());
             add(deleteButton);
         }
     }
