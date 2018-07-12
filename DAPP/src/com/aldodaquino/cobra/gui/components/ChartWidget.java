@@ -2,9 +2,9 @@ package com.aldodaquino.cobra.gui.components;
 
 import com.aldodaquino.cobra.main.CatalogManager;
 
-public class ChartBanner extends InfoPanel {
+public class ChartWidget extends InfoPanel {
 
-    public ChartBanner(CatalogManager catalogManager) {
+    public ChartWidget(CatalogManager catalogManager) {
         super("Charts");
 
         latestLabel.update(catalogManager.getLatest());

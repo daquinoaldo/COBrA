@@ -145,15 +145,20 @@ public class CatalogManager extends ContractManager {
      * @param n the number of item that you want in the list.
      * @return Map<name of the content, address of the content>.
      */
-    public Map<String, String> getNewContentsList(int n) {
+    public String[][] getNewContentsList(int n) {
         try {
+            // get the list
             Tuple2<List<byte[]>, List<String>> res = catalog.getNewContentsList(new BigInteger(Integer.toString(n))).send();
-            Map<String, String> map = new HashMap<>();
             List<byte[]> names = res.getValue1();
             List<String> addresses = res.getValue2();
-            for (int i = 0; i < names.size(); i++)
-                map.put(Utils.bytesToString(names.get(i)), addresses.get(i));
-            return map;
+
+            // parse the list in a String matrix
+            String[][] rows = new String[names.size()][2];
+            for (int i = 0; i < names.size(); i++) {
+                rows[i][0] = Utils.bytesToString(names.get(i));
+                rows[i][1] = addresses.get(i);
+            }
+            return rows;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -165,9 +170,9 @@ public class CatalogManager extends ContractManager {
      * @return String[] where the first element is the name of the content and the second is the address.
      */
     public String[] getLatest() {
-        Map<String, String> map = getNewContentsList(1);
-        if (map == null || map.size() == 0) return null;
-        return new String[] {map.keySet().iterator().next(), map.values().iterator().next()};
+        String[][] rows = getNewContentsList(1);
+        if (rows == null || rows.length == 0) return null;
+        return rows[0];
     }
 
     /**

@@ -17,7 +17,7 @@ public class Utils {
      * @param exitOnClose if true exit the Client when the Window is close.
      * @return the generated JFrame.
      */
-    public static JFrame createFixedWindow(String title, JPanel panel, boolean exitOnClose) {
+    public static JFrame createFixedWindow(String title, JComponent panel, boolean exitOnClose) {
         JFrame window = new JFrame(title);                                  // create a window
         window.setIconImage(Images.logo.getImage());                         // set logo as application icon
         window.setContentPane(panel);                                       // put a panel inside the window

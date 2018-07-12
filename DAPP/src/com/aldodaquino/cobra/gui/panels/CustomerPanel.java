@@ -19,7 +19,7 @@ public class CustomerPanel extends UpgradablePanel {
     private JTable table;
     private JPanel lateralBar;
     private final UserInfo userInfo;
-    private ChartBanner chartBanner;
+    private ChartWidget chartWidget;
     private GridBagConstraints chartBannerPosition = newGBC(1, 10);
 
     public CustomerPanel(Status status) {
@@ -39,7 +39,8 @@ public class CustomerPanel extends UpgradablePanel {
         JButton accessSelectedButton = ComponentFactory.newButton("Access selected", e -> accessSelected());
         JButton buyPremiumButton = ComponentFactory.newButton("Buy premium", e -> buyPremium());
         JButton giftPremiumButton = ComponentFactory.newButton("Gift premium", e -> giftPremium());
-        chartBanner = new ChartBanner(catalogManager);
+        chartWidget = new ChartWidget(catalogManager);
+        JPanel newContentWidget = new newContentWidget(catalogManager);
 
         lateralBar = new JPanel(new GridBagLayout());
         lateralBar.add(userInfo, newGBC(1, 1));
@@ -51,7 +52,8 @@ public class CustomerPanel extends UpgradablePanel {
         lateralBar.add(buyPremiumButton, newGBC(1, 7));
         lateralBar.add(giftPremiumButton, newGBC(1, 8));
         lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 9));
-        lateralBar.add(chartBanner, chartBannerPosition);
+        lateralBar.add(chartWidget, chartBannerPosition);
+        lateralBar.add(newContentWidget, newGBC(1, 11));
 
         // assemble the panel
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -70,9 +72,9 @@ public class CustomerPanel extends UpgradablePanel {
             userInfo.update();
 
             // update charts
-            lateralBar.remove(chartBanner);
-            chartBanner = new ChartBanner(catalogManager);
-            lateralBar.add(chartBanner, chartBannerPosition);
+            lateralBar.remove(chartWidget);
+            chartWidget = new ChartWidget(catalogManager);
+            lateralBar.add(chartWidget, chartBannerPosition);
         });
     }
 
