@@ -2,17 +2,15 @@
 .idea
 *.iml
 
-# Mac OS
+# MacOS
 .DS_Store
 
 # Compiled output
 out
+target
 
-# OTHER
-# web3 library
-DAPP/lib/
 # java contracts
 DAPP/src/com/aldodaquino/cobra/contracts
 
-
+# OTHER
 geth-ropsten.sh

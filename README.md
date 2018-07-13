@@ -5,27 +5,21 @@ Check the assignments for [COBrA](docs/COBrA_Assignment.pdf) and [COBrA DAPP](do
 information.
 
 ## Requirements
-- [Node.js](https://nodejs.org/it/download/)
-- [geth](https://geth.ethereum.org/downloads/) (optional)
+- [geth](https://geth.ethereum.org/downloads/)
+- Java 10
+    - [JRE](http://www.oracle.com/technetwork/java/javase/downloads/jre10-downloads-4417026.html)
+    - [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk10-downloads-4416644.html)
+- [Apache Maven](https://maven.apache.org/install.html/)
+    - Ubuntu: `sudo apt-get install maven`
+    - MacOS: `sudo brew install maven` (requires [brew](https://docs.brew.sh/Installation))
+    - [Binaries](https://maven.apache.org/download.cgi)
 
-## Dependency installation
-To prepare test suit just run `npm install`.
-
-#### Troubleshooting
-In case of problem with node-gyp run `sudo npm install -g node-gyp rebuild` (python 2 is needed).
-
-If you are using MacOS X you may need to download Xcode from the app store, open it and accept the license/terms
-agreement.
-
-In case of problems with permissions (EACCES) try to remove the entire `node_modules` folder and run again `npm install`
-without `sudo`.
-
-If you got vulnerability alerts with this version of web3 you can use the latest version running
-`npm install ethereum/web3.js` instead of `npm install`.
+## Dependency installation with Maven
+- `cd DAPP`
+- `mvn install`
 
 ## Run
-The test suite requires a web3 interface running at `http://localhost:8545`.
-You can use [geth](https://github.com/ethereum/go-ethereum/wiki/geth) or you can run `node node_modules/.bin/testrpc`
-to start the RPC testing environment.  
+Start and Ethereum node on the testnet Ropsten with [geth](https://github.com/ethereum/go-ethereum/wiki/geth) running
+`geth --rpcapi personal,db,eth,net,web3 --rpc --testnet` or start an emulated node with `ganache-cli`.
 
-To start the tests just run `npm start` or `node demo.js`.
+Start the DAPP with java target/DAPP-1.0.com.aldodaquino.cobra.gui.MainGUI
