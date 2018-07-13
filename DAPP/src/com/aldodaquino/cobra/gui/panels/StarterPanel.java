@@ -5,6 +5,7 @@ import com.aldodaquino.cobra.gui.components.*;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.main.Status;
 
+import javax.naming.OperationNotSupportedException;
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
@@ -46,28 +47,42 @@ public class StarterPanel extends UpgradablePanel {
     /* CALLBACKS */
     private void loginCallback(String privateKey) {
         // set the status
-        status.login(privateKey);
-
-        // change form
-        catalogForm = new CatalogForm(this::connectCallback, this::deployCallback);
-        replaceComponent(loginForm, catalogForm, replacingPosition);
+        try {
+            status.login(privateKey);
+            // change form
+            catalogForm = new CatalogForm(this::connectCallback, this::deployCallback);
+            replaceComponent(loginForm, catalogForm, replacingPosition);
+        } catch (OperationNotSupportedException e) {
+            e.printStackTrace();
+            Utils.showErrorDialog(e.getMessage());
+        }
     }
 
     private void connectCallback(String catalogAddress) {
         doAsync(() -> {
-            status.connectCatalog(catalogAddress);
-            postConnect();
+            try {
+                status.connectCatalog(catalogAddress);
+                postConnect();
+            } catch (OperationNotSupportedException e) {
+                e.printStackTrace();
+                Utils.showErrorDialog(e.getMessage());
+            }
         });
     }
 
     private void deployCallback() {
         doAsync(() -> {
-            status.deployCatalog();
-            postConnect();
+            try {
+                status.deployCatalog();
+                postConnect();
+            } catch (OperationNotSupportedException e) {
+                e.printStackTrace();
+                Utils.showErrorDialog(e.getMessage());
+            }
         });
     }
 
-    private void postConnect() {
+    private void postConnect() throws OperationNotSupportedException {
         Runnable deleteCallback = status.isCatalogOwner() ? this::deleteCallback : null;
         roleForm = new RoleForm(this::browseCallback, this::manageCallback, this::disconnectCallback, deleteCallback);
         replaceComponent(catalogForm, roleForm, replacingPosition);

@@ -57,6 +57,7 @@ class ContractManager {
             System.err.println("ERROR while deploying " + contractClass + ".");
             e.printStackTrace();
         } catch (Exception e) {
+            //TODO: wrong
             System.err.println("Got Web3j error while deploying " + contractClass + ".");
             e.printStackTrace();
         }

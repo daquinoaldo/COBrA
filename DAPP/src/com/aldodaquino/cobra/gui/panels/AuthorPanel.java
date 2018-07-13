@@ -10,6 +10,7 @@ import com.aldodaquino.cobra.main.Status;
 
 import java.math.BigInteger;
 import java.util.List;
+import javax.naming.OperationNotSupportedException;
 import javax.swing.*;
 
 public class AuthorPanel extends AsyncPanel {
@@ -47,19 +48,21 @@ public class AuthorPanel extends AsyncPanel {
     }
 
     private void deployContent() {
-        JPanel deployContentPanel = new DeployContentPanel((String name, String genre, BigInteger price) ->
-                doAsync(() -> {
-                    status.deployContent(name, genre, price);
-                    updateTable();
-                }));
+        JPanel deployContentPanel = new DeployContentPanel(status, this::updateTable);
         Utils.createFixedWindow("Deploy new content", deployContentPanel, false);
     }
 
     private void updateTable() {
         doAsync(() -> {
-            List<Content> contents = catalogManager.getAuthorContents(status.getUserAddress());
-            table = new ContentTable(contents);
-            tableContainer.setViewportView(table);
+            try {
+                List<Content> contents = catalogManager.getAuthorContents(status.getUserAddress());
+                table = new ContentTable(contents);
+                tableContainer.setViewportView(table);
+            } catch (OperationNotSupportedException e) {
+                e.printStackTrace();
+                Utils.showErrorDialog(e.getMessage());
+                System.exit(-1);
+            }
         });
     }
 

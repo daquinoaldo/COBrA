@@ -1,17 +1,18 @@
 package com.aldodaquino.cobra.api;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.Map;
 
 import com.aldodaquino.cobra.main.CatalogManager;
-import com.aldodaquino.cobra.main.Content;
-import com.aldodaquino.cobra.main.Stringifiable;
-import com.aldodaquino.javautils.HttpRequestHelper;
+import com.aldodaquino.cobra.main.ContentManager;
+import com.aldodaquino.javautils.HttpHelper;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+
+
+import org.apache.commons.cli.*;
 import org.web3j.crypto.Credentials;
 
 /**
@@ -19,103 +20,120 @@ import org.web3j.crypto.Credentials;
  */
 public class MainAPI {
 
-    private static final int PORT = 8000;
-    private CatalogManager catalogManager;
+    private static final int DEFAULT_PORT = 8000;
+
+    private static String privateKey;
+    private static Credentials credentials;
+    private static CatalogManager catalogManager;
 
     /**
      * Main method.
-     * @param args first argument th private key of an account,
-     *             second argument, optional, the address of an existent catalog.
-     * @throws IOException if the web server cannot be created on the specified port
      */
     public static void main(String[] args) throws IOException {
-        CatalogManager catalogManager;
 
-        // Get an existent catalog from address or create a new one
-        if (args.length == 0) throw new IllegalArgumentException(
-                "Usage: args[0] private key, args[1], optional, an existent CatalogContract address.");
-        Credentials credentials = Credentials.create(args[0]);
-        if (args.length > 1)
-            catalogManager = new CatalogManager(credentials, args[1]);
-        else catalogManager = new CatalogManager(credentials);
+        // Parse cmd options
+        Options options = new Options();
 
-        // create server
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        Option privateKeyOption = new Option("k", "private-key (required)", true,
+                "private key to authenticate and deploy contents (default 8080)");
+        privateKeyOption.setRequired(true);
+        options.addOption(privateKeyOption);
+
+        Option catalogOption = new Option("c", "catalog", true,
+                "catalog address");
+        catalogOption.setRequired(true);
+        options.addOption(catalogOption);
+
+        Option portOption = new Option("p", "port", true,
+                "port on which running the author server");
+        portOption.setRequired(false);
+        options.addOption(portOption);
+
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd;
+
+        String catalogAddress = null;
+        int port = DEFAULT_PORT;
+        try {
+            cmd = parser.parse(options, args);
+
+            privateKey = cmd.getOptionValue("private-key");
+            if (privateKey == null || privateKey.length() != 64) throw new IllegalArgumentException("Empty private key");
+
+            catalogAddress = cmd.getOptionValue("catalog");
+            if (catalogAddress == null || catalogAddress.length() == 0)
+                throw new IllegalArgumentException("Empty catalog address");
+
+            String portS = cmd.getOptionValue("port");
+            if (portS != null) port = Integer.parseInt(portS);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("author-server", options);
+            System.exit(1);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
+
+        // Init status
+        credentials = Credentials.create(privateKey);
+        catalogManager = new CatalogManager(credentials, catalogAddress);
+
+        // Create server
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
         // set handlers
-        server.createContext("/getAuthorContents", new GetAuthorContents(catalogManager));
+        server.createContext("/deploy", HttpHelper.newHandler(MainAPI::deploy));
 
         // start server
         server.setExecutor(null); // creates a default executor
         server.start();
     }
 
-    /**
-     * Auxiliary function: stringify a list of Stringifiable objects.
-     * @param list the list of objects that implement the Stringifiable interface.
-     * @return a JSON string.
-     */
-    private static <T extends Stringifiable> String stringifyList(List<T> list) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
-        for (T element : list)
-            stringBuilder.append(element.stringify()).append(",");
-        stringBuilder.append("]");
-        return stringBuilder.toString();
-    }
 
     /**
-     * Send a JSON string containing the list of Contents of a specified author.
+     * Handler for the /deploy url.
+     * @param request a POST request with JSON encoded data containing:
+     *                privateKey of the author
+     *                name of the content
+     *                genre of the content (can be null)
+     *                price of the content (if null is set to 0)
      */
-    private static class GetAuthorContents implements HttpHandler  {
-        final CatalogManager catalogManager;
-        GetAuthorContents(CatalogManager catalogManager) {
-            this.catalogManager = catalogManager;
+    private static void deploy(HttpExchange request) {
+        // get parameters
+        Map<String, String> parameters = HttpHelper.parsePOST(request);
+
+        if (!isOwner(parameters.get("privateKey")))
+            HttpHelper.sendResponse(request, "Only the author server owner can perform this action." +
+                    "You must login with the same private key of the server.", 403);
+
+        String name = parameters.get("name");
+        if (name == null) HttpHelper.sendResponse(request, "ERROR: name not specified.", 400);
+
+        String genre = parameters.get("genre");
+
+        String priceS = parameters.get("price");
+        BigInteger price;
+        try {
+            price = new BigInteger(priceS.length() != 0 ? priceS : "0");
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            HttpHelper.sendResponse(request, e.getMessage(), 400);
+            return;
         }
 
-        @Override
-        public void handle(HttpExchange request) throws IOException {
-            // get parameters
-            Map<String, Object> parameters = HttpRequestHelper.parseGET(request);
-            String author = (String) parameters.get("author");
-            if (author == null) HttpRequestHelper.sendResponse(request, "ERROR: author address not specified.", 400);
-
-            // get the list of content
-            List<Content> authorContents = catalogManager.getAuthorContents(author);
-
-            // send response
-            String response = stringifyList(authorContents);
-            HttpRequestHelper.sendResponse(request, response);
+        try {
+            ContentManager contentManager = new ContentManager(credentials, catalogManager.getAddress(), name, genre, price);
+            HttpHelper.sendResponse(request, contentManager.getAddress());
+        } catch (Exception e) {
+            e.printStackTrace();
+            HttpHelper.sendResponse(request, e.getMessage(), 400);
         }
     }
 
-    /**
-     * Deploy a CatalogContract.
-     */
-    private static class DeployCatalog implements HttpHandler  {
-        final MainAPI main;
-        DeployCatalog(MainAPI main) {
-            this.main = main;
-        }
-
-        @Override
-        public void handle(HttpExchange request) throws IOException {
-
-            // get parameters
-            Map<String, Object> parameters = HttpRequestHelper.parseGET(request);
-            String address = (String) parameters.get("address");
-            if (address == null) {
-                HttpRequestHelper.sendResponse(request, "ERROR: address not specified.", 400);
-                return;
-            }
-
-            // get the list of content
-            Credentials credentials = Credentials.create(address);
-            main.catalogManager = new CatalogManager(credentials);
-
-            // send response
-            String response = main.catalogManager.getAddress();
-            HttpRequestHelper.sendResponse(request, response);
-        }
+    private static boolean isOwner(String privateKey) {
+        return privateKey != null && privateKey.length() == 64 && MainAPI.privateKey.equals(privateKey);
     }
+
 }

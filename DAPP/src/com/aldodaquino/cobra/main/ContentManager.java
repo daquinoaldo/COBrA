@@ -5,7 +5,7 @@ import org.web3j.crypto.Credentials;
 
 import java.math.BigInteger;
 
-class ContentManager extends ContractManager {
+public class ContentManager extends ContractManager {
 
     private final GenericContentManagementContract contentManager;
 
@@ -13,17 +13,14 @@ class ContentManager extends ContractManager {
      * Deploy and manage a new content manager contract.
      * @param credentials your account credentials.
      */
-    ContentManager(Credentials credentials, String catalogAddress, String name, String genre, BigInteger price) {
+    public ContentManager(Credentials credentials, String catalogAddress, String name, String genre, BigInteger price)
+            throws Exception {
         super(credentials);
         contentManager = (GenericContentManagementContract) deploy(GenericContentManagementContract.class);
-        try {
-            contentManager.setName(Utils.stringToBytes(name)).send();
-            contentManager.setGenre(Utils.stringToBytes(genre)).send();
-            contentManager.setPrice(price).send();
-            contentManager.publish(catalogAddress).send();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        contentManager.setName(Utils.stringToBytes(name)).send();
+        contentManager.setGenre(Utils.stringToBytes(genre)).send();
+        contentManager.setPrice(price).send();
+        contentManager.publish(catalogAddress).send();
     }
 
     /**

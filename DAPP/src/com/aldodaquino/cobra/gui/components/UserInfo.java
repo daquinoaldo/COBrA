@@ -1,8 +1,10 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Colors;
 import com.aldodaquino.cobra.main.Status;
 
+import javax.naming.OperationNotSupportedException;
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,7 +14,7 @@ import java.awt.*;
 public class UserInfo extends UpgradablePanel {
 
     private final Status status;
-    private final String account;
+    private String account = null;
     private JLabel premiumLabel;
     private final GridBagConstraints replacingPosition;
 
@@ -20,7 +22,13 @@ public class UserInfo extends UpgradablePanel {
         this.status = status;
 
         // account label
-        account = status.getUserAddress();
+        try {
+            account = status.getUserAddress();
+        } catch (OperationNotSupportedException e) {
+            e.printStackTrace();
+            Utils.showErrorDialog(e.getMessage());
+            System.exit(1);
+        }
         JLabel accountLabel = new JLabel(account);
 
         // premium label

@@ -2,6 +2,7 @@ package com.aldodaquino.cobra.main;
 
 import org.web3j.crypto.Credentials;
 
+import javax.naming.OperationNotSupportedException;
 import java.math.BigInteger;
 
 public class Status {
@@ -9,19 +10,24 @@ public class Status {
     public static final int ROLE_CUSTOMER = 0;
     public static final int ROLE_AUTHOR = 1;
 
+    private String privateKey;
     private Credentials credentials;
     private CatalogManager catalogManager;
     private int role;
 
-    public void login (String privateKey) {
+    public void login (String privateKey) throws OperationNotSupportedException {
+        this.privateKey = privateKey;
+        if (privateKey == null || privateKey.length() == 0) throw new IllegalArgumentException("Empty private key");
         if (credentials != null)
-            throw new UnsupportedOperationException("Already logged in as "+credentials.getAddress()+".");
+            throw new OperationNotSupportedException("Already logged in as "+credentials.getAddress()+".");
         credentials = Credentials.create(privateKey);
     }
 
-    public void connectCatalog(String catalogAddress) {
+    public void connectCatalog(String catalogAddress) throws OperationNotSupportedException {
+        if (catalogAddress == null || catalogAddress.length() == 0)
+            throw new IllegalArgumentException("Empty catalog address");
         if (credentials == null)
-            throw new UnsupportedOperationException("You must be logged in to connect to a catalog.");
+            throw new OperationNotSupportedException("You must be logged in to connect to a catalog.");
         catalogManager = new CatalogManager(credentials, catalogAddress);
     }
 
@@ -29,26 +35,31 @@ public class Status {
         catalogManager = null;
     }
 
-    public void deployCatalog() {
+    public String deployCatalog() throws OperationNotSupportedException {
         if (credentials == null)
-            throw new UnsupportedOperationException("You must be logged in to deploy a new catalog.");
+            throw new OperationNotSupportedException("You must be logged in to deploy a new catalog.");
         catalogManager = new CatalogManager(credentials);
+        return catalogManager.getAddress();
     }
 
-    public String getUserAddress() {
+    public String getUserAddress() throws OperationNotSupportedException {
         if (credentials == null)
-            throw new UnsupportedOperationException("You must be logged in.");
+            throw new OperationNotSupportedException("You must be logged in.");
         return credentials.getAddress();
     }
 
-    public boolean isCatalogOwner() {
+    public boolean isCatalogOwner() throws OperationNotSupportedException {
         if (catalogManager == null)
-            throw new UnsupportedOperationException("Not connected to a catalog.");
+            throw new OperationNotSupportedException("Not connected to a catalog.");
         return catalogManager.getOwner().equals(getUserAddress());
     }
 
     public CatalogManager getCatalogManager() {
         return catalogManager;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
     }
 
     public void setRole(int role) {
@@ -57,11 +68,5 @@ public class Status {
 
     public int getRole() {
         return role;
-    }
-
-    public void deployContent(String name, String genre, BigInteger price) {
-        if (credentials == null)
-            throw new UnsupportedOperationException("You must be logged in to deploy a new catalog.");
-        new ContentManager(credentials, catalogManager.getAddress(), name, genre, price);
     }
 }

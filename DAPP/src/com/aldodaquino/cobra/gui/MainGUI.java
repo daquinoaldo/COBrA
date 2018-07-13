@@ -15,23 +15,6 @@ public class MainGUI {
 
     private static JFrame window;
 
-    private static void showMainPanel(Status status) {
-        JPanel newPanel;
-
-        switch (status.getRole()) {
-            case (Status.ROLE_CUSTOMER):
-                newPanel = new CustomerPanel(status);
-                break;
-            case (Status.ROLE_AUTHOR):
-                newPanel = new AuthorPanel(status);
-                break;
-            default:
-                throw new IllegalArgumentException("Status role property has an invalid value. " +
-                        "Should be one of the Status.ROLE_X constants.");
-        }
-        setContent(newPanel);
-    }
-
     public static void main(String[] args) {
 
         // Create the starter panel
@@ -48,5 +31,22 @@ public class MainGUI {
         window.repaint();
         window.pack();
         window.setLocationRelativeTo(null);
+    }
+
+    private static void showMainPanel(Status status) {
+        JPanel newPanel;
+
+        switch (status.getRole()) {
+            case (Status.ROLE_CUSTOMER):
+                newPanel = new CustomerPanel(status);
+                break;
+            case (Status.ROLE_AUTHOR):
+                newPanel = new AuthorPanel(status);
+                break;
+            default:
+                throw new IllegalArgumentException("Status role property has an invalid value. " +
+                        "Should be one of the Status.ROLE_X constants.");
+        }
+        setContent(newPanel);
     }
 }
