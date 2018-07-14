@@ -1,7 +1,7 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
+import com.aldodaquino.cobra.gui.Utils;
 
 import javax.swing.*;
 

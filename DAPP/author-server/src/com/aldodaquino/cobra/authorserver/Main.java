@@ -1,4 +1,4 @@
-package com.aldodaquino.cobra.api;
+package com.aldodaquino.cobra.authorserver;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.ContentManager;
-import com.aldodaquino.javautils.HttpHelper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -16,9 +15,9 @@ import org.apache.commons.cli.*;
 import org.web3j.crypto.Credentials;
 
 /**
- * HTTP Server for the REST MainAPI
+ * HTTP Server for the REST Main
  */
-public class MainAPI {
+public class Main {
 
     private static final int DEFAULT_PORT = 8000;
 
@@ -84,7 +83,7 @@ public class MainAPI {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
         // set handlers
-        server.createContext("/deploy", HttpHelper.newHandler(MainAPI::deploy));
+        server.createContext("/deploy", HttpHelper.newHandler(Main::deploy));
 
         // start server
         server.setExecutor(null); // creates a default executor
@@ -133,7 +132,7 @@ public class MainAPI {
     }
 
     private static boolean isOwner(String privateKey) {
-        return privateKey != null && privateKey.length() == 64 && MainAPI.privateKey.equals(privateKey);
+        return privateKey != null && privateKey.length() == 64 && Main.privateKey.equals(privateKey);
     }
 
 }

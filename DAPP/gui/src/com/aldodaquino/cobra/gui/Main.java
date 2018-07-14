@@ -4,21 +4,20 @@ import com.aldodaquino.cobra.gui.constants.Strings;
 import com.aldodaquino.cobra.gui.panels.AuthorPanel;
 import com.aldodaquino.cobra.gui.panels.CustomerPanel;
 import com.aldodaquino.cobra.gui.panels.StarterPanel;
-import com.aldodaquino.cobra.main.Status;
 
 import javax.swing.*;
 
 /**
  * The GUI Main. Starts the GUI with the login panel.
  */
-public class MainGUI {
+public class Main {
 
     private static JFrame window;
 
     public static void main(String[] args) {
 
         // Create the starter panel
-        JPanel starterPanel = new StarterPanel(MainGUI::showMainPanel);
+        JPanel starterPanel = new StarterPanel(Main::showMainPanel);
 
         // Create the window
         window = Utils.createFixedWindow(Strings.appName, starterPanel, true);

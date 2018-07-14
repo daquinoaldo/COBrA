@@ -22,4 +22,4 @@ information.
 Start and Ethereum node on the testnet Ropsten with [geth](https://github.com/ethereum/go-ethereum/wiki/geth) running
 `geth --rpcapi personal,db,eth,net,web3 --rpc --testnet` or start an emulated node with `ganache-cli`.
 
-Start the DAPP with java target/DAPP-1.0.com.aldodaquino.cobra.gui.MainGUI
+Start the DAPP with java target/DAPP-1.0.gui.MainGUI

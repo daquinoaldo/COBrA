@@ -1,8 +1,8 @@
 package com.aldodaquino.cobra.gui.panels;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
+import com.aldodaquino.cobra.gui.Utils;
 
 import javax.swing.*;
 import java.util.function.Consumer;

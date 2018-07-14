@@ -2,7 +2,7 @@
 
 # configs
 contracts_path="contracts"
-java_path="DAPP/src"
+java_path="DAPP/contracts/src"
 java_package="com.aldodaquino.cobra.contracts"
 
 # prepare the output folder (deleting any previous compiled files)

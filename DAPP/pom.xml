@@ -7,9 +7,17 @@
     <!-- Project info -->
     <groupId>com.aldodaquino</groupId>
     <artifactId>DAPP</artifactId>
+    <packaging>pom</packaging>
     <version>1.0</version>
+    <modules>
+        <module>author-server</module>
+        <module>gui</module>
+        <module>contracts</module>
+    </modules>
 
     <properties>
+        <!-- Set encoding -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Set Java version to JRE 10 - SDK 1.10 -->
         <java.version>1.10</java.version>
         <maven.compiler.source>1.10</maven.compiler.source>
@@ -17,14 +25,6 @@
     </properties>
 
     <build>
-        <!-- Change default sources path -->
-        <sourceDirectory>src</sourceDirectory>
-        <!-- Add resources -->
-        <resources>
-            <resource>
-                <directory>res</directory>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -36,34 +36,7 @@
                     <target>1.10</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <!-- Generate manifest.mf with main class -->
-                            <addClasspath>true</addClasspath>
-                            <mainClass>com.aldodaquino.cobra.gui.MainGUI</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
-    <!-- Dependencies: Web3j and org.apache.commons.cli -->
-    <dependencies>
-        <dependency>
-            <groupId>org.web3j</groupId>
-            <artifactId>core</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-            <version>1.4</version>
-        </dependency>
-    </dependencies>
 
 </project>

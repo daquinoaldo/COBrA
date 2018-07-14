@@ -109,7 +109,7 @@ class ContractManager {
      * Returns the contract owner.
      * @return a string containing the contract owner.
      */
-    String getOwner() {
+    public String getOwner() {
         return owner;
     }
 

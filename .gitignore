@@ -8,9 +8,10 @@
 # Compiled output
 out
 target
+jar
 
-# java contracts
-DAPP/src/com/aldodaquino/cobra/contracts
+# java compiled contracts
+DAPP/contracts/src/com/aldodaquino/cobra/contracts
 
 # OTHER
 geth-ropsten.sh

@@ -1,11 +1,11 @@
 package com.aldodaquino.cobra.gui.panels;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.*;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
+import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
-import com.aldodaquino.cobra.main.Status;
+import com.aldodaquino.cobra.gui.Status;
 
 import javax.swing.*;
 import java.awt.*;

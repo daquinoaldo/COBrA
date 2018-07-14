@@ -1,12 +1,12 @@
 package com.aldodaquino.cobra.gui.panels;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.components.ContentTable;
+import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
-import com.aldodaquino.cobra.main.Status;
+import com.aldodaquino.cobra.gui.Status;
 
 import java.math.BigInteger;
 import java.util.List;

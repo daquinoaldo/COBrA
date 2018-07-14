@@ -1,9 +1,9 @@
-package com.aldodaquino.cobra.main;
+package com.aldodaquino.cobra.gui;
 
+import com.aldodaquino.cobra.main.CatalogManager;
 import org.web3j.crypto.Credentials;
 
 import javax.naming.OperationNotSupportedException;
-import java.math.BigInteger;
 
 public class Status {
 

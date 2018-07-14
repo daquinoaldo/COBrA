@@ -1,9 +1,9 @@
 package com.aldodaquino.cobra.gui.panels;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.*;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
-import com.aldodaquino.cobra.main.Status;
+import com.aldodaquino.cobra.gui.Utils;
+import com.aldodaquino.cobra.gui.Status;
 
 import javax.naming.OperationNotSupportedException;
 import javax.swing.*;
