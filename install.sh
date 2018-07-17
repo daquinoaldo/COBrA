@@ -3,7 +3,7 @@
 bash compile.sh
 
 cd DAPP
-rm -rf jar
+rm jar/*
 
 mvn clean
 mvn install

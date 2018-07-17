@@ -10,8 +10,6 @@ import com.aldodaquino.cobra.main.ContentManager;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-
-import org.apache.commons.cli.*;
 import org.web3j.crypto.Credentials;
 
 /**
@@ -31,49 +29,33 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         // Parse cmd options
-        Options options = new Options();
+        CliHelper cliHelper = new CliHelper();
+        cliHelper.addOption("h", "help", false, "Print this help message.");
+        cliHelper.addOption("c", "catalog", true, "Catalog address.");
+        cliHelper.addOption("k", "private-key", true, "Private key of your account.");
+        cliHelper.addOption("p", "port", true, "Port on which run the server.");
+        cliHelper.parse(args);
 
-        Option privateKeyOption = new Option("k", "private-key (required)", true,
-                "private key to authenticate and deploy contents (default 8080)");
-        privateKeyOption.setRequired(true);
-        options.addOption(privateKeyOption);
+        if (cliHelper.isPresent("h")) System.out.println(cliHelper.getHelpMessage());
 
-        Option catalogOption = new Option("c", "catalog", true,
-                "catalog address");
-        catalogOption.setRequired(true);
-        options.addOption(catalogOption);
-
-        Option portOption = new Option("p", "port", true,
-                "port on which running the author server");
-        portOption.setRequired(false);
-        options.addOption(portOption);
-
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd;
-
-        String catalogAddress = null;
-        int port = DEFAULT_PORT;
-        try {
-            cmd = parser.parse(options, args);
-
-            privateKey = cmd.getOptionValue("private-key");
-            if (privateKey == null || privateKey.length() != 64) throw new IllegalArgumentException("Empty private key");
-
-            catalogAddress = cmd.getOptionValue("catalog");
-            if (catalogAddress == null || catalogAddress.length() == 0)
-                throw new IllegalArgumentException("Empty catalog address");
-
-            String portS = cmd.getOptionValue("port");
-            if (portS != null) port = Integer.parseInt(portS);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("author-server", options);
-            System.exit(1);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            System.exit(1);
+        privateKey = cliHelper.getValue("private-key");
+        if (privateKey == null || privateKey.length() == 0) {
+            System.err.println(cliHelper.getMissingOptionMessage("private-key"));
+            System.err.flush();
+            System.out.println(cliHelper.getHelpMessage());
+            System.out.flush();
         }
+
+        String catalogAddress = cliHelper.getValue("catalog");
+        if (catalogAddress == null || catalogAddress.length() == 0) {
+            System.err.println(cliHelper.getMissingOptionMessage("catalog"));
+            System.err.flush();
+            System.out.println(cliHelper.getHelpMessage());
+            System.out.flush();
+        }
+
+        String portS = cliHelper.getValue("port");
+        int port = portS != null && portS.length() != 0 ? Integer.parseInt(portS) : DEFAULT_PORT;
 
         // Init status
         credentials = Credentials.create(privateKey);
@@ -81,6 +63,7 @@ public class Main {
 
         // Create server
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        System.out.println("Server running on port " + port);
 
         // set handlers
         server.createContext("/deploy", HttpHelper.newHandler(Main::deploy));
