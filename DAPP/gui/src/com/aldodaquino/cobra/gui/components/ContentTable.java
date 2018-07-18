@@ -1,18 +1,23 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Utils;
+import com.aldodaquino.cobra.gui.panels.AuthorInfoPanel;
+import com.aldodaquino.cobra.gui.panels.GenreInfoPanel;
+import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 public class ContentTable extends JTable {
 
-    private static final String[] colNames = {"Address", "Name", "Genre", "Views", "Enjoy", "Price fairness",
+    private static final String[] colNames = {"Address", "Name", "Author", "Genre", "Views", "Enjoy", "Price fairness",
             "Content meaning", "Price"};
-
-    public ContentTable(List<Content> contents) {
-        super(prepareRows(contents), colNames);
-    }
 
     private static Object[][] prepareRows(List<Content> contents) {
         Object[][] rows = new Object[contents.size()][colNames.length];
@@ -20,16 +25,85 @@ public class ContentTable extends JTable {
             String address = contents.get(i).address;
             rows[i][0] = address;
             rows[i][1] = contents.get(i).name;
-            rows[i][2] = contents.get(i).genre;
-            rows[i][3] = contents.get(i).views;
-            rows[i][4] = contents.get(i).enjoy;
-            rows[i][5] = contents.get(i).priceFairness;
-            rows[i][6] = contents.get(i).contentMeaning;
-            rows[i][7] = contents.get(i).price;
+            rows[i][2] = contents.get(i).author;
+            rows[i][3] = contents.get(i).genre;
+            rows[i][4] = contents.get(i).views;
+            rows[i][5] = contents.get(i).enjoy;
+            rows[i][6] = contents.get(i).priceFairness;
+            rows[i][7] = contents.get(i).contentMeaning;
+            rows[i][8] = contents.get(i).price;
         }
         return rows;
     }
 
+    private final CatalogManager catalogManager;
 
+    public ContentTable(CatalogManager catalogManager, List<Content> contents) {
+        super(prepareRows(contents), colNames);
+        this.catalogManager = catalogManager;
+
+        // resize column to fit content
+        // TODO: doesn't work properly
+        TableColumnModel columnModel = getColumnModel();
+        for (int column = 0; column < getColumnCount(); column++) {
+            if (column == 1 || column == 3) continue;   // address columns cannot fit the content
+            int maxWidth = 0;
+            for (int row = 0; row < getRowCount(); row++) {
+                Component comp = prepareRenderer(getCellRenderer(row, column), row, column);
+                maxWidth = Math.max(comp.getPreferredSize().width +1 , maxWidth);
+            }
+            columnModel.getColumn(column).setPreferredWidth(maxWidth);
+        }
+
+        // render author and genre as link style
+        TableCellRenderer linkRenderer = (table, value, arg2, arg3, arg4, arg5) ->
+                new JLabel("<html><a href=\"about:" + value + "\">" + value + "</a>");
+        getColumnModel().getColumn(2).setCellRenderer(linkRenderer);
+        getColumnModel().getColumn(3).setCellRenderer(linkRenderer);
+
+        // mouse listener for author and genre click and hover
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = rowAtPoint(new Point(e.getX(), e.getY()));
+                int col = columnAtPoint(new Point(e.getX(), e.getY()));
+                String cellContent = (String) getModel().getValueAt(row, col);
+                if (col == 2) showAuthorInfo(cellContent);
+                if (col == 3) showGenreInfo(cellContent);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                int col = columnAtPoint(new Point(e.getX(), e.getY()));
+                if (col == 2 || col == 3) {
+                    setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                int col = columnAtPoint(new Point(e.getX(), e.getY()));
+                if (col != 2 && col != 3) {
+                    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            }
+        });
+    }
+
+    // Make cells not editable
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return false;
+    }
+
+    private void showAuthorInfo(String author) {
+        JPanel authorInfoPanel = new AuthorInfoPanel(catalogManager, author);
+        Utils.createFixedWindow("About the author", authorInfoPanel, false);
+    }
+
+    private void showGenreInfo(String genre) {
+        JPanel genreInfoPanel = new GenreInfoPanel(catalogManager, genre);
+        Utils.createFixedWindow("About the genre", genreInfoPanel, false);
+    }
 
 }

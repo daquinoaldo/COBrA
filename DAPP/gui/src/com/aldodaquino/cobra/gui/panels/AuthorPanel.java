@@ -2,7 +2,7 @@ package com.aldodaquino.cobra.gui.panels;
 
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
-import com.aldodaquino.cobra.gui.components.ContentTable;
+import com.aldodaquino.cobra.gui.components.AuthorContentTable;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
@@ -28,7 +28,7 @@ public class AuthorPanel extends AsyncPanel {
         // table container
         tableContainer = new JScrollPane();
         List<Content> contents = catalogManager.getContents();
-        table = new ContentTable(contents);
+        table = new AuthorContentTable(catalogManager, contents);
         tableContainer.setViewportView(table);
 
         // buttons
@@ -56,7 +56,7 @@ public class AuthorPanel extends AsyncPanel {
         doAsync(() -> {
             try {
                 List<Content> contents = catalogManager.getAuthorContents(status.getUserAddress());
-                table = new ContentTable(contents);
+                table = new AuthorContentTable(catalogManager, contents);
                 tableContainer.setViewportView(table);
             } catch (OperationNotSupportedException e) {
                 e.printStackTrace();

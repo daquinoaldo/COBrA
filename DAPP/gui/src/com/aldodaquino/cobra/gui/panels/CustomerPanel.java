@@ -28,7 +28,7 @@ public class CustomerPanel extends UpgradablePanel {
         // table container
         tableContainer = new JScrollPane();
         List<Content> contents = catalogManager.getContents();
-        table = new CustomerContentTable(catalogManager, contents);
+        table = new ContentTable(catalogManager, contents);
         tableContainer.setViewportView(table);
 
         // lateral bar
@@ -42,7 +42,20 @@ public class CustomerPanel extends UpgradablePanel {
         chartWidget = new ChartWidget(catalogManager);
         JPanel newContentWidget = new newContentWidget(catalogManager);
 
-        lateralBar = new JPanel(new GridBagLayout());
+        lateralBar = new JPanel(new GridBagLayout()) {
+            // prevent widely resize with window
+            @Override
+            public Dimension getMaximumSize() {
+                Dimension dim = super.getMaximumSize();
+                dim.width = getPreferredSize().width;
+                return dim;
+            }
+            // minimum size to fit all component
+            @Override
+            public Dimension getMinimumSize() {
+                return getPreferredSize();
+            }
+        };
         lateralBar.add(userInfo, newGBC(1, 1));
         lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 2));
         lateralBar.add(updateButton, newGBC(1, 3));
@@ -65,7 +78,7 @@ public class CustomerPanel extends UpgradablePanel {
         doAsync(() -> {
             // update table
             List<Content> contents = catalogManager.getContents();
-            table = new CustomerContentTable(catalogManager, contents);
+            table = new ContentTable(catalogManager, contents);
             tableContainer.setViewportView(table);
 
             // update user info

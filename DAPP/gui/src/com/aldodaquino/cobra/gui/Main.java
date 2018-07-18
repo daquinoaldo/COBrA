@@ -21,6 +21,7 @@ public class Main {
 
         // Create the window
         window = Utils.createFixedWindow(Strings.appName, starterPanel, true);
+        window.setMinimumSize(starterPanel.getMinimumSize());
 
     }
 
@@ -30,6 +31,7 @@ public class Main {
         window.repaint();
         window.pack();
         window.setLocationRelativeTo(null);
+        window.setMinimumSize(replacement.getMinimumSize());
     }
 
     private static void showMainPanel(Status status) {

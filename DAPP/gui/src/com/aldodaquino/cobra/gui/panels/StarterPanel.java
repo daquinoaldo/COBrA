@@ -42,6 +42,12 @@ public class StarterPanel extends UpgradablePanel {
         add(loginForm, replacingPosition);
     }
 
+    // minimum size to fit all component
+    @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
+    }
+
     /* CALLBACKS */
     private void loginCallback(String privateKey) {
         doAsync(() -> {
