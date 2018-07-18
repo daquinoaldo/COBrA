@@ -9,25 +9,30 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gui</artifactId>
+    <artifactId>test</artifactId>
 
-    <!-- contract module dependent -->
     <dependencies>
+        <!-- contract module dependent -->
         <dependency>
             <groupId>com.aldodaquino.cobra</groupId>
             <artifactId>contracts</artifactId>
             <version>1.0</version>
         </dependency>
+        <!-- author-server module dependent -->
+        <dependency>
+            <groupId>com.aldodaquino.cobra</groupId>
+            <artifactId>author-server</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <!-- GUI module dependent -->
+        <dependency>
+            <groupId>com.aldodaquino.cobra</groupId>
+            <artifactId>gui</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
-        <!-- Add resources -->
-        <resources>
-            <resource>
-                <directory>res</directory>
-            </resource>
-        </resources>
-
         <!-- Change default sources path -->
         <sourceDirectory>src</sourceDirectory>
 
@@ -41,7 +46,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.aldodaquino.cobra.gui.Main</mainClass>
+                            <mainClass>com.aldodaquino.cobra.test.Main</mainClass>
                         </manifest>
                     </archive>
                     <!-- JAR output directory -->
@@ -55,7 +60,7 @@
                     <!-- Generate manifest.mf with main class -->
                     <archive>
                         <manifest>
-                            <mainClass>com.aldodaquino.cobra.gui.Main</mainClass>
+                            <mainClass>com.aldodaquino.cobra.test.Main</mainClass>
                         </manifest>
                     </archive>
                     <!-- JAR output directory -->

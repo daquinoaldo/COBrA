@@ -7,23 +7,25 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
-public class HttpHelper {
+public class HttpServerHelper {
 
     private static class HttpRequestHandler implements HttpHandler {
-        Consumer<HttpExchange> consumer;
-        HttpRequestHandler(Consumer<HttpExchange> consumer) {
+        BiConsumer<HttpExchange, Main.Status> consumer;
+        Main.Status status;
+        HttpRequestHandler(BiConsumer<HttpExchange, Main.Status> consumer, Main.Status status) {
             this.consumer = consumer;
+            this.status = status;
         }
         @Override
         public void handle(HttpExchange request) {
-            consumer.accept(request);
+            consumer.accept(request, status);
         }
     }
 
-    static HttpHandler newHandler(Consumer<HttpExchange> consumer) {
-        return new HttpRequestHandler(consumer);
+    static HttpHandler newHandler(BiConsumer<HttpExchange, Main.Status> consumer, Main.Status status) {
+        return new HttpRequestHandler(consumer, status);
     }
 
     public static Map<String, String> parseGET(HttpExchange request) {
@@ -39,7 +41,32 @@ public class HttpHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return parseQuery(query);
+        return parseJson(query);
+    }
+
+    private static Map<String, String> parseJson(String json) {
+        if (json == null || json.length() == 0) throw new IllegalArgumentException("Invalid query: null.");
+
+        // HashMap to be filled with all parameters in the query
+        Map<String, String> parameters = new HashMap<>();
+
+        // remove parenthesis and quotes
+        json = json.replace("{", "").replace("}", "").replaceAll("\"", "");
+
+        // Split the query in pairs key=value
+        String pairs[] = json.split("[;]");
+        // Split each pair in key and value and put them in the Map
+        for (String pair : pairs) {
+            String param[] = pair.split("[:]");
+            if (param.length > 0) {
+                String key = param[0];
+                String value = null;
+                if (param.length > 1) value = param[1];
+                parameters.put(key, value);
+            }
+        }
+
+        return parameters;
     }
 
     private static Map<String, String> parseQuery(String query) {

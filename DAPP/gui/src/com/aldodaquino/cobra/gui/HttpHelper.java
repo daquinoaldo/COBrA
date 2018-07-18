@@ -19,15 +19,16 @@ public class HttpHelper {
 
     private static Response makeRequest(String url, String method, String parameters) {
         HttpURLConnection connection = null;
-
+        int status = -1;
         try {
             //Create connection
             connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setDoOutput(true);
             connection.setRequestMethod(method);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Content-Length", Integer.toString(parameters.getBytes().length));
             connection.setRequestProperty("Content-Language", "en-US");
-            connection.setRequestProperty("Cookie", joinCookie(cookieManager.getCookieStore().getCookies()));
+            //connection.setRequestProperty("Cookie", joinCookie(cookieManager.getCookieStore().getCookies())); TODO: delete
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
@@ -38,13 +39,13 @@ public class HttpHelper {
                 outputStream.close();
             }
 
-            // Get cookies
-            String cookiesHeader = connection.getHeaderField("Set-Cookie");
+            // Get cookies TODO: delete
+            /*String cookiesHeader = connection.getHeaderField("Set-Cookie");
             List<HttpCookie> cookies = HttpCookie.parse(cookiesHeader);
-            cookies.forEach(cookie -> cookieManager.getCookieStore().add(null, cookie));
+            cookies.forEach(cookie -> cookieManager.getCookieStore().add(null, cookie));*/
 
             //Get Response
-            int status = connection.getResponseCode();
+            status = connection.getResponseCode();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder responseData = new StringBuilder(); // or StringBuffer if Java version 5+
             String line;
@@ -58,14 +59,14 @@ public class HttpHelper {
         }
         catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return status < 0 ? null : new Response(status, "");
         }
         finally {
             if (connection != null) connection.disconnect();
         }
     }
 
-    private static String joinCookie(List<?> list) {
+    /*private static String joinCookie(List<?> list) {
         if (list == null || list.size() == 0) return null;
         final StringBuilder stringBuilder = new StringBuilder(list.size() * 16);
         for (int i = 0; i < list.size(); i++) {
@@ -74,7 +75,7 @@ public class HttpHelper {
             if (elem != null) stringBuilder.append(elem);
         }
         return stringBuilder.toString();
-    }
+    } TODO: delete*/
 
     private static String jsonifyParameters(Map<String, String> parameters) {
         if (parameters == null) return "";
@@ -109,6 +110,10 @@ public class HttpHelper {
         private Response (int code, String data) {
             this.code = code;
             this.data = data;
+        }
+        @Override
+        public String toString() {
+            return "{\"code\":\"" + code + "\",\"data\":\"" + data + "\"}";
         }
     }
 

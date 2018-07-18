@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-class CliHelper {
+public class CliHelper {
 
     private ArrayList<CliOption> cliOptions = new ArrayList<>();
     private ArrayList<CliFlag> cliFlags = new ArrayList<>();
@@ -19,7 +19,7 @@ class CliHelper {
      * @throws IllegalArgumentException if the {@param shortOpt} or the {@param longOpt} already exists in another
      * option.
      */
-    void addOption(String shortOpt, String longOpt, boolean hasValue, String description) {
+    public void addOption(String shortOpt, String longOpt, boolean hasValue, String description) {
         if (!hasValue) addFlag(shortOpt, longOpt, description);
         // search for an already existent option
         for (CliOption cliOption : cliOptions) {
@@ -45,7 +45,7 @@ class CliHelper {
      * Parse the String[] args of the main and saves the option value.
      * @param args the main's args.
      */
-    void parse(String[] args) {
+    public void parse(String[] args) {
         if (args == null) return;
         for (int i = 0; i < args.length; i++) {
             if (isNotAnOption(args[i])) System.err.println("Invalid option " + args[i] + ".");
@@ -66,7 +66,7 @@ class CliHelper {
      * @return a String[] containing all the values, empty array if the option has no value or null if this option
      * doesn't exist.
      */
-    String[] getValues(String opt) {
+    public String[] getValues(String opt) {
         for (CliOption cliOption : cliOptions)
             if (cliOption.isEqual(opt)) return cliOption.getValues();
         return null;
@@ -78,7 +78,7 @@ class CliHelper {
      * @param opt the option in the short or the long format (will return the same list).
      * @return the first value, empty string if the option has no value or null if this option doesn't exist.
      */
-    String getValue(String opt) {
+    public String getValue(String opt) {
         String[] values = getValues(opt);
         return values == null ? null : values.length == 0 ? "" : values[0];
     }
@@ -88,7 +88,7 @@ class CliHelper {
      * @param opt the option in the short or the long format (will return the same list).
      * @return true if the program is launched with the specified option, false otherwise.
      */
-    boolean isPresent(String opt) {
+    public boolean isPresent(String opt) {
         for (CliFlag cliFlag : cliFlags)
             if (cliFlag.isEqual(opt))
                 return cliFlag.isPresent();

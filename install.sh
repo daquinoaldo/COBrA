@@ -15,3 +15,7 @@ mvn install
 cd ../gui
 mvn clean
 mvn install
+
+cd ../test
+mvn clean
+mvn install

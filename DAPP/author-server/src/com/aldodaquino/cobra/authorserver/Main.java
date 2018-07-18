@@ -19,9 +19,11 @@ public class Main {
 
     private static final int DEFAULT_PORT = 8000;
 
-    private static String privateKey;
-    private static Credentials credentials;
-    private static CatalogManager catalogManager;
+    static class Status {
+        String privateKey;
+        Credentials credentials;
+        CatalogManager catalogManager;
+    }
 
     /**
      * Main method.
@@ -36,14 +38,20 @@ public class Main {
         cliHelper.addOption("p", "port", true, "Port on which run the server.");
         cliHelper.parse(args);
 
-        if (cliHelper.isPresent("h")) System.out.println(cliHelper.getHelpMessage());
+        if (cliHelper.isPresent("h")) {
+            System.out.println(cliHelper.getHelpMessage());
+            System.exit(0);
+        }
 
-        privateKey = cliHelper.getValue("private-key");
-        if (privateKey == null || privateKey.length() == 0) {
+        Status status = new Main.Status();
+
+        status.privateKey = cliHelper.getValue("private-key");
+        if (status.privateKey == null || status.privateKey.length() == 0) {
             System.err.println(cliHelper.getMissingOptionMessage("private-key"));
             System.err.flush();
             System.out.println(cliHelper.getHelpMessage());
             System.out.flush();
+            System.exit(1);
         }
 
         String catalogAddress = cliHelper.getValue("catalog");
@@ -52,21 +60,22 @@ public class Main {
             System.err.flush();
             System.out.println(cliHelper.getHelpMessage());
             System.out.flush();
+            System.exit(1);
         }
 
         String portS = cliHelper.getValue("port");
         int port = portS != null && portS.length() != 0 ? Integer.parseInt(portS) : DEFAULT_PORT;
 
         // Init status
-        credentials = Credentials.create(privateKey);
-        catalogManager = new CatalogManager(credentials, catalogAddress);
+        status.credentials = Credentials.create(status.privateKey);
+        status.catalogManager = new CatalogManager(status.credentials, catalogAddress);
 
         // Create server
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        System.out.println("Server running on port " + port);
+        System.out.println("Server running on port " + port + ".\n");
 
         // set handlers
-        server.createContext("/deploy", HttpHelper.newHandler(Main::deploy));
+        server.createContext("/deploy", HttpServerHelper.newHandler(Main::deploy, status));
 
         // start server
         server.setExecutor(null); // creates a default executor
@@ -82,16 +91,21 @@ public class Main {
      *                genre of the content (can be null)
      *                price of the content (if null is set to 0)
      */
-    private static void deploy(HttpExchange request) {
+    private static void deploy(HttpExchange request, Status status) {
         // get parameters
-        Map<String, String> parameters = HttpHelper.parsePOST(request);
+        Map<String, String> parameters = HttpServerHelper.parsePOST(request);
 
-        if (!isOwner(parameters.get("privateKey")))
-            HttpHelper.sendResponse(request, "Only the author server owner can perform this action." +
+        if (!status.privateKey.equals(parameters.get("privateKey"))) {
+            HttpServerHelper.sendResponse(request, "Only the author server owner can perform this action." +
                     "You must login with the same private key of the server.", 403);
+            return;
+        }
 
         String name = parameters.get("name");
-        if (name == null) HttpHelper.sendResponse(request, "ERROR: name not specified.", 400);
+        if (name == null) {
+            HttpServerHelper.sendResponse(request, "ERROR: name not specified.", 400);
+            return;
+        }
 
         String genre = parameters.get("genre");
 
@@ -101,21 +115,18 @@ public class Main {
             price = new BigInteger(priceS.length() != 0 ? priceS : "0");
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            HttpHelper.sendResponse(request, e.getMessage(), 400);
+            HttpServerHelper.sendResponse(request, e.getMessage(), 400);
             return;
         }
 
         try {
-            ContentManager contentManager = new ContentManager(credentials, catalogManager.getAddress(), name, genre, price);
-            HttpHelper.sendResponse(request, contentManager.getAddress());
+            ContentManager contentManager = new ContentManager(status.credentials,
+                    status.catalogManager.getAddress(), name, genre, price);
+            HttpServerHelper.sendResponse(request, contentManager.getAddress());
         } catch (Exception e) {
             e.printStackTrace();
-            HttpHelper.sendResponse(request, e.getMessage(), 400);
+            HttpServerHelper.sendResponse(request, e.getMessage(), 400);
         }
-    }
-
-    private static boolean isOwner(String privateKey) {
-        return privateKey != null && privateKey.length() == 64 && Main.privateKey.equals(privateKey);
     }
 
 }

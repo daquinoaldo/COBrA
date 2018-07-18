@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Project info -->
-    <groupId>com.aldodaquino</groupId>
+    <groupId>com.aldodaquino.cobra</groupId>
     <artifactId>DAPP</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
@@ -13,6 +13,7 @@
         <module>author-server</module>
         <module>gui</module>
         <module>contracts</module>
+        <module>test</module>
     </modules>
 
     <properties>
