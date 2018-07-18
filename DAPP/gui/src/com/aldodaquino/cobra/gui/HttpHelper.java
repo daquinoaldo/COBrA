@@ -2,12 +2,11 @@ package com.aldodaquino.cobra.gui;
 
 import java.io.*;
 import java.net.*;
-import java.util.List;
 import java.util.Map;
 
 public class HttpHelper {
 
-    private static CookieManager cookieManager = new CookieManager();
+    // --Commented out by Inspection (18/07/2018, 12:27):private static CookieManager cookieManager = new CookieManager();
 
     public static Response makeGet(String url, Map<String, String> parameters) {
         return makeRequest(url + querifyParameters(parameters), "GET", "");
@@ -105,8 +104,8 @@ public class HttpHelper {
     }
 
     public static class Response {
-        public int code;
-        public String data;
+        public final int code;
+        public final String data;
         private Response (int code, String data) {
             this.code = code;
             this.data = data;

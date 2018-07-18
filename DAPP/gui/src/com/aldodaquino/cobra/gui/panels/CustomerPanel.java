@@ -17,10 +17,10 @@ public class CustomerPanel extends UpgradablePanel {
 
     private final JScrollPane tableContainer;
     private JTable table;
-    private JPanel lateralBar;
+    private final JPanel lateralBar;
     private final UserInfo userInfo;
     private ChartWidget chartWidget;
-    private GridBagConstraints chartBannerPosition = newGBC(1, 10);
+    private final GridBagConstraints chartBannerPosition = newGBC(1, 10);
 
     public CustomerPanel(Status status) {
         this.catalogManager = status.getCatalogManager();

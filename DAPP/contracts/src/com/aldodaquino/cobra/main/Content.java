@@ -2,7 +2,7 @@ package com.aldodaquino.cobra.main;
 
 import java.math.BigInteger;
 
-public class Content implements Stringifiable {
+public class Content {
 
     public final String address;
     public final String name;
@@ -27,7 +27,7 @@ public class Content implements Stringifiable {
         this.contentMeaning = contentMeaning.intValue();
     }
 
-    public String stringify() {
+    /*public String stringify() {
         return "\"address\n:" + address + "," +
                 "\"name\n:" + name + "," +
                 "\"author\n:" + author + "," +
@@ -37,6 +37,6 @@ public class Content implements Stringifiable {
                 "\"enjoy\n:" + enjoy + "," +
                 "\"priceFairness\n:" + priceFairness + "," +
                 "\"contentMeaning\n:" + contentMeaning;
-    }
+    }TODO: delete*/
 
 }

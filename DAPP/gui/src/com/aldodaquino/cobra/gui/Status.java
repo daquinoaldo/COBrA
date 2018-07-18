@@ -35,11 +35,10 @@ public class Status {
         catalogManager = null;
     }
 
-    public String deployCatalog() throws OperationNotSupportedException {
+    public void deployCatalog() throws OperationNotSupportedException {
         if (credentials == null)
             throw new OperationNotSupportedException("You must be logged in to deploy a new catalog.");
         catalogManager = new CatalogManager(credentials);
-        return catalogManager.getAddress();
     }
 
     public String getUserAddress() throws OperationNotSupportedException {

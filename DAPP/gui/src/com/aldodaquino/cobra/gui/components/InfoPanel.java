@@ -7,14 +7,14 @@ import javax.swing.*;
 
 public class InfoPanel extends AsyncPanel {
 
-    protected LabelPanel latestLabel;
-    protected LabelPanel mostPopularLabel;
-    protected LabelPanel highestRatedLabel;
-    protected LabelPanel mostEnjoyedLabel;
-    protected LabelPanel biggestPriceFairnessLabel;
-    protected LabelPanel highestContentMeaningLabel;
+    protected final LabelPanel latestLabel;
+    protected final LabelPanel mostPopularLabel;
+    protected final LabelPanel highestRatedLabel;
+    protected final LabelPanel mostEnjoyedLabel;
+    protected final LabelPanel biggestPriceFairnessLabel;
+    protected final LabelPanel highestContentMeaningLabel;
 
-    public InfoPanel(String mainLabelString) {
+    protected InfoPanel(String mainLabelString) {
 
         // set layout (vertical)
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

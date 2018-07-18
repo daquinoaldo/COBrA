@@ -7,8 +7,8 @@ import java.awt.*;
 
 public class LabelPanel extends UpgradablePanel {
 
-    private JLabel loader = new JLabel(new ImageIcon(Images.loading.getImage()), JLabel.CENTER);
-    private GridBagConstraints replacingPosition = newGBC(2, 1);
+    private final JLabel loader = new JLabel(new ImageIcon(Images.loading.getImage()), JLabel.CENTER);
+    private final GridBagConstraints replacingPosition = newGBC(2, 1);
 
     LabelPanel(String label) {
         add(new JLabel(label), newGBC(1, 1));

@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public class HttpServerHelper {
+class HttpServerHelper {
 
     private static class HttpRequestHandler implements HttpHandler {
-        BiConsumer<HttpExchange, Main.Status> consumer;
-        Main.Status status;
+        final BiConsumer<HttpExchange, Main.Status> consumer;
+        final Main.Status status;
         HttpRequestHandler(BiConsumer<HttpExchange, Main.Status> consumer, Main.Status status) {
             this.consumer = consumer;
             this.status = status;

@@ -7,8 +7,8 @@ import javax.swing.*;
 
 public class newContentWidget extends JPanel {
 
-    private CatalogManager catalogManager;
-    private JSpinner numberSpinner;
+    private final CatalogManager catalogManager;
+    private final JSpinner numberSpinner;
 
     public newContentWidget(CatalogManager catalogManager) {
         this.catalogManager = catalogManager;
