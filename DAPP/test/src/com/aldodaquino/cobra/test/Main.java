@@ -21,6 +21,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Main {
 
+    private static final boolean START_GUIS = false;
+
     private static final int NUMBER_OF_CONTENTS = 15;
     private static final String[] genres = {"Comedy", "Romance", "Thriller"};
 
@@ -101,24 +103,23 @@ public class Main {
 
 
         // Start the GUI
-        System.out.print("Starting two GUI windows...");
-        //new Thread(() -> com.aldodaquino.cobra.gui.Main.main(null)).start();
-        //new Thread(() -> com.aldodaquino.cobra.gui.Main.main(null)).start();
+        if (START_GUIS) {
+            System.out.print("Starting two GUI windows...");
+            Process GUI1 = newGUIProcess();
+            Process GUI2 = newGUIProcess();
 
-        Process GUI1 = newGUIProcess();
-        Process GUI2 = newGUIProcess();
-
-        // Wait for the GUIs to end
-        try {
-            assert GUI1 != null && GUI2 != null;
-            GUI1.waitFor();
-            GUI2.waitFor();
-            System.out.println("    GUI 1 exit with value " + GUI1.exitValue()
-                    + ".\n    GUI 2 exit with value " + GUI2.exitValue() + ".\n\n");
-            System.exit(GUI1.exitValue() + GUI2.exitValue()); // 0 if none fails, 1 if one fails, 2 if both fail.
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            System.exit(1);
+            // Wait for the GUIs to end
+            try {
+                assert GUI1 != null && GUI2 != null;
+                GUI1.waitFor();
+                GUI2.waitFor();
+                System.out.println("    GUI 1 exit with value " + GUI1.exitValue()
+                        + ".\n    GUI 2 exit with value " + GUI2.exitValue() + ".\n\n");
+                System.exit(GUI1.exitValue() + GUI2.exitValue()); // 0 if none fails, 1 if one fails, 2 if both fail.
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
 
     }
