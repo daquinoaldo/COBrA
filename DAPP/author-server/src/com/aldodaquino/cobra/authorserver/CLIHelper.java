@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 
 public class CliHelper {
 
-    private ArrayList<CliOption> cliOptions = new ArrayList<>();
-    private ArrayList<CliFlag> cliFlags = new ArrayList<>();
+    private final ArrayList<CliOption> cliOptions = new ArrayList<>();
+    private final ArrayList<CliFlag> cliFlags = new ArrayList<>();
     private int maxLongOptLength = 0;
 
     /**
@@ -148,8 +148,8 @@ public class CliHelper {
     /* Auxiliary classes */
 
     private class CliObject {
-        String shortOpt;
-        String longOpt;
+        final String shortOpt;
+        final String longOpt;
         String description;
 
         CliObject(String shortOpt, String longOpt, String description) {
@@ -172,7 +172,7 @@ public class CliHelper {
 
     private class CliOption extends CliObject {
 
-        ArrayList<String> values = new ArrayList<>();
+        final ArrayList<String> values = new ArrayList<>();
 
         CliOption(String shortOpt, String longOpt, String description) {
             super(shortOpt, longOpt, description);

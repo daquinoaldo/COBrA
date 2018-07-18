@@ -50,7 +50,7 @@ public class StarterPanel extends UpgradablePanel {
         try {
             status.login(privateKey);
             // change form
-            catalogForm = new CatalogForm(this::connectCallback, this::deployCallback);
+            catalogForm = new CatalogForm(status, this::connectCallback, this::deployCallback);
             replaceComponent(loginForm, catalogForm, replacingPosition);
         } catch (OperationNotSupportedException e) {
             e.printStackTrace();
@@ -84,7 +84,8 @@ public class StarterPanel extends UpgradablePanel {
 
     private void postConnect() throws OperationNotSupportedException {
         Runnable deleteCallback = status.isCatalogOwner() ? this::deleteCallback : null;
-        roleForm = new RoleForm(this::browseCallback, this::manageCallback, this::disconnectCallback, deleteCallback);
+        roleForm = new RoleForm(status, this::browseCallback, this::manageCallback, this::disconnectCallback,
+                deleteCallback);
         replaceComponent(catalogForm, roleForm, replacingPosition);
     }
 
