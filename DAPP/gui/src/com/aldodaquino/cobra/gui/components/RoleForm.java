@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 
 import javax.swing.*;
@@ -16,7 +15,7 @@ public class RoleForm extends JPanel {
      * @param manageCallback callback for the "Manage my contents" button.
      * @param deleteCallback callback for the "Delete catalogManager" contents button. If null the button is not shown.
      */
-    public RoleForm(Status status, Runnable browseCallback, Runnable manageCallback, Runnable disconnectCallback,
+    public RoleForm(Runnable browseCallback, Runnable manageCallback, Runnable disconnectCallback,
                     Runnable deleteCallback) {
 
         // set layout (vertical)
@@ -32,8 +31,6 @@ public class RoleForm extends JPanel {
                 e -> disconnectCallback.run());
 
         // add all to the panel
-        add(new UserInfo(status));
-        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L));
         add(title);
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(browseButton);

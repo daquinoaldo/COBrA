@@ -69,7 +69,7 @@ public class CustomerPanel extends UpgradablePanel {
             tableContainer.setViewportView(table);
 
             // update user info
-            userInfo.update();
+            userInfo.updateStatus();
 
             // update charts
             lateralBar.remove(chartWidget);
@@ -101,7 +101,7 @@ public class CustomerPanel extends UpgradablePanel {
             if (catalogManager.buyPremium()) Utils.showMessageDialog("Premium bought.");
             else Utils.showErrorDialog("UNKNOWN ERROR: cannot buy a premium subscription.");
         });
-        userInfo.update();
+        userInfo.updateStatus();
     }
 
     private void giftPremium() {

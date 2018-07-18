@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 
@@ -16,7 +15,7 @@ public class CatalogForm extends JPanel {
     // the callback to call if the input data are correct
     private final Consumer<String> connectCallback;
 
-    public CatalogForm(Status status, Consumer<String> connectCallback, Runnable deployCallback) {
+    public CatalogForm(Consumer<String> connectCallback, Runnable deployCallback) {
         this.connectCallback = connectCallback;
 
         // set layout (vertical)
@@ -46,8 +45,6 @@ public class CatalogForm extends JPanel {
         deployPanel.add(deployButton);
 
         // add all to the panel
-        add(new UserInfo(status));
-        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L));
         add(connectPanel);
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M));
         add(deployPanel);

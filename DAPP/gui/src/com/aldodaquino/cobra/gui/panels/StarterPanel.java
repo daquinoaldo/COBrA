@@ -17,6 +17,7 @@ public class StarterPanel extends UpgradablePanel {
     private final Status status = new Status();
     private final Consumer<Status> whenDone;
 
+    private final UserInfo userInfo;
     private final JPanel loginForm;
     private JPanel catalogForm;
     private JPanel roleForm;
@@ -28,34 +29,35 @@ public class StarterPanel extends UpgradablePanel {
 
         // init components
         JPanel logo = new Logo();
+        userInfo = new UserInfo(status);
         loginForm = new LoginForm(this::loginCallback);
+        replacingPosition = newGBC(1, 5);
         
-        // making the panel
+        // prepare the panel and add components
         setBorder(ComponentFactory.newBorder(padding.width, padding.height));
-
-        // add logo in (1, 1)
         add(logo, newGBC(1, 1));
-
-        // add spacer in (1, 2)
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 2));
-
-        // add login form in (1, 3)
-        replacingPosition = newGBC(1, 3);
+        add(userInfo, newGBC(1, 3));
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 4));
         add(loginForm, replacingPosition);
     }
 
     /* CALLBACKS */
     private void loginCallback(String privateKey) {
-        // set the status
-        try {
-            status.login(privateKey);
-            // change form
-            catalogForm = new CatalogForm(status, this::connectCallback, this::deployCallback);
-            replaceComponent(loginForm, catalogForm, replacingPosition);
-        } catch (OperationNotSupportedException e) {
-            e.printStackTrace();
-            Utils.showErrorDialog(e.getMessage());
-        }
+        doAsync(() -> {
+            try {
+                // set the status
+                status.login(privateKey);
+                // update the user info
+                userInfo.updateStatus();
+                // change form
+                catalogForm = new CatalogForm(this::connectCallback, this::deployCallback);
+                replaceComponent(loginForm, catalogForm, replacingPosition);
+            } catch (OperationNotSupportedException e) {
+                e.printStackTrace();
+                Utils.showErrorDialog(e.getMessage());
+            }
+        });
     }
 
     private void connectCallback(String catalogAddress) {
@@ -83,15 +85,18 @@ public class StarterPanel extends UpgradablePanel {
     }
 
     private void postConnect() throws OperationNotSupportedException {
+        userInfo.updateStatus();
         Runnable deleteCallback = status.isCatalogOwner() ? this::deleteCallback : null;
-        roleForm = new RoleForm(status, this::browseCallback, this::manageCallback, this::disconnectCallback,
-                deleteCallback);
+        roleForm = new RoleForm(this::browseCallback, this::manageCallback, this::disconnectCallback, deleteCallback);
         replaceComponent(catalogForm, roleForm, replacingPosition);
     }
 
     private void disconnectCallback() {
-        status.disconnectCatalog();
-        replaceComponent(roleForm, catalogForm, replacingPosition);
+        doAsync(() -> {
+            status.disconnectCatalog();
+            userInfo.updateStatus();
+            replaceComponent(roleForm, catalogForm, replacingPosition);
+        });
     }
 
     private void deleteCallback() {
