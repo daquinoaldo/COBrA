@@ -8,9 +8,10 @@ public class Dimensions {
     public static final int LOGO_SIZE = 128;
     public static final int STAR_SIZE = 10;
 
-    // borders
-    public static final Dimension STARTER_PANEL_PADDING = new Dimension(65, 35);
+    // borders padding
+    public static final Dimension STARTER_PANEL_PADDING = new Dimension(60, 30);
     public static final Dimension INFO_PANEL_PADDING = new Dimension(30, 30);
+    public static final Dimension LATERAL_BAR_PADDING = new Dimension(15, 15);
 
     // spacers and separators
     public static final Dimension V_SPACER_S = new Dimension(0,5);

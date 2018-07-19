@@ -9,6 +9,8 @@ import com.aldodaquino.cobra.gui.Status;
 import javax.swing.*;
 import java.awt.*;
 
+import static com.aldodaquino.cobra.gui.constants.Dimensions.LATERAL_BAR_PADDING;
+
 public class CustomerPanel extends UpgradablePanel {
 
     private final CatalogManager catalogManager;
@@ -58,6 +60,7 @@ public class CustomerPanel extends UpgradablePanel {
         };
 
         lateralBar.add(userInfo, newGBC(1, 1));
+        lateralBar.setBorder(ComponentFactory.newBorder(LATERAL_BAR_PADDING.width, LATERAL_BAR_PADDING.height));
         lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 2));
         lateralBar.add(buyPremiumButton, newGBC(1, 3));
         lateralBar.add(giftPremiumButton, newGBC(1, 4));
