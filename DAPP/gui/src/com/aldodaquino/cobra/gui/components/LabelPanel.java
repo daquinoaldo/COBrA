@@ -1,8 +1,7 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Images;
-import com.aldodaquino.cobra.gui.panels.ContentPanel;
+import com.aldodaquino.cobra.gui.panels.ContentInfoPanel;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 
@@ -31,7 +30,7 @@ public class LabelPanel extends UpgradablePanel {
         if (content != null) link.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Utils.createWindow(content.name, new ContentPanel(catalogManager, content.address), false);
+                ContentInfoPanel.newWindow(catalogManager, content.address);
             }
             @Override
             public void mouseEntered(MouseEvent e) {

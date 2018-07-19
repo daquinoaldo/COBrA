@@ -15,7 +15,7 @@ class ContractManager {
     private Web3j web3;
     private BigInteger gasPrice;
     private BigInteger gasLimit;
-    private Credentials credentials;
+    Credentials credentials;
 
     private Contract contract;
     private Class<? extends Contract> contractClass;

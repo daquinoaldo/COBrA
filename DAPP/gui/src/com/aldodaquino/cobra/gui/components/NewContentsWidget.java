@@ -30,7 +30,7 @@ public class NewContentsWidget extends JPanel {
     private void getNewContentList() {
         List<Content> contents = catalogManager.getNewContentList((int) numberSpinner.getValue());
         JList contentList = new ContentList(catalogManager, contents);
-        Utils.createWindow("New content list", contentList, false);
+        Utils.newWindow("New content list", contentList, false);
     }
 
 }

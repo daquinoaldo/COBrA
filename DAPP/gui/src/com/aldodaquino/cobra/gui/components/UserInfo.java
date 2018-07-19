@@ -82,13 +82,7 @@ public class UserInfo extends UpgradablePanel {
 
     private JLabel newPremiumLabel() {
         if (status.getCatalogManager() == null) return new JLabel();    // catalog not connected
-        Boolean isPremium;
-        try {
-            isPremium = status.getCatalogManager().isPremium(status.getUserAddress());
-        } catch (OperationNotSupportedException e) {
-            // not logged in
-            return new JLabel();
-        }
+        Boolean isPremium = status.getCatalogManager().isPremium();
         JLabel newPremiumLabel;
         if (isPremium) {
             newPremiumLabel = new JLabel("Premium user");

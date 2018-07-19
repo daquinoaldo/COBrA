@@ -15,7 +15,7 @@ public class Logo extends JPanel {
     
     public Logo() {
         // icon
-        Image icon = Images.logo.getImage().getScaledInstance(Dimensions.ICON_SIZE, Dimensions.ICON_SIZE, Image.SCALE_SMOOTH);
+        Image icon = Images.logo.getImage().getScaledInstance(Dimensions.LOGO_SIZE, Dimensions.LOGO_SIZE, Image.SCALE_SMOOTH);
         JLabel iconLabel = new JLabel(new ImageIcon(icon), JLabel.CENTER);
 
         // title
@@ -26,7 +26,7 @@ public class Logo extends JPanel {
         Font labelFont = title.getFont();
         String labelText = title.getText();
         int stringWidth = title.getFontMetrics(labelFont).stringWidth(labelText);
-        double widthRatio = (double) Dimensions.ICON_SIZE / (double)stringWidth;
+        double widthRatio = (double) Dimensions.LOGO_SIZE / (double)stringWidth;
         int newFontSize = (int) (labelFont.getSize() * widthRatio);
         // set the new font size
         Utils.setFontSize(title, newFontSize);

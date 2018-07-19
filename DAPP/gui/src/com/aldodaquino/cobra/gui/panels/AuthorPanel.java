@@ -49,7 +49,7 @@ public class AuthorPanel extends AsyncPanel {
 
     private void deployContent() {
         JPanel deployContentPanel = new DeployContentPanel(status, this::updateTable);
-        Utils.createWindow("Deploy new content", deployContentPanel, false);
+        Utils.newWindow("Deploy new content", deployContentPanel, false);
     }
 
     private void updateTable() {
@@ -60,7 +60,7 @@ public class AuthorPanel extends AsyncPanel {
                 tableContainer.setViewportView(table);
             } catch (OperationNotSupportedException e) {
                 e.printStackTrace();
-                Utils.showErrorDialog(e.getMessage());
+                Utils.newErrorDialog(e.getMessage());
                 System.exit(-1);
             }
         });
@@ -71,8 +71,8 @@ public class AuthorPanel extends AsyncPanel {
             String address = table.getValueAt(table.getSelectedRow(), 0).toString();
             BigInteger amount = catalogManager.withdraw(address);
             if (amount.equals(BigInteger.ZERO))
-                Utils.showErrorDialog("There is no payout available for this contract.");
-            else Utils.showMessageDialog(amount + " wei collected.");
+                Utils.newErrorDialog("There is no payout available for this contract.");
+            else Utils.newMessageDialog(amount + " wei collected.");
         });
     }
 

@@ -11,13 +11,13 @@ import java.awt.*;
 public class Utils {
 
     /**
-     * Create and show a new centered Window with fixed dimensions and not resizable.
+     * Show a new centered Window with fixed dimensions and not resizable.
      * @param title of the Window.
      * @param panel to show in the Window body.
      * @param exitOnClose if true exit the Client when the Window is close.
      * @return the generated JFrame.
      */
-    public static JFrame createWindow(String title, JComponent panel, boolean exitOnClose) {
+    public static JFrame newWindow(String title, JComponent panel, boolean exitOnClose) {
         JFrame window = new JFrame(title);                                  // create a window
         window.setIconImage(Images.logo.getImage());                         // set logo as application icon
         window.setContentPane(panel);                                       // put a panel inside the window
@@ -33,19 +33,19 @@ public class Utils {
      * Shows a dialog, running on another thread.
      * @param msg the dialog message.
      */
-    public static void showMessageDialog(String msg) {
-        showDialog("Info", msg, JOptionPane.INFORMATION_MESSAGE);
+    public static void newMessageDialog(String msg) {
+        newDialog("Info", msg, JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
      * Shows an error dialog, running on another thread.
      * @param msg the error message.
      */
-    public static void showErrorDialog(String msg) {
-        showDialog("Error", msg, JOptionPane.WARNING_MESSAGE);
+    public static void newErrorDialog(String msg) {
+        newDialog("Error", msg, JOptionPane.WARNING_MESSAGE);
     }
     
-    private static void showDialog(String title, String msg, int type) {
+    private static void newDialog(String title, String msg, int type) {
         Thread t = new Thread(() -> JOptionPane.showMessageDialog(null, msg, title, type));
         t.start();
     }
@@ -55,7 +55,7 @@ public class Utils {
      * @param msg the question.
      * @return true for yes, false for no.
      */
-    public static boolean showConfirmDialog(String msg) {
+    public static boolean newConfirmDialog(String msg) {
         return JOptionPane.showConfirmDialog(null, msg,"Warning", JOptionPane.YES_NO_OPTION) ==
                 JOptionPane.YES_OPTION;
     }
@@ -126,11 +126,11 @@ public class Utils {
             else continue;
     
             if (!isOpenDialog && selected.exists()) {
-                aFileIsSelected = showConfirmDialog("The file will be overwritten. Are you sure?");
+                aFileIsSelected = newConfirmDialog("The file will be overwritten. Are you sure?");
             } else if (!isOpenDialog && selected.exists() && !selected.canWrite()) {
-                showErrorDialog("Can't write in the specified path. Please try again.");
+                newErrorDialog("Can't write in the specified path. Please try again.");
             } else if (isOpenDialog && !selected.canRead()) {
-                showErrorDialog("Can't read the selected file. Please try again.");
+                newErrorDialog("Can't read the selected file. Please try again.");
             } else {
                 aFileIsSelected = true;
             }

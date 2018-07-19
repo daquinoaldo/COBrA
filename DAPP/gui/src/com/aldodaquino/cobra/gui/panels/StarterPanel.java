@@ -61,7 +61,7 @@ public class StarterPanel extends UpgradablePanel {
                 replaceComponent(loginForm, catalogForm, replacingPosition);
             } catch (OperationNotSupportedException e) {
                 e.printStackTrace();
-                Utils.showErrorDialog(e.getMessage());
+                Utils.newErrorDialog(e.getMessage());
             }
         });
     }
@@ -73,7 +73,7 @@ public class StarterPanel extends UpgradablePanel {
                 postConnect();
             } catch (OperationNotSupportedException e) {
                 e.printStackTrace();
-                Utils.showErrorDialog(e.getMessage());
+                Utils.newErrorDialog(e.getMessage());
             }
         });
     }
@@ -85,7 +85,7 @@ public class StarterPanel extends UpgradablePanel {
                 postConnect();
             } catch (OperationNotSupportedException e) {
                 e.printStackTrace();
-                Utils.showErrorDialog(e.getMessage());
+                Utils.newErrorDialog(e.getMessage());
             }
         });
     }
@@ -106,12 +106,12 @@ public class StarterPanel extends UpgradablePanel {
     }
 
     private void deleteCallback() {
-        if (!Utils.showConfirmDialog("Do you really want to delete this catalog?")) return;
+        if (!Utils.newConfirmDialog("Do you really want to delete this catalog?")) return;
         doAsync(() -> {
             if (status.getCatalogManager().suicide()) {
-                Utils.showMessageDialog("Catalog deleted.");
+                Utils.newMessageDialog("Catalog deleted.");
                 disconnectCallback();
-            } else Utils.showErrorDialog("UNKNOWN ERROR: the catalog is not deleted.");
+            } else Utils.newErrorDialog("UNKNOWN ERROR: the catalog is not deleted.");
         });
     }
 

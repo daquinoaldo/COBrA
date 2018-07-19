@@ -12,7 +12,7 @@ contract CatalogContract {
 
     /* VARIABLES */
     // Constants
-    uint public contentCost = 0.01 ether;   // ~ 4€
+    //uint public contentCost = 0.01 ether;   // ~ 4€ - deprecated: now the price is chosen by the author
     uint public premiumCost = 0.1 ether;    // ~ 40€
     uint public premiumTime = 172800;       // ~ 1 month
     uint public payAfter = 10;  // views
@@ -103,7 +103,7 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
-        for (uint i = 0; i < contentList.length; i++) {
+        /*for (uint i = 0; i < contentList.length; i++) {
             BaseContentManagementContract cc =
             BaseContentManagementContract(contentList[i]);
             if (!authors[cc.owner()].alreadyFound) {
@@ -140,7 +140,7 @@ contract CatalogContract {
                 uint256 amount = amountFromUncollectedViews + amountFromPremium;
                 if (amount != 0) authorsList[i].transfer(amount);
             }
-        }
+        }TODO: review! */
         // emit an event
         emit CatalogClosed();
         // Transfer weis in excess to the owner

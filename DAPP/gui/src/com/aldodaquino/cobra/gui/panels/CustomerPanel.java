@@ -98,8 +98,8 @@ public class CustomerPanel extends UpgradablePanel {
 
     private void buyPremium() {
         doAsync(() -> {
-            if (catalogManager.buyPremium()) Utils.showMessageDialog("Premium bought.");
-            else Utils.showErrorDialog("UNKNOWN ERROR: cannot buy a premium subscription.");
+            if (catalogManager.buyPremium()) Utils.newMessageDialog("Premium bought.");
+            else Utils.newErrorDialog("UNKNOWN ERROR: cannot buy a premium subscription.");
         });
         userInfo.updateStatus();
     }
@@ -107,10 +107,10 @@ public class CustomerPanel extends UpgradablePanel {
     private void giftPremium() {
         JPanel pickUserPanel = new PickUserPanel((String user) ->
                 doAsync(() -> {
-                    if (catalogManager.giftPremium(user)) Utils.showMessageDialog("Premium gifted.");
-                    else Utils.showErrorDialog("UNKNOWN ERROR: cannot gift a premium subscription.");
+                    if (catalogManager.giftPremium(user)) Utils.newMessageDialog("Premium gifted.");
+                    else Utils.newErrorDialog("UNKNOWN ERROR: cannot gift a premium subscription.");
                 }));
-        Utils.createWindow("Gift premium", pickUserPanel, false);
+        Utils.newWindow("Gift premium", pickUserPanel, false);
     }
 
 }

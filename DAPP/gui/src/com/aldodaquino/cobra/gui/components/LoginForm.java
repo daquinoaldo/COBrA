@@ -45,6 +45,6 @@ public class LoginForm extends JPanel {
 
         // check the length  of the inputs and validate the form
         if (privateKey.length() == 64) loginCallback.accept(privateKey);
-        else Utils.showErrorDialog("Check the values entered in the fields.");
+        else Utils.newErrorDialog("Check the values entered in the fields.");
     }
 }

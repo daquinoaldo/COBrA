@@ -64,7 +64,7 @@ public class CatalogForm extends JPanel {
         // check the length  of the inputs and validate the form
         if (address.length() == 42)
             connectCallback.accept(address);
-        else Utils.showErrorDialog("Check the values entered in the fields.");
+        else Utils.newErrorDialog("Check the values entered in the fields.");
     }
 
 }

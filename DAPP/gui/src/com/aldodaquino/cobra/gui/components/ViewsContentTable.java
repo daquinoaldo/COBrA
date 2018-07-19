@@ -1,7 +1,6 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Utils;
-import com.aldodaquino.cobra.gui.panels.ContentPanel;
+import com.aldodaquino.cobra.gui.panels.ContentInfoPanel;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 
@@ -24,11 +23,8 @@ public class ViewsContentTable extends JTable {
         return rows;
     }
 
-    private final CatalogManager catalogManager;
-
     public ViewsContentTable(CatalogManager catalogManager, List<Content> contents) {
         super(prepareRows(contents), colNames);
-        this.catalogManager = catalogManager;
 
         // double-click listener
         addMouseListener(new MouseAdapter() {
@@ -36,7 +32,7 @@ public class ViewsContentTable extends JTable {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() < 2) return;
                 int row = rowAtPoint(new Point(e.getX(), e.getY()));
-                showContentInfo(contents.get(row).address, contents.get(row).name);
+                ContentInfoPanel.newWindow(catalogManager, contents.get(row).address);
             }
         });
     }
@@ -45,10 +41,6 @@ public class ViewsContentTable extends JTable {
     @Override
     public boolean isCellEditable(int row, int column) {
         return false;
-    }
-
-    private void showContentInfo(String address, String title) {
-        Utils.createWindow(title, new ContentPanel(catalogManager, address), false);
     }
 
 }

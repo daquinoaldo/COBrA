@@ -88,7 +88,7 @@ class DeployContentPanel extends AsyncPanel {
         // get input data
         String url = addressField.getText().trim();
         if (url.length() == 0) {
-            Utils.showErrorDialog("You must specify an url.");
+            Utils.newErrorDialog("You must specify an url.");
             return;
         }
         try {
@@ -97,13 +97,13 @@ class DeployContentPanel extends AsyncPanel {
             if (port <= 0) throw new NumberFormatException();
             url += ":" + port + DEPLOY_API_PATH;
         } catch (NumberFormatException e) {
-            Utils.showErrorDialog("Invalid port number.");
+            Utils.newErrorDialog("Invalid port number.");
             return;
         }
 
         String name = nameField.getText().trim();
         if (name.length() == 0) {
-            Utils.showErrorDialog("You must specify a name.");
+            Utils.newErrorDialog("You must specify a name.");
             return;
         }
         String genre = genreField.getText().trim();
@@ -112,7 +112,7 @@ class DeployContentPanel extends AsyncPanel {
         try {
             price = new BigInteger(priceS.length() != 0 ? priceS : "0");
         } catch (NumberFormatException e) {
-            Utils.showErrorDialog("Invalid port number.");
+            Utils.newErrorDialog("Invalid port number.");
             return;
         }
 
@@ -124,7 +124,7 @@ class DeployContentPanel extends AsyncPanel {
         parameters.put("price", price.toString());
 
         HttpHelper.Response response = HttpHelper.makePost(url, parameters);
-        if (response.code != 200) Utils.showErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
+        if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
 
         // close the widow
         deployCallback.run();

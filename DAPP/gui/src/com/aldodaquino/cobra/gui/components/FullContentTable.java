@@ -54,8 +54,8 @@ public class FullContentTable extends JTable {
                 int row = rowAtPoint(new Point(e.getX(), e.getY()));
                 int col = columnAtPoint(new Point(e.getX(), e.getY()));
                 String cellContent = (String) getModel().getValueAt(row, col);
-                if (col == 2) showAuthorInfo(cellContent);
-                if (col == 3) showGenreInfo(cellContent);
+                if (col == 2) AuthorInfoPanel.newWindow(catalogManager, cellContent);
+                if (col == 3) GenreInfoPanel.newWindow(catalogManager, cellContent);
             }
 
             @Override
@@ -80,16 +80,6 @@ public class FullContentTable extends JTable {
     @Override
     public boolean isCellEditable(int row, int column) {
         return false;
-    }
-
-    private void showAuthorInfo(String author) {
-        JPanel authorInfoPanel = new AuthorInfoPanel(catalogManager, author);
-        Utils.createWindow("About the author", authorInfoPanel, false);
-    }
-
-    private void showGenreInfo(String genre) {
-        JPanel genreInfoPanel = new GenreInfoPanel(catalogManager, genre);
-        Utils.createWindow("About the genre", genreInfoPanel, false);
     }
 
 }

@@ -42,14 +42,27 @@ public class CatalogManager extends ContractManager {
     /* Catalog interaction methods */
 
     /**
+     * Check if the user has access to a content.
+     * @param address the content address.
+     * @return boolean if has access, false otherwise.
+     */
+    public boolean hasAccess(String address) {
+        try {
+            return catalog.hasAccess(credentials.getAddress(), address).send();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Buy a content.
      * @param address the content address.
      * @return a boolean representing the operation outcome.
      */
-    public boolean buyContent(String address) {
+    public boolean buyContent(String address, BigInteger price) {
         try {
-            BigInteger contentCost = catalog.contentCost().send();
-            return catalog.getContent(address, contentCost).send().isStatusOK();
+            return catalog.getContent(address, price).send().isStatusOK();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -62,10 +75,9 @@ public class CatalogManager extends ContractManager {
      * @param user the user address.
      * @return a boolean representing the operation outcome.
      */
-    public boolean giftContent(String address, String user) {
+    public boolean giftContent(String address, String user, BigInteger price) {
         try {
-            BigInteger contentCost = catalog.contentCost().send();
-            return catalog.giftContent(address, user, contentCost).send().isStatusOK();
+            return catalog.giftContent(address, user, price).send().isStatusOK();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -103,12 +115,11 @@ public class CatalogManager extends ContractManager {
 
     /**
      * Return true if the user has an active premium subscription.
-     * @param user the user address.
      * @return a boolean representing the operation outcome.
      */
-    public boolean isPremium(String user) {
+    public boolean isPremium() {
         try {
-            return catalog.isPremium(user).send();
+            return catalog.isPremium(credentials.getAddress()).send();
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -51,7 +51,7 @@ class PickUserPanel extends AsyncPanel {
         // check the length  of the inputs and validate the form
         if (address.length() == 42)
             giftCallback.accept(address);
-        else Utils.showErrorDialog("You must specify an address.");
+        else Utils.newErrorDialog("You must specify an address.");
 
         // close the widow
         window.dispose();

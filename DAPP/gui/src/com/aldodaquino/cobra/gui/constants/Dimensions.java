@@ -4,8 +4,9 @@ import java.awt.*;
 
 public class Dimensions {
 
-    // default logo size
-    public static final int ICON_SIZE = 128;
+    // icons size
+    public static final int LOGO_SIZE = 128;
+    public static final int STAR_SIZE = 10;
 
     // spacers and separators
     public static final Dimension V_SPACER_S = new Dimension(0,5);
