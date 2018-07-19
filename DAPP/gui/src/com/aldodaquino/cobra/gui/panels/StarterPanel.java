@@ -10,9 +10,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
-public class StarterPanel extends UpgradablePanel {
+import static com.aldodaquino.cobra.gui.constants.Dimensions.STARTER_PANEL_PADDING;
 
-    private static final Dimension padding = new Dimension(65, 35);
+public class StarterPanel extends UpgradablePanel {
 
     private final Status status = new Status();
     private final Consumer<Status> whenDone;
@@ -34,7 +34,7 @@ public class StarterPanel extends UpgradablePanel {
         replacingPosition = newGBC(1, 5);
         
         // prepare the panel and add components
-        setBorder(ComponentFactory.newBorder(padding.width, padding.height));
+        setBorder(ComponentFactory.newBorder(STARTER_PANEL_PADDING.width, STARTER_PANEL_PADDING.height));
         add(logo, newGBC(1, 1));
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 2));
         add(userInfo, newGBC(1, 3));

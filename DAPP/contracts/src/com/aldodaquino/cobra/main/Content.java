@@ -57,16 +57,4 @@ public class Content {
         this.contentMeaning = contentMeaning.intValue();
     }
 
-    /*public String stringify() {
-        return "\"address\n:" + address + "," +
-                "\"name\n:" + name + "," +
-                "\"author\n:" + author + "," +
-                "\"genre\n:" + genre + "," +
-                "\"price\n:" + price + "," +
-                "\"views\n:" + views + "," +
-                "\"enjoy\n:" + enjoy + "," +
-                "\"priceFairness\n:" + priceFairness + "," +
-                "\"contentMeaning\n:" + contentMeaning;
-    }TODO: delete*/
-
 }

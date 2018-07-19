@@ -7,6 +7,8 @@ import com.aldodaquino.cobra.main.CatalogManager;
 import javax.swing.*;
 import java.awt.*;
 
+import static com.aldodaquino.cobra.gui.constants.Dimensions.INFO_PANEL_PADDING;
+
 public class InfoPanel extends JPanel {
 
     protected final LabelPanel latestLabel;
@@ -18,8 +20,9 @@ public class InfoPanel extends JPanel {
 
     protected InfoPanel(CatalogManager catalogManager, String mainLabelString) {
 
-        // set layout (vertical)
+        // set layout and border
         setLayout(new GridBagLayout());
+        setBorder(ComponentFactory.newBorder(INFO_PANEL_PADDING.width, INFO_PANEL_PADDING.height));
 
         // prepare content
         JLabel mainLabel = new JLabel(mainLabelString);
@@ -42,7 +45,6 @@ public class InfoPanel extends JPanel {
         add(mostEnjoyedLabel, UpgradablePanel.newGBC(1, 8));
         add(biggestPriceFairnessLabel, UpgradablePanel.newGBC(1, 9));
         add(highestContentMeaningLabel, UpgradablePanel.newGBC(1, 10));
-        //add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), UpgradablePanel.newGBC(1, 11)); TODO: delete
 
     }
 

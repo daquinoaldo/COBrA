@@ -27,7 +27,6 @@ public class HttpHelper {
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Content-Length", Integer.toString(parameters.getBytes().length));
             connection.setRequestProperty("Content-Language", "en-US");
-            //connection.setRequestProperty("Cookie", joinCookie(cookieManager.getCookieStore().getCookies())); TODO: delete
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
@@ -37,11 +36,6 @@ public class HttpHelper {
                 outputStream.writeBytes(parameters);
                 outputStream.close();
             }
-
-            // Get cookies TODO: delete
-            /*String cookiesHeader = connection.getHeaderField("Set-Cookie");
-            List<HttpCookie> cookies = HttpCookie.parse(cookiesHeader);
-            cookies.forEach(cookie -> cookieManager.getCookieStore().add(null, cookie));*/
 
             //Get Response
             status = connection.getResponseCode();
@@ -64,17 +58,6 @@ public class HttpHelper {
             if (connection != null) connection.disconnect();
         }
     }
-
-    /*private static String joinCookie(List<?> list) {
-        if (list == null || list.size() == 0) return null;
-        final StringBuilder stringBuilder = new StringBuilder(list.size() * 16);
-        for (int i = 0; i < list.size(); i++) {
-            if (i > 0) stringBuilder.append(";");
-            Object elem = list.get(i);
-            if (elem != null) stringBuilder.append(elem);
-        }
-        return stringBuilder.toString();
-    } TODO: delete*/
 
     private static String jsonifyParameters(Map<String, String> parameters) {
         if (parameters == null) return "";

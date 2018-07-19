@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static com.aldodaquino.cobra.gui.components.UpgradablePanel.newGBC;
+import static com.aldodaquino.cobra.gui.constants.Dimensions.INFO_PANEL_PADDING;
 
 public class ContentInfoPanel extends AsyncPanel {
 
@@ -44,8 +45,9 @@ public class ContentInfoPanel extends AsyncPanel {
         JButton viewButton = ComponentFactory.newButton("View", e -> view());
         JButton giftButton = ComponentFactory.newButton("Gift this content", e -> gift());
 
-        // add all to the panel
+        // prepare the panel
         setLayout(new GridBagLayout());
+        setBorder(ComponentFactory.newBorder(INFO_PANEL_PADDING.width, INFO_PANEL_PADDING.height));
         add(mainLabel, newGBC(1, 1));
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 2));
         add(addressLabel, newGBC(1, 3));
@@ -86,7 +88,7 @@ public class ContentInfoPanel extends AsyncPanel {
                     return;
                 }
             }
-            //TODO: view consume content
+            //TODO: view and consume content
         });
     }
 
