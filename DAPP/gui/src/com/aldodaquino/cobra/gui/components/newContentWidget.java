@@ -26,7 +26,7 @@ public class newContentWidget extends JPanel {
     }
 
     private void getNewContentList() {
-        String[][] rows = catalogManager.getNewContentsList((int) numberSpinner.getValue());
+        String[][] rows = catalogManager.getNewContentList((int) numberSpinner.getValue());
         String[] colNames = {"Name", "Address"};
         JScrollPane tableContainer = new JScrollPane(new JTable(rows, colNames));
         Utils.createFixedWindow("New content list", tableContainer, false);

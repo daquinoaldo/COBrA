@@ -57,7 +57,7 @@ contract CatalogContract {
     mapping (address => uint) private premiumUsers;
     // map a user into his accessible contents
     mapping (address => mapping (address => bool)) private accessibleContent;
-    address[] contentsList;  // list of all contents
+    address[] contentList;  // list of all contents
     // map content addresses into contents
     mapping (address => content) private contents;
     // map a user into the content that he can vote
@@ -103,9 +103,9 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
-        for (uint i = 0; i < contentsList.length; i++) {
+        for (uint i = 0; i < contentList.length; i++) {
             BaseContentManagementContract cc =
-            BaseContentManagementContract(contentsList[i]);
+            BaseContentManagementContract(contentList[i]);
             if (!authors[cc.owner()].alreadyFound) {
                 authors[cc.owner()].alreadyFound = true;
                 authorsList.push(cc.owner());
@@ -113,7 +113,7 @@ contract CatalogContract {
             // Murder all the contents in the catalog: this will free up space
             // in the blockchain and create negative gas to consume less in this
             // process: all this transfers cost a lot.
-            BaseContentManagementContract(contentsList[i]).murder();
+            BaseContentManagementContract(contentList[i]).murder();
         }
         // Distribute the balance to the authors according with their views
         // count
@@ -250,7 +250,7 @@ contract CatalogContract {
         BaseContentManagementContract(msg.sender);
         contents[cc] = content(cc.name(), cc.owner(), cc.genre(), cc.price(),
             0, 0, 0, 0, 0, 0, 0, 0);
-        contentsList.push(cc);
+        contentList.push(cc);
         emit NewContentAvailable(cc.name(), cc);
     }
 
@@ -286,20 +286,20 @@ contract CatalogContract {
         delete contents[msg.sender];
         bool found = false;
         // Search the address in the array
-        for (uint i = 0; i < contentsList.length; i++) {
+        for (uint i = 0; i < contentList.length; i++) {
             // lazy if: skip the storage read if found is true
-            if (!found && contentsList[i] == msg.sender) {
+            if (!found && contentList[i] == msg.sender) {
                 found = true;
             }
-            if (found && i < contentsList.length - 1) {
+            if (found && i < contentList.length - 1) {
                 // move all the following items back of 1 position
-                contentsList[i] = contentsList[i+1];
+                contentList[i] = contentList[i+1];
             }
         }
         if (found) {
             // and finally delete the last item
-            delete contentsList[contentsList.length - 1];
-            contentsList.length--;
+            delete contentList[contentList.length - 1];
+            contentList.length--;
         }
     }
 
@@ -311,14 +311,14 @@ contract CatalogContract {
      * Burden: O(n).
      */
     function getStatistics() public view returns(bytes32[], address[], uint[]) {
-        bytes32[] memory names = new bytes32[](contentsList.length);
-        uint[] memory views = new uint[](contentsList.length);
-        for (uint i = 0; i < contentsList.length; i++) {
-            content memory c = contents[contentsList[i]];
+        bytes32[] memory names = new bytes32[](contentList.length);
+        uint[] memory views = new uint[](contentList.length);
+        for (uint i = 0; i < contentList.length; i++) {
+            content memory c = contents[contentList[i]];
             names[i] = c.name;
             views[i] = c.views;
         }
-        return (names, contentsList, views);
+        return (names, contentList, views);
     }
 
     /** Returns the list of contents without the number of views.
@@ -327,12 +327,12 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getContentsList() public view returns(bytes32[], address[]) {
-        bytes32[] memory names = new bytes32[](contentsList.length);
-        for (uint i = 0; i < contentsList.length; i++) {
-            names[i] = contents[contentsList[i]].name;
+    function getContentList() public view returns(bytes32[], address[]) {
+        bytes32[] memory names = new bytes32[](contentList.length);
+        for (uint i = 0; i < contentList.length; i++) {
+            names[i] = contents[contentList[i]].name;
         }
-        return (names, contentsList);
+        return (names, contentList);
     }
 
     /** Returns the list of contents with all information.
@@ -341,22 +341,22 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getFullContentsList() public view
+    function getFullContentList() public view
     returns(address[], bytes32[], address[], bytes32[], uint[], uint[]) {
-        bytes32[] memory name = new bytes32[](contentsList.length);
-        address[] memory authorAddr = new address[](contentsList.length);
-        bytes32[] memory genre = new bytes32[](contentsList.length);
-        uint[] memory price = new uint[](contentsList.length);
-        uint[] memory views = new uint[](contentsList.length);
-        for (uint i = 0; i < contentsList.length; i++) {
-            content memory c = contents[contentsList[i]];
+        bytes32[] memory name = new bytes32[](contentList.length);
+        address[] memory authorAddr = new address[](contentList.length);
+        bytes32[] memory genre = new bytes32[](contentList.length);
+        uint[] memory price = new uint[](contentList.length);
+        uint[] memory views = new uint[](contentList.length);
+        for (uint i = 0; i < contentList.length; i++) {
+            content memory c = contents[contentList[i]];
             name[i] = c.name;
             authorAddr[i] = c.author;
             genre[i] = c.genre;
             price[i] = c.price;
             views[i] = c.views;
         }
-        return (contentsList, name, authorAddr, genre, price, views);
+        return (contentList, name, authorAddr, genre, price, views);
     }
 
     /** Returns ratings list of contents.
@@ -367,11 +367,11 @@ contract CatalogContract {
      */
     function getRatingsList() public view
     returns(address[], uint[], uint[], uint[]) {
-        uint[] memory enjoy = new uint[](contentsList.length);
-        uint[] memory priceFairness = new uint[](contentsList.length);
-        uint[] memory contentMeaning = new uint[](contentsList.length);
-        for (uint i = 0; i < contentsList.length; i++) {
-            content memory c = contents[contentsList[i]];
+        uint[] memory enjoy = new uint[](contentList.length);
+        uint[] memory priceFairness = new uint[](contentList.length);
+        uint[] memory contentMeaning = new uint[](contentList.length);
+        for (uint i = 0; i < contentList.length; i++) {
+            content memory c = contents[contentList[i]];
             if (c.enjoyNum != 0)
                 enjoy[i] = c.enjoySum / c.enjoyNum;
             if (c.priceFairnessNum != 0)
@@ -379,7 +379,7 @@ contract CatalogContract {
             if (c.contentMeaningNum != 0)
                 contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
         }
-        return (contentsList, enjoy, priceFairness, contentMeaning);
+        return (contentList, enjoy, priceFairness, contentMeaning);
     }
 
     /** Returns the list of n newest contents.
@@ -389,12 +389,12 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
-    function getNewContentsList(uint n) public view
+    function getNewContentList(uint n) public view
     returns(bytes32[], address[]) {
         uint listLength = n;
-        // If i have less than chartListLength element in the contentsList I
-        // have to return contentsList.length elements
-        if (contentsList.length < listLength) listLength = contentsList.length;
+        // If i have less than chartListLength element in the contentList I
+        // have to return contentList.length elements
+        if (contentList.length < listLength) listLength = contentList.length;
         // NOTE: I assume that the latest content is not the last deployed
         // contract in the blockchain (with the highest block number), but is
         // the last added to the catalog (that ideally is when is "published").
@@ -402,7 +402,7 @@ contract CatalogContract {
         address[] memory addresses = new address[](listLength);
         for (uint i = 0; i < listLength; i++) {
             // add it in reverse order: the latest first
-            address a = contentsList[contentsList.length - 1 - i];
+            address a = contentList[contentList.length - 1 - i];
             names[i] = contents[a].name;
             addresses[i] = a;
         }
@@ -418,9 +418,9 @@ contract CatalogContract {
     function getLatestByGenre(bytes32 g) public view returns(bytes32, address) {
         // using int because i can be negative if the list is empty or there
         // aren't element of genre g. Should not fail.
-        int i = int(contentsList.length - 1);
+        int i = int(contentList.length - 1);
         while (i >= 0)  {
-            address addr = contentsList[uint(i)];
+            address addr = contentList[uint(i)];
             content memory c = contents[addr];
             if (c.genre == g) {
                 return (c.name, addr);
@@ -441,9 +441,9 @@ contract CatalogContract {
     returns(bytes32, address) {
         // using int because i can be negative if the list is empty or there
         // aren't element of genre g. Should not fail.
-        int i = int(contentsList.length - 1);
+        int i = int(contentList.length - 1);
         while (i >= 0)  {
-            address addr = contentsList[uint(i)];
+            address addr = contentList[uint(i)];
             content memory c = contents[addr];
             if (c.author == a) {
                 return (c.name, addr);
@@ -466,8 +466,8 @@ contract CatalogContract {
         int maxViews = -1;
         bytes32 maxName;
         address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
+        for (uint i = 0; i < contentList.length; i++) {
+            address addr = contentList[i];
             content memory c = contents[addr];
             if (int(c.views) > maxViews) {
                 maxViews = int(c.views);
@@ -491,8 +491,8 @@ contract CatalogContract {
         int maxViews = -1;
         bytes32 maxName;
         address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
+        for (uint i = 0; i < contentList.length; i++) {
+            address addr = contentList[i];
             content memory c = contents[addr];
             if (c.genre == g && int(c.views) > maxViews) {
                 maxViews = int(c.views);
@@ -516,8 +516,8 @@ contract CatalogContract {
         int maxViews = -1;
         bytes32 maxName;
         address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
+        for (uint i = 0; i < contentList.length; i++) {
+            address addr = contentList[i];
             content memory c = contents[addr];
             if (c.author == a && int(c.views) > maxViews) {
                 maxViews = int(c.views);
@@ -541,8 +541,8 @@ contract CatalogContract {
         int maxRate = -1;
         bytes32 maxName;
         address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
+        for (uint i = 0; i < contentList.length; i++) {
+            address addr = contentList[i];
             content memory c = contents[addr];
             uint rate = 0;
             if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
@@ -578,8 +578,8 @@ contract CatalogContract {
         int maxRate = -1;
         bytes32 maxName;
         address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
+        for (uint i = 0; i < contentList.length; i++) {
+            address addr = contentList[i];
             content memory c = contents[addr];
             if (c.genre == g) {
                 uint rate = 0;
@@ -618,8 +618,8 @@ contract CatalogContract {
         int maxRate = -1;
         bytes32 maxName;
         address maxAddress;
-        for (uint i = 0; i < contentsList.length; i++) {
-            address addr = contentsList[i];
+        for (uint i = 0; i < contentList.length; i++) {
+            address addr = contentList[i];
             content memory c = contents[addr];
             if (c.author == a) {
                 uint rate = 0;

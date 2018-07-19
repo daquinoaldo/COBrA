@@ -124,9 +124,9 @@ public class CatalogManager extends ContractManager {
      * Returns a list of all contents in the Catalog and its views.
      * @return a list of Content objects.
      */
-    public List<Content> getContentsList() {
+    public List<Content> getContentList() {
         try {
-            Tuple2<List<byte[]>, List<String>> statistics = catalog.getContentsList().send();
+            Tuple2<List<byte[]>, List<String>> statistics = catalog.getContentList().send();
             List<byte[]> names = statistics.getValue1();
             List<String> addresses = statistics.getValue2();
 
@@ -145,7 +145,7 @@ public class CatalogManager extends ContractManager {
      * Returns a list of all contents in the Catalog and its views.
      * @return a list of Content objects.
      */
-    public List<Content> getContentsListWithViews() {
+    public List<Content> getContentListWithViews() {
         try {
             Tuple3<List<byte[]>, List<String>, List<BigInteger>> statistics = catalog.getStatistics().send();
             List<byte[]> names = statistics.getValue1();
@@ -167,9 +167,9 @@ public class CatalogManager extends ContractManager {
      * Returns a list of all contents in the Catalog with all the data available.
      * @return a list of Content objects.
      */
-    public List<Content> getFullContentsList() {
+    public List<Content> getFullContentList() {
         ContentList contentList = new ContentList();
-        return contentList.getFilteredContentsList(null, null);
+        return contentList.getFilteredContentList(null, null);
     }
 
     /**
@@ -179,7 +179,7 @@ public class CatalogManager extends ContractManager {
      */
     public List<Content> getAuthorContents(String author) {
         ContentList contentList = new ContentList();
-        return contentList.getFilteredContentsList(contentList.authors, author);
+        return contentList.getFilteredContentList(contentList.authors, author);
     }
 
     /**
@@ -187,11 +187,11 @@ public class CatalogManager extends ContractManager {
      * @param n the number of item that you want in the list.
      * @return Map<name of the content, address of the content>.
      */
-    public String[][] getNewContentsList(int n) {
+    public String[][] getNewContentList(int n) {
         try {
             // get the list
             Tuple2<List<byte[]>, List<String>> res =
-                    catalog.getNewContentsList(new BigInteger(Integer.toString(n))).send();
+                    catalog.getNewContentList(new BigInteger(Integer.toString(n))).send();
             List<byte[]> names = res.getValue1();
             List<String> addresses = res.getValue2();
 
@@ -213,7 +213,7 @@ public class CatalogManager extends ContractManager {
      * @return String[] where the first element is the name of the content and the second is the address.
      */
     public String[] getLatest() {
-        String[][] rows = getNewContentsList(1);
+        String[][] rows = getNewContentList(1);
         if (rows == null || rows.length == 0) return null;
         return rows[0];
     }
@@ -371,7 +371,7 @@ public class CatalogManager extends ContractManager {
             try {
                 // Query the CatalogContract for the list
                 Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>>
-                        fullContentList = catalog.getFullContentsList().send();
+                        fullContentList = catalog.getFullContentList().send();
                 Tuple4<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>>
                         ratingsList = catalog.getRatingsList().send();
 
@@ -397,13 +397,13 @@ public class CatalogManager extends ContractManager {
          * @param filterValue the value that filterBy must have.
          * @return a list of Content objects.
          */
-        <T> List<Content> getFilteredContentsList(List<T> filterBy, T filterValue) {
+        <T> List<Content> getFilteredContentList(List<T> filterBy, T filterValue) {
             // Build an usable list
-            List<Content> contentsList = new ArrayList<>();
+            List<Content> contentList = new ArrayList<>();
             for (int i = 0; i < addresses.size(); i++)
                 // if the where list is null do not filter
                 if (filterBy == null || filterBy.get(i).equals(filterValue))
-                    contentsList.add(new Content(
+                    contentList.add(new Content(
                             addresses.get(i),
                             names.get(i),
                             authors.get(i),
@@ -413,7 +413,7 @@ public class CatalogManager extends ContractManager {
                             priceFairnessRatings.get(i),
                             contentMeaningRatings.get(i)
                             ));
-            return contentsList;
+            return contentList;
         }
     }
 

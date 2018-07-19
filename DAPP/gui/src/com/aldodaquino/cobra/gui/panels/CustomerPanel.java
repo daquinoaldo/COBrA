@@ -92,8 +92,8 @@ public class CustomerPanel extends UpgradablePanel {
     }
 
     private Component getTable() {
-        return showViews ? new ViewsContentTable(catalogManager, catalogManager.getContentsListWithViews())
-                : new ContentList(catalogManager, catalogManager.getContentsList());
+        return showViews ? new ViewsContentTable(catalogManager, catalogManager.getContentListWithViews())
+                : new ContentList(catalogManager, catalogManager.getContentList());
     }
 
     /*private void buySelected() {

@@ -7,13 +7,13 @@ function checkLogin() {
         } else {
             document.getElementById("welcome_message").innerHTML =
                 document.getElementById("welcome_message").innerHTML.replace("!", " "+json.text+"!");
-            loadContentsList();
+            loadContentList();
         }
     });
 }
 checkLogin();
 
-function loadContentsList() {
+function loadContentList() {
   var data = {
     author: "c83407c0b9738578d23b6a5c44e7120628e2c2c6"
   };
