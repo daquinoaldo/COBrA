@@ -4,41 +4,41 @@ import com.aldodaquino.cobra.gui.components.*;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
-import com.aldodaquino.cobra.main.Content;
 import com.aldodaquino.cobra.gui.Status;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class CustomerPanel extends UpgradablePanel {
 
     private final CatalogManager catalogManager;
 
     private final JScrollPane tableContainer;
-    private JTable table;
+    private Component table;
     private final JPanel lateralBar;
     private final UserInfo userInfo;
     private ChartWidget chartWidget;
-    private final GridBagConstraints chartBannerPosition = newGBC(1, 10);
+    private final GridBagConstraints chartWidgetPosition;
+
+    private boolean showViews = false;
 
     public CustomerPanel(Status status) {
         this.catalogManager = status.getCatalogManager();
 
         // table container
         tableContainer = new JScrollPane();
-        List<Content> contents = catalogManager.getContents();
-        table = new ContentTable(catalogManager, contents);
+        table = getTable();
         tableContainer.setViewportView(table);
 
         // lateral bar
         userInfo = new UserInfo(status);
-        JButton updateButton = ComponentFactory.newButton("Refresh", e -> update());
-        JButton buySelectedButton = ComponentFactory.newButton("Buy selected", e -> buySelected());
-        JButton giftSelectedButton = ComponentFactory.newButton("Gift selected", e -> giftSelected());
-        JButton accessSelectedButton = ComponentFactory.newButton("Access selected", e -> accessSelected());
         JButton buyPremiumButton = ComponentFactory.newButton("Buy premium", e -> buyPremium());
         JButton giftPremiumButton = ComponentFactory.newButton("Gift premium", e -> giftPremium());
+        JButton updateButton = ComponentFactory.newButton("Refresh", e -> update());
+        JButton showHideViewsButton = ComponentFactory.newButton("Show/hide views", e -> {
+            showViews = !showViews;
+            update();
+        });
         chartWidget = new ChartWidget(catalogManager);
         JPanel newContentWidget = new newContentWidget(catalogManager);
 
@@ -56,17 +56,18 @@ public class CustomerPanel extends UpgradablePanel {
                 return getPreferredSize();
             }
         };
+
         lateralBar.add(userInfo, newGBC(1, 1));
-        lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 2));
-        lateralBar.add(updateButton, newGBC(1, 3));
-        lateralBar.add(buySelectedButton, newGBC(1, 4));
-        lateralBar.add(giftSelectedButton, newGBC(1, 5));
-        lateralBar.add(accessSelectedButton, newGBC(1, 6));
-        lateralBar.add(buyPremiumButton, newGBC(1, 7));
-        lateralBar.add(giftPremiumButton, newGBC(1, 8));
-        lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 9));
-        lateralBar.add(chartWidget, chartBannerPosition);
-        lateralBar.add(newContentWidget, newGBC(1, 11));
+        lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 2));
+        lateralBar.add(buyPremiumButton, newGBC(1, 3));
+        lateralBar.add(giftPremiumButton, newGBC(1, 4));
+        lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 5));
+        lateralBar.add(updateButton, newGBC(1, 6));
+        lateralBar.add(showHideViewsButton, newGBC(1, 7));
+        lateralBar.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L), newGBC(1, 8));
+        chartWidgetPosition = newGBC(1, 9);
+        lateralBar.add(chartWidget, chartWidgetPosition);
+        lateralBar.add(newContentWidget, newGBC(1, 10));
 
         // assemble the panel
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -77,8 +78,7 @@ public class CustomerPanel extends UpgradablePanel {
     private void update() {
         doAsync(() -> {
             // update table
-            List<Content> contents = catalogManager.getContents();
-            table = new ContentTable(catalogManager, contents);
+            table = getTable();
             tableContainer.setViewportView(table);
 
             // update user info
@@ -87,11 +87,16 @@ public class CustomerPanel extends UpgradablePanel {
             // update charts
             lateralBar.remove(chartWidget);
             chartWidget = new ChartWidget(catalogManager);
-            lateralBar.add(chartWidget, chartBannerPosition);
+            lateralBar.add(chartWidget, chartWidgetPosition);
         });
     }
 
-    private void buySelected() {
+    private Component getTable() {
+        return showViews ? new ViewsContentTable(catalogManager, catalogManager.getContentsListWithViews())
+                : new ContentList(catalogManager, catalogManager.getContentsList());
+    }
+
+    /*private void buySelected() {
         doAsync(() -> {
             String address = table.getValueAt(table.getSelectedRow(), 0).toString();
             if (catalogManager.buyContent(address)) Utils.showMessageDialog("Content bought.");
@@ -107,7 +112,7 @@ public class CustomerPanel extends UpgradablePanel {
                     else Utils.showErrorDialog("Cannot gift this content. The user may have already bought it.");
                 }));
         Utils.createFixedWindow("Gift content", pickUserPanel, false);
-    }
+    }TODO: delete*/
 
     private void buyPremium() {
         doAsync(() -> {
@@ -124,11 +129,6 @@ public class CustomerPanel extends UpgradablePanel {
                     else Utils.showErrorDialog("UNKNOWN ERROR: cannot gift a premium subscription.");
                 }));
         Utils.createFixedWindow("Gift premium", pickUserPanel, false);
-    }
-
-    private void accessSelected() {
-        // TODO
-        Utils.showErrorDialog("TODO");
     }
 
 }

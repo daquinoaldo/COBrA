@@ -27,7 +27,7 @@ public class AuthorPanel extends AsyncPanel {
 
         // table container
         tableContainer = new JScrollPane();
-        List<Content> contents = catalogManager.getContents();
+        List<Content> contents = catalogManager.getFullContentsList();
         table = new AuthorContentTable(catalogManager, contents);
         tableContainer.setViewportView(table);
 

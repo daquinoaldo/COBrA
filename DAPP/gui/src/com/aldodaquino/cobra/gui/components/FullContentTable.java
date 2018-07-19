@@ -8,13 +8,12 @@ import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-public class ContentTable extends JTable {
+public class FullContentTable extends JTable {
 
     private static final String[] colNames = {"Address", "Name", "Author", "Genre", "Views", "Enjoy", "Price fairness",
             "Content meaning", "Price"};
@@ -38,22 +37,9 @@ public class ContentTable extends JTable {
 
     private final CatalogManager catalogManager;
 
-    public ContentTable(CatalogManager catalogManager, List<Content> contents) {
+    public FullContentTable(CatalogManager catalogManager, List<Content> contents) {
         super(prepareRows(contents), colNames);
         this.catalogManager = catalogManager;
-
-        // resize column to fit content
-        // TODO: doesn't work properly
-        TableColumnModel columnModel = getColumnModel();
-        for (int column = 0; column < getColumnCount(); column++) {
-            if (column == 1 || column == 3) continue;   // address columns cannot fit the content
-            int maxWidth = 0;
-            for (int row = 0; row < getRowCount(); row++) {
-                Component comp = prepareRenderer(getCellRenderer(row, column), row, column);
-                maxWidth = Math.max(comp.getPreferredSize().width +1 , maxWidth);
-            }
-            columnModel.getColumn(column).setPreferredWidth(maxWidth);
-        }
 
         // render author and genre as link style
         TableCellRenderer linkRenderer = (table, value, arg2, arg3, arg4, arg5) ->

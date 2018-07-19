@@ -14,6 +14,32 @@ public class Content {
     public final int priceFairness;
     public final int contentMeaning;
 
+    Content(String address, byte[] name) {
+        this.address = address;
+        this.name = Utils.bytesToString(name);
+
+        this.views = null;
+        this.author = null;
+        this.genre = null;
+        this.price = null;
+        this.enjoy = -1;
+        this.priceFairness = -1;
+        this.contentMeaning = -1;
+    }
+
+    Content(String address, byte[] name, BigInteger views) {
+        this.address = address;
+        this.name = Utils.bytesToString(name);
+        this.views = views;
+
+        this.author = null;
+        this.genre = null;
+        this.price = null;
+        this.enjoy = -1;
+        this.priceFairness = -1;
+        this.contentMeaning = -1;
+    }
+
     Content(String address, byte[] name, String author, byte[] genre, BigInteger price, BigInteger views,
             BigInteger enjoy, BigInteger priceFairness, BigInteger contentMeaning) {
         this.address = address;

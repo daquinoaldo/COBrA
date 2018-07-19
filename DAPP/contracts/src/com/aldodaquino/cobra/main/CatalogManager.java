@@ -3,6 +3,7 @@ package com.aldodaquino.cobra.main;
 import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
 import org.web3j.tuples.generated.Tuple2;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
 
@@ -120,10 +121,53 @@ public class CatalogManager extends ContractManager {
     /* Getters for lists, statistics and charts */
 
     /**
-     * Returns a list of all contents in the Catalog.
+     * Returns a list of all contents in the Catalog and its views.
      * @return a list of Content objects.
      */
-    public List<Content> getContents() {
+    public List<Content> getContentsList() {
+        try {
+            Tuple2<List<byte[]>, List<String>> statistics = catalog.getContentsList().send();
+            List<byte[]> names = statistics.getValue1();
+            List<String> addresses = statistics.getValue2();
+
+            List<Content> contents = new ArrayList<>();
+            for (int i = 0; i < names.size(); i++)
+                contents.add(new Content(addresses.get(i), names.get(i)));
+
+            return contents;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns a list of all contents in the Catalog and its views.
+     * @return a list of Content objects.
+     */
+    public List<Content> getContentsListWithViews() {
+        try {
+            Tuple3<List<byte[]>, List<String>, List<BigInteger>> statistics = catalog.getStatistics().send();
+            List<byte[]> names = statistics.getValue1();
+            List<String> addresses = statistics.getValue2();
+            List<BigInteger> views = statistics.getValue3();
+
+            List<Content> contents = new ArrayList<>();
+            for (int i = 0; i < names.size(); i++)
+                contents.add(new Content(addresses.get(i), names.get(i), views.get(i)));
+
+            return contents;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns a list of all contents in the Catalog with all the data available.
+     * @return a list of Content objects.
+     */
+    public List<Content> getFullContentsList() {
         ContentList contentList = new ContentList();
         return contentList.getFilteredContentsList(null, null);
     }
@@ -146,7 +190,8 @@ public class CatalogManager extends ContractManager {
     public String[][] getNewContentsList(int n) {
         try {
             // get the list
-            Tuple2<List<byte[]>, List<String>> res = catalog.getNewContentsList(new BigInteger(Integer.toString(n))).send();
+            Tuple2<List<byte[]>, List<String>> res =
+                    catalog.getNewContentsList(new BigInteger(Integer.toString(n))).send();
             List<byte[]> names = res.getValue1();
             List<String> addresses = res.getValue2();
 

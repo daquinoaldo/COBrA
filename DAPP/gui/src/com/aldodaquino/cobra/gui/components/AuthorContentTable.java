@@ -5,7 +5,7 @@ import com.aldodaquino.cobra.main.Content;
 
 import java.util.List;
 
-public class AuthorContentTable extends ContentTable {
+public class AuthorContentTable extends FullContentTable {
 
     public AuthorContentTable(CatalogManager catalogManager, List<Content> contents) {
         super(catalogManager, contents);

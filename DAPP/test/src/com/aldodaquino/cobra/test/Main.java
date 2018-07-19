@@ -27,9 +27,9 @@ public class Main {
     private static final String[] genres = {"Comedy", "Romance", "Thriller"};
 
     // Change this value with your private keys.
-    private static final String CATALOG_OWNER_DEFAULT_KEY = "f22196df42e288dc5c94efe33f19808c12e5af29b667c2e354cb92d1a444c527";
-    private static final String[] AUTHOR_DEFAULT_KEYS = {"c148832fde8619543c6573f3da7241ef5d9f0be12fbc9caf3606f1aaa0a47690",
-            "68630d4d647d14d93b6954fec63094ef6b18ea0a6cd372d1489716b894014354"};
+    private static final String CATALOG_OWNER_DEFAULT_KEY = "41f5d7ac65a52ad3cddf8cfe9450bf8d4a0c7b518ceb8abc578a568826e88fce";
+    private static final String[] AUTHOR_DEFAULT_KEYS = {"6502bce55581e00721b3fd6fd10e8b4858063ee890eb8bafaa93cb78e1492a0f",
+            "0d97274de8f4d4f07ccbe100771ed72c1d9962124fff76ad223ba77a2faba861"};
     //TODO reset
     //private static final String CATALOG_OWNER_DEFAULT_KEY = "";
     //private static final String[] AUTHOR_DEFAULT_KEYS = {""};
