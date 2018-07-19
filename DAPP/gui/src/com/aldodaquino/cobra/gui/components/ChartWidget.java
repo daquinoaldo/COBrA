@@ -5,7 +5,7 @@ import com.aldodaquino.cobra.main.CatalogManager;
 public class ChartWidget extends InfoPanel {
 
     public ChartWidget(CatalogManager catalogManager) {
-        super("Charts");
+        super(catalogManager, "Charts");
 
         latestLabel.update(catalogManager.getLatest());
         mostPopularLabel.update(catalogManager.getMostPopular());

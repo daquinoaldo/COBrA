@@ -1,22 +1,48 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Images;
+import com.aldodaquino.cobra.gui.panels.ContentPanel;
+import com.aldodaquino.cobra.main.CatalogManager;
+import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class LabelPanel extends UpgradablePanel {
 
     private final JLabel loader = new JLabel(new ImageIcon(Images.loading.getImage()), JLabel.CENTER);
     private final GridBagConstraints replacingPosition = newGBC(2, 1);
 
-    LabelPanel(String label) {
+    private CatalogManager catalogManager;
+
+    LabelPanel(CatalogManager catalogManager, String label) {
+        this.catalogManager = catalogManager;
         add(new JLabel(label), newGBC(1, 1));
-        //add(loader, replacingPosition);
+        add(loader, replacingPosition);
     }
 
-    public void update(String[] info) {
-        JLabel link = new JLabel(info == null ? "" : "<html><a href=\"about:" + info[1] + "\">" + info[0] + "</a>");
+    public void update(Content content) {
+        JLabel link = new JLabel(content == null ? ""
+                : "<html><a href=\"about:" + content.address + "\">" + content.name + "</a>");
+        // onClick show content panel
+        if (content != null) link.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Utils.createWindow(content.name, new ContentPanel(catalogManager, content.address), false);
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
         replaceComponent(loader, link, replacingPosition);
     }
 

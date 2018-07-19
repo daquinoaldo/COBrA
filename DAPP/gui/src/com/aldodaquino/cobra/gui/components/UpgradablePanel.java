@@ -19,7 +19,7 @@ public class UpgradablePanel extends AsyncPanel {
         }
     }
 
-    protected static GridBagConstraints newGBC(int x, int y) {
+    public static GridBagConstraints newGBC(int x, int y) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = x;
         gbc.gridy = y;

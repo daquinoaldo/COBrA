@@ -28,13 +28,13 @@ class PickUserPanel extends AsyncPanel {
         addressField = ComponentFactory.newTextField(e -> gift());
 
         // send button
-        JButton sendButton = ComponentFactory.newButton("Deploy", e -> gift());
+        JButton giftButton = ComponentFactory.newButton("Gift", e -> gift());
 
         // add all to the panel
         add(addressLabel);
         add(addressField);
         add(ComponentFactory.newVSpacer());
-        add(sendButton);
+        add(giftButton);
     }
 
     /**

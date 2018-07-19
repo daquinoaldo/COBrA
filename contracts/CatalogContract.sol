@@ -336,7 +336,8 @@ contract CatalogContract {
     }
 
     /** Returns the list of contents with all information.
-     * @return (address[], bytes32[], address[], bytes32[], uint[], uint[]). In the position n we got in order address,
+     * @return (address[], bytes32[], address[], bytes32[], uint[], uint[]).
+     * In the position n we got in order address,
      * name, author, genre, price, views of the content n.
      * Gas: no one pay.
      * Burden: O(n).
@@ -360,13 +361,15 @@ contract CatalogContract {
     }
 
     /** Returns ratings list of contents.
-     * @return (address[], uint[], uint[], uint[]). In the position n we got in order address, enjoy rating, value for
-     * money rating and content meaning rating of the content n.
+     * @return (address[], uint[], uint[], uint[], uint[]). In the position n we
+     * got in order address, average rating enjoy rating, value for money rating
+     * and content meaning rating of the content n.
      * Gas: no one pay.
      * Burden: O(n).
      */
     function getRatingsList() public view
-    returns(address[], uint[], uint[], uint[]) {
+    returns(address[], uint[], uint[], uint[], uint[]) {
+        uint[] memory averageRating = new uint[](contentList.length);
         uint[] memory enjoy = new uint[](contentList.length);
         uint[] memory priceFairness = new uint[](contentList.length);
         uint[] memory contentMeaning = new uint[](contentList.length);
@@ -378,8 +381,48 @@ contract CatalogContract {
                 priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
             if (c.contentMeaningNum != 0)
                 contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
+            averageRating[i] =
+            (enjoy[i] + priceFairness[i] + contentMeaning[i]) / 3;
         }
-        return (contentList, enjoy, priceFairness, contentMeaning);
+        return (contentList, averageRating, enjoy, priceFairness,
+        contentMeaning);
+    }
+
+    /** Returns all the information about a content.
+     * @param addr address of the content.
+     * @return (bytes32, address, bytes32, uint, uint) corresponding to name,
+     * author, genre, price and views of the content.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getContentInfo(address addr) public view
+    returns(bytes32, address, bytes32, uint, uint) {
+        content memory c = contents[addr];
+        return (c.name, c.author, c.genre, c.price, c.views);
+    }
+
+    /** Returns ratings for a content.
+     * @param addr address of the content.
+     * @return returns(uint, uint, uint, uint) corresponding to total, enjoy,
+     * priceFairness and contentMeaning rating of the content.
+     * Gas: no one pay.
+     * Burden: O(n).
+     */
+    function getContentRatings(address addr) public view
+    returns(uint, uint, uint, uint) {
+        content memory c = contents[addr];
+        uint total = 0;
+        uint enjoy = 0;
+        uint priceFairness = 0;
+        uint contentMeaning = 0;
+        if (c.enjoyNum != 0)
+            enjoy = c.enjoySum / c.enjoyNum;
+        if (c.priceFairnessNum != 0)
+            priceFairness = c.priceFairnessSum / c.priceFairnessNum;
+        if (c.contentMeaningNum != 0)
+            contentMeaning = c.contentMeaningSum / c.contentMeaningNum;
+        total = (enjoy + priceFairness + contentMeaning) / 3;
+        return (total, enjoy, priceFairness, contentMeaning);
     }
 
     /** Returns the list of n newest contents.
@@ -548,7 +591,8 @@ contract CatalogContract {
             if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
                 rate += c.enjoySum / c.enjoyNum;
             }
-            if ((y[0] == 0 || y == "value for money") && c.priceFairnessNum != 0) {
+            if ((y[0] == 0 || y == "value for money")
+            && c.priceFairnessNum != 0) {
                 rate += c.priceFairnessSum / c.priceFairnessNum;
             }
             if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
@@ -586,7 +630,8 @@ contract CatalogContract {
                 if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
                     rate += c.enjoySum / c.enjoyNum;
                 }
-                if ((y[0] == 0 || y == "value for money") && c.priceFairnessNum != 0) {
+                if ((y[0] == 0 || y == "value for money")
+                && c.priceFairnessNum != 0) {
                     rate += c.priceFairnessSum / c.priceFairnessNum;
                 }
                 if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
@@ -626,7 +671,8 @@ contract CatalogContract {
                 if ((y[0] == 0 || y == "enjoy") && c.enjoyNum != 0) {
                     rate += c.enjoySum / c.enjoyNum;
                 }
-                if ((y[0] == 0 || y == "value for money") && c.priceFairnessNum != 0) {
+                if ((y[0] == 0 || y == "value for money")
+                && c.priceFairnessNum != 0) {
                     rate += c.priceFairnessSum / c.priceFairnessNum;
                 }
                 if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
@@ -691,13 +737,14 @@ contract CatalogContract {
     * @param x the content.
     */
     function grantAccess(address u, address x) private {
-        // do not manage the extra value, just require exactly what the content cost
+        // do not manage the extra value,
+        // just require exactly what the content cost
         require(msg.value == contents[x].price);
         // prevent double purchase of contents
         require(!accessibleContent[u][x]);
         // the author cannot buy his contents
-        // this also ensure that an author cannot vote its content to increase the
-        // withdrawal
+        // this also ensure that an author cannot vote its content to increase
+        // the withdrawal
         require(contents[x].author != u);
         // grant access
         accessibleContent[u][x] = true;

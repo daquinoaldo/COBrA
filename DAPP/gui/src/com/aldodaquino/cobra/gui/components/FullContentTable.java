@@ -84,12 +84,12 @@ public class FullContentTable extends JTable {
 
     private void showAuthorInfo(String author) {
         JPanel authorInfoPanel = new AuthorInfoPanel(catalogManager, author);
-        Utils.createFixedWindow("About the author", authorInfoPanel, false);
+        Utils.createWindow("About the author", authorInfoPanel, false);
     }
 
     private void showGenreInfo(String genre) {
         JPanel genreInfoPanel = new GenreInfoPanel(catalogManager, genre);
-        Utils.createFixedWindow("About the genre", genreInfoPanel, false);
+        Utils.createWindow("About the genre", genreInfoPanel, false);
     }
 
 }

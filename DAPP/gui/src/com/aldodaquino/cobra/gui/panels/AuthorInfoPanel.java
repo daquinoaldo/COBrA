@@ -6,7 +6,7 @@ import com.aldodaquino.cobra.main.CatalogManager;
 public class AuthorInfoPanel extends InfoPanel {
 
     public AuthorInfoPanel(CatalogManager catalogManager, String author) {
-        super(author);
+        super(catalogManager, author);
 
         new Thread(() -> latestLabel.update(catalogManager.getLatestByAuthor(author))).start();
         new Thread(() -> mostPopularLabel.update(catalogManager.getMostPopularByAuthor(author))).start();

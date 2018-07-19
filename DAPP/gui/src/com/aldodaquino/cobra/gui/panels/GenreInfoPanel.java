@@ -6,7 +6,7 @@ import com.aldodaquino.cobra.main.CatalogManager;
 public class GenreInfoPanel extends InfoPanel {
 
     public GenreInfoPanel(CatalogManager catalogManager, String genre) {
-        super(genre);
+        super(catalogManager, genre);
 
         new Thread(() -> latestLabel.update(catalogManager.getLatestByGenre(genre))).start();
         new Thread(() -> mostPopularLabel.update(catalogManager.getMostPopularByGenre(genre))).start();

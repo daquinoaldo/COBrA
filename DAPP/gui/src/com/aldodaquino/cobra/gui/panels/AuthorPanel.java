@@ -49,7 +49,7 @@ public class AuthorPanel extends AsyncPanel {
 
     private void deployContent() {
         JPanel deployContentPanel = new DeployContentPanel(status, this::updateTable);
-        Utils.createFixedWindow("Deploy new content", deployContentPanel, false);
+        Utils.createWindow("Deploy new content", deployContentPanel, false);
     }
 
     private void updateTable() {

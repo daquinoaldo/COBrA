@@ -48,7 +48,7 @@ public class ViewsContentTable extends JTable {
     }
 
     private void showContentInfo(String address, String title) {
-        Utils.createFixedWindow(title, new ContentPanel(catalogManager, address), false);
+        Utils.createWindow(title, new ContentPanel(catalogManager, address), false);
     }
 
 }

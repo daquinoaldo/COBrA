@@ -10,6 +10,7 @@ public class Content {
     public final String genre;
     public final BigInteger price;
     public final BigInteger views;
+    public final int averageRating;
     public final int enjoy;
     public final int priceFairness;
     public final int contentMeaning;
@@ -22,6 +23,7 @@ public class Content {
         this.author = null;
         this.genre = null;
         this.price = null;
+        this.averageRating = -1;
         this.enjoy = -1;
         this.priceFairness = -1;
         this.contentMeaning = -1;
@@ -35,19 +37,21 @@ public class Content {
         this.author = null;
         this.genre = null;
         this.price = null;
+        this.averageRating = -1;
         this.enjoy = -1;
         this.priceFairness = -1;
         this.contentMeaning = -1;
     }
 
     Content(String address, byte[] name, String author, byte[] genre, BigInteger price, BigInteger views,
-            BigInteger enjoy, BigInteger priceFairness, BigInteger contentMeaning) {
+            BigInteger averageRating, BigInteger enjoy, BigInteger priceFairness, BigInteger contentMeaning) {
         this.address = address;
         this.name = Utils.bytesToString(name);
         this.author = author;
         this.genre = Utils.bytesToString(genre);
         this.price = price;
         this.views = views;
+        this.averageRating = averageRating.intValue();
         this.enjoy = enjoy.intValue();
         this.priceFairness = priceFairness.intValue();
         this.contentMeaning = contentMeaning.intValue();

@@ -20,7 +20,7 @@ public class Main {
         JPanel starterPanel = new StarterPanel(Main::showMainPanel);
 
         // Create the window
-        window = Utils.createFixedWindow(Strings.appName, starterPanel, true);
+        window = Utils.createWindow(Strings.appName, starterPanel, true);
         window.setMinimumSize(starterPanel.getMinimumSize());
 
     }

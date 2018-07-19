@@ -2,10 +2,7 @@ package com.aldodaquino.cobra.main;
 
 import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
-import org.web3j.tuples.generated.Tuple2;
-import org.web3j.tuples.generated.Tuple3;
-import org.web3j.tuples.generated.Tuple4;
-import org.web3j.tuples.generated.Tuple6;
+import org.web3j.tuples.generated.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -121,7 +118,24 @@ public class CatalogManager extends ContractManager {
     /* Getters for lists, statistics and charts */
 
     /**
-     * Returns a list of all contents in the Catalog and its views.
+     * Returns all the info and ratings of a content.
+     * @return a list of Content objects.
+     */
+    public Content getContentInfo(String address) {
+        try {
+            Tuple5<byte[], String, byte[], BigInteger, BigInteger> info = catalog.getContentInfo(address).send();
+            Tuple4<BigInteger, BigInteger, BigInteger, BigInteger> ratings = catalog.getContentRatings(address).send();
+
+            return new Content(address, info.getValue1(), info.getValue2(), info.getValue3(), info.getValue4(),
+                    info.getValue5(), ratings.getValue1(), ratings.getValue2(), ratings.getValue3(), ratings.getValue4());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns a list of all contents in the Catalog.
      * @return a list of Content objects.
      */
     public List<Content> getContentList() {
@@ -185,9 +199,9 @@ public class CatalogManager extends ContractManager {
     /**
      * Return the n latest releases.
      * @param n the number of item that you want in the list.
-     * @return Map<name of the content, address of the content>.
+     * @return List<Content> with the latest n contents.
      */
-    public String[][] getNewContentList(int n) {
+    public List<Content> getNewContentList(int n) {
         try {
             // get the list
             Tuple2<List<byte[]>, List<String>> res =
@@ -196,12 +210,10 @@ public class CatalogManager extends ContractManager {
             List<String> addresses = res.getValue2();
 
             // parse the list in a String matrix
-            String[][] rows = new String[names.size()][2];
-            for (int i = 0; i < names.size(); i++) {
-                rows[i][0] = Utils.bytesToString(names.get(i));
-                rows[i][1] = addresses.get(i);
-            }
-            return rows;
+            List<Content> contents = new ArrayList<>();
+            for (int i = 0; i < names.size(); i++)
+                contents.add(new Content(addresses.get(i), names.get(i)));
+            return contents;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -212,10 +224,10 @@ public class CatalogManager extends ContractManager {
      * Return the latest release.
      * @return String[] where the first element is the name of the content and the second is the address.
      */
-    public String[] getLatest() {
-        String[][] rows = getNewContentList(1);
-        if (rows == null || rows.length == 0) return null;
-        return rows[0];
+    public Content getLatest() {
+        List<Content> contents = getNewContentList(1);
+        if (contents == null || contents.size() == 0) return null;
+        return contents.get(0);
     }
 
     /**
@@ -223,10 +235,10 @@ public class CatalogManager extends ContractManager {
      * @param genre the chosen genre.
      * @return String[] where the first element is the name of the content and the second is the address.
      */
-    public String[] getLatestByGenre(String genre) {
+    public Content getLatestByGenre(String genre) {
         try {
             Tuple2<byte[], String> res = catalog.getLatestByGenre(Utils.stringToBytes(genre)).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -238,10 +250,10 @@ public class CatalogManager extends ContractManager {
      * @param author the author address.
      * @return String[] where the first element is the name of the content and the second is the address.
      */
-    public String[] getLatestByAuthor(String author) {
+    public Content getLatestByAuthor(String author) {
         try {
             Tuple2<byte[], String> res = catalog.getLatestByAuthor(author).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -250,12 +262,12 @@ public class CatalogManager extends ContractManager {
 
     /**
      * Return the most popular content.
-     * @return String[] where the first element is the name of the content and the second is the address.
+     * @return Content.
      */
-    public String[] getMostPopular() {
+    public Content getMostPopular() {
         try {
             Tuple2<byte[], String> res = catalog.getMostPopular().send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -267,10 +279,10 @@ public class CatalogManager extends ContractManager {
      * @param genre the chosen genre.
      * @return String[] where the first element is the name of the content and the second is the address.
      */
-    public String[] getMostPopularByGenre(String genre) {
+    public Content getMostPopularByGenre(String genre) {
         try {
             Tuple2<byte[], String> res = catalog.getMostPopularByGenre(Utils.stringToBytes(genre)).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -282,10 +294,10 @@ public class CatalogManager extends ContractManager {
      * @param author the author address.
      * @return String[] where the first element is the name of the content and the second is the address.
      */
-    public String[] getMostPopularByAuthor(String author) {
+    public Content getMostPopularByAuthor(String author) {
         try {
             Tuple2<byte[], String> res = catalog.getMostPopularByAuthor(author).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -294,12 +306,12 @@ public class CatalogManager extends ContractManager {
 
     /**
      * Return the highest rated content.
-     * @return String[] where the first element is the name of the content and the second is the address.
+     * @return Content.
      */
-    public String[] getMostRated(String category) {
+    public Content getMostRated(String category) {
         try {
             Tuple2<byte[], String> res = catalog.getMostRated(Utils.stringToBytes(category)).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -309,13 +321,13 @@ public class CatalogManager extends ContractManager {
     /**
      * Return the highest rated content for a genre.
      * @param genre the chosen genre.
-     * @return String[] where the first element is the name of the content and the second is the address.
+     * @return Content.
      */
-    public String[] getMostRatedByGenre(String genre, String category) {
+    public Content getMostRatedByGenre(String genre, String category) {
         try {
             Tuple2<byte[], String> res = catalog.getMostRatedByGenre(Utils.stringToBytes(genre),
                     Utils.stringToBytes(category)).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -325,12 +337,12 @@ public class CatalogManager extends ContractManager {
     /**
      * Return the highest rated content of an author.
      * @param author the author address.
-     * @return String[] where the first element is the name of the content and the second is the address.
+     * @return Content.
      */
-    public String[] getMostRatedByAuthor(String author, String category) {
+    public Content getMostRatedByAuthor(String author, String category) {
         try {
             Tuple2<byte[], String> res = catalog.getMostRatedByAuthor(author, Utils.stringToBytes(category)).send();
-            return new String[] {Utils.bytesToString(res.getValue1()), res.getValue2()};
+            return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -363,6 +375,7 @@ public class CatalogManager extends ContractManager {
         List<byte[]> genres;
         List<BigInteger> prices;
         List<BigInteger> views;
+        List<BigInteger> averageRatings;
         List<BigInteger> enjoyRatings;
         List<BigInteger> priceFairnessRatings;
         List<BigInteger> contentMeaningRatings;
@@ -372,7 +385,7 @@ public class CatalogManager extends ContractManager {
                 // Query the CatalogContract for the list
                 Tuple6<List<String>, List<byte[]>, List<String>, List<byte[]>, List<BigInteger>, List<BigInteger>>
                         fullContentList = catalog.getFullContentList().send();
-                Tuple4<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>>
+                Tuple5<List<String>, List<BigInteger>, List<BigInteger>, List<BigInteger>, List<BigInteger>>
                         ratingsList = catalog.getRatingsList().send();
 
                 // Parse parameters
@@ -382,9 +395,10 @@ public class CatalogManager extends ContractManager {
                 genres = fullContentList.getValue4();
                 prices = fullContentList.getValue5();
                 views = fullContentList.getValue6();
-                enjoyRatings = ratingsList.getValue2();
-                priceFairnessRatings = ratingsList.getValue3();
-                contentMeaningRatings = ratingsList.getValue4();
+                averageRatings = ratingsList.getValue2();
+                enjoyRatings = ratingsList.getValue3();
+                priceFairnessRatings = ratingsList.getValue4();
+                contentMeaningRatings = ratingsList.getValue5();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -408,7 +422,9 @@ public class CatalogManager extends ContractManager {
                             names.get(i),
                             authors.get(i),
                             genres.get(i),
-                            prices.get(i), views.get(i),
+                            prices.get(i),
+                            views.get(i),
+                            averageRatings.get(i),
                             enjoyRatings.get(i),
                             priceFairnessRatings.get(i),
                             contentMeaningRatings.get(i)

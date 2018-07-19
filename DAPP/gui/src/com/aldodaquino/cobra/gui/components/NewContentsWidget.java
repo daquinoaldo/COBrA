@@ -2,15 +2,17 @@ package com.aldodaquino.cobra.gui.components;
 
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
+import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
+import java.util.List;
 
-public class newContentWidget extends JPanel {
+public class NewContentsWidget extends JPanel {
 
     private final CatalogManager catalogManager;
     private final JSpinner numberSpinner;
 
-    public newContentWidget(CatalogManager catalogManager) {
+    public NewContentsWidget(CatalogManager catalogManager) {
         this.catalogManager = catalogManager;
 
         JLabel label1 = new JLabel("Get");
@@ -26,10 +28,9 @@ public class newContentWidget extends JPanel {
     }
 
     private void getNewContentList() {
-        String[][] rows = catalogManager.getNewContentList((int) numberSpinner.getValue());
-        String[] colNames = {"Name", "Address"};
-        JScrollPane tableContainer = new JScrollPane(new JTable(rows, colNames));
-        Utils.createFixedWindow("New content list", tableContainer, false);
+        List<Content> contents = catalogManager.getNewContentList((int) numberSpinner.getValue());
+        JList contentList = new ContentList(catalogManager, contents);
+        Utils.createWindow("New content list", contentList, false);
     }
 
 }

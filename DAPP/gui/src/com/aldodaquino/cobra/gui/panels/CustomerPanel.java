@@ -40,7 +40,7 @@ public class CustomerPanel extends UpgradablePanel {
             update();
         });
         chartWidget = new ChartWidget(catalogManager);
-        JPanel newContentWidget = new newContentWidget(catalogManager);
+        JPanel newContentWidget = new NewContentsWidget(catalogManager);
 
         lateralBar = new JPanel(new GridBagLayout()) {
             // prevent widely resize with window
@@ -96,24 +96,6 @@ public class CustomerPanel extends UpgradablePanel {
                 : new ContentList(catalogManager, catalogManager.getContentList());
     }
 
-    /*private void buySelected() {
-        doAsync(() -> {
-            String address = table.getValueAt(table.getSelectedRow(), 0).toString();
-            if (catalogManager.buyContent(address)) Utils.showMessageDialog("Content bought.");
-            else Utils.showErrorDialog("Cannot buy this content. You may have bought it previously.");
-        });
-    }
-
-    private void giftSelected() {
-        JPanel pickUserPanel = new PickUserPanel((String user) ->
-                doAsync(() -> {
-                    String address = table.getValueAt(table.getSelectedRow(), 0).toString();
-                    if (catalogManager.giftContent(address, user)) Utils.showMessageDialog("Content gifted.");
-                    else Utils.showErrorDialog("Cannot gift this content. The user may have already bought it.");
-                }));
-        Utils.createFixedWindow("Gift content", pickUserPanel, false);
-    }TODO: delete*/
-
     private void buyPremium() {
         doAsync(() -> {
             if (catalogManager.buyPremium()) Utils.showMessageDialog("Premium bought.");
@@ -128,7 +110,7 @@ public class CustomerPanel extends UpgradablePanel {
                     if (catalogManager.giftPremium(user)) Utils.showMessageDialog("Premium gifted.");
                     else Utils.showErrorDialog("UNKNOWN ERROR: cannot gift a premium subscription.");
                 }));
-        Utils.createFixedWindow("Gift premium", pickUserPanel, false);
+        Utils.createWindow("Gift premium", pickUserPanel, false);
     }
 
 }
