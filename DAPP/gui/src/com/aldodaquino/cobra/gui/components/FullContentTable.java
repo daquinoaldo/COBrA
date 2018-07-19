@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.panels.AuthorInfoPanel;
 import com.aldodaquino.cobra.gui.panels.GenreInfoPanel;
 import com.aldodaquino.cobra.main.CatalogManager;
@@ -13,7 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-public class FullContentTable extends JTable {
+class FullContentTable extends JTable {
 
     private static final String[] colNames = {"Address", "Name", "Author", "Genre", "Views", "Enjoy", "Price fairness",
             "Content meaning", "Price"};
@@ -35,11 +34,8 @@ public class FullContentTable extends JTable {
         return rows;
     }
 
-    private final CatalogManager catalogManager;
-
-    public FullContentTable(CatalogManager catalogManager, List<Content> contents) {
+    FullContentTable(CatalogManager catalogManager, List<Content> contents) {
         super(prepareRows(contents), colNames);
-        this.catalogManager = catalogManager;
 
         // render author and genre as link style
         TableCellRenderer linkRenderer = (table, value, arg2, arg3, arg4, arg5) ->

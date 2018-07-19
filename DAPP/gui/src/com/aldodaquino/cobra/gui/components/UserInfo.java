@@ -1,6 +1,5 @@
 package com.aldodaquino.cobra.gui.components;
 
-import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.constants.Colors;
 import com.aldodaquino.cobra.gui.Status;
 

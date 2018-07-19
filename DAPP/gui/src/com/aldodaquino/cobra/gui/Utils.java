@@ -55,6 +55,7 @@ public class Utils {
      * @param msg the question.
      * @return true for yes, false for no.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean newConfirmDialog(String msg) {
         return JOptionPane.showConfirmDialog(null, msg,"Warning", JOptionPane.YES_NO_OPTION) ==
                 JOptionPane.YES_OPTION;

@@ -15,7 +15,7 @@ public class LabelPanel extends UpgradablePanel {
     private final JLabel loader = new JLabel(new ImageIcon(Images.loading.getImage()), JLabel.CENTER);
     private final GridBagConstraints replacingPosition = newGBC(2, 1);
 
-    private CatalogManager catalogManager;
+    private final CatalogManager catalogManager;
 
     LabelPanel(CatalogManager catalogManager, String label) {
         this.catalogManager = catalogManager;
