@@ -23,7 +23,6 @@ contract BaseContentManagementContract {
 
 
     /* EVENTS */
-    event FallbackFunctionCall(string message, bytes data);
     event ContentPublished();
     event ContentDeleted();
     event contentConsumed(address user);

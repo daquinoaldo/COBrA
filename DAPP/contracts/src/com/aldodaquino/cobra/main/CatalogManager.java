@@ -2,15 +2,30 @@ package com.aldodaquino.cobra.main;
 
 import com.aldodaquino.cobra.contracts.CatalogContract;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.tuples.generated.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.RunnableFuture;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class CatalogManager extends ContractManager {
 
     private final CatalogContract catalog;
+
+    // event callbacks
+    private final List<BiConsumer<String, String>> newContentAvailableBiConsumers = new ArrayList<>();
+    private final List<Runnable> newContentAvailableRunnables = new ArrayList<>();
+    private final List<Consumer<String>> accessGrantedConsumers = new ArrayList<>();
+    private final List<Runnable> becomesPremiumRunnables = new ArrayList<>();
+    private final List<Consumer<String>> feedbackAvailableConsumer = new ArrayList<>();
+    private final Map<String, List<Runnable>> paymentAvailableMap = new HashMap<>();
+    private final List<Runnable> catalogClosedRunnables = new ArrayList<>();
 
     /*
      * CONSTRUCTORS
@@ -23,6 +38,50 @@ public class CatalogManager extends ContractManager {
     public CatalogManager(Credentials credentials) {
         super(credentials);
         catalog = (CatalogContract) deploy(CatalogContract.class);
+
+        // events callbacks
+        catalog.newContentAvailableEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    for (BiConsumer<String, String> biConsumer : newContentAvailableBiConsumers)
+                        biConsumer.accept(Utils.bytes32ToString(e.name), e.addr);
+                    for (Runnable runnable : newContentAvailableRunnables)
+                        runnable.run();
+                });
+
+        catalog.grantedAccessEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    if (e.user.equals(credentials.getAddress()))
+                        for (Consumer<String> consumer : accessGrantedConsumers)
+                            consumer.accept(e.content);
+                });
+
+        catalog.becomesPremiumEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    if (e.user.equals(credentials.getAddress()))
+                        for (Runnable runnable : becomesPremiumRunnables)
+                            runnable.run();
+                });
+
+        catalog.feedbackAvailableEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    if (e.user.equals(credentials.getAddress()))
+                        for (Consumer<String> consumer : feedbackAvailableConsumer)
+                            consumer.accept(e.content);
+                });
+
+        catalog.paymentAvailableEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    List<Runnable> runnables = paymentAvailableMap.get(e.content);
+                    if (runnables != null)
+                        for (Runnable runnable : runnables)
+                            runnable.run();
+                });
+
+        catalog.catalogClosedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    for (Runnable runnable : catalogClosedRunnables)
+                        runnable.run();
+                });
     }
 
     /**
@@ -38,6 +97,66 @@ public class CatalogManager extends ContractManager {
     /*
      * CATALOG CONTRACT SPECIFIC METHODS
      */
+
+    /* Events */
+
+    /**
+     * Subscribe a callback for new content available events.
+     * @param callback a BiConsumer of content name and address.
+     */
+    public void listenNewContentAvailable(BiConsumer<String, String> callback) {
+        newContentAvailableBiConsumers.add(callback);
+    }
+
+    /**
+     * Subscribe a callback for new content available events.
+     * @param callback a Runnable.
+     */
+    public void listenNewContentAvailable(Runnable callback) {
+        newContentAvailableRunnables.add(callback);
+    }
+
+    /**
+     * Subscribe a callback for access granted events for this user.
+     * @param callback a Consumer of content address.
+     */
+    public void listenAccessGranted(Consumer<String> callback) {
+        accessGrantedConsumers.add(callback);
+    }
+
+    /**
+     * Subscribe a callback for becomes premium events for this user.
+     * @param callback a Runnable.
+     */
+    public void listenBecomesPremium(Runnable callback) {
+        becomesPremiumRunnables.add(callback);
+    }
+
+    /**
+     * Subscribe a callback for feedback available events for this user.
+     * @param callback a Consumer of content address.
+     */
+    public void listenFeedbackAvailable(Consumer<String> callback) {
+        feedbackAvailableConsumer.add(callback);
+    }
+
+    /**
+     * Subscribe a callback for payment available events for this user.
+     * @param content the content of which listen to.
+     * @param callback a Runnable.
+     */
+    public void listenPaymentAvailable(String content, Runnable callback) {
+        paymentAvailableMap.putIfAbsent(content, new ArrayList<>());
+        paymentAvailableMap.get(content).add(callback);
+    }
+
+    /**
+     * Subscribe a callback for payment available events for this user.
+     * @param callback a Runnable.
+     */
+    public void listenCatalogClosed(Runnable callback) {
+        catalogClosedRunnables.add(callback);
+    }
 
     /* Catalog interaction methods */
 

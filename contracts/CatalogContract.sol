@@ -74,6 +74,7 @@ contract CatalogContract {
     event PaymentAvailable(address content);
     event BecomesPremium(address user);
     event NewContentAvailable(bytes32 name, address addr);
+    event FeedbackAvailable(address content, address user);
 
 
     /* MODIFIERS */
@@ -267,6 +268,7 @@ contract CatalogContract {
         // is the msg.sender
         delete accessibleContent[u][msg.sender];
         pendingFeedback[u][msg.sender] = true;
+        emit FeedbackAvailable(msg.sender, u);
         contents[msg.sender].views++;
         contents[msg.sender].uncollectedViews++;
         /* Notice the author if his contents has enough views.
