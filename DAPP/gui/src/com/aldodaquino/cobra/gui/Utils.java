@@ -52,6 +52,17 @@ public class Utils {
     }
 
     /**
+     * Shows an error dialog that advice that the program will close, then exit the program.
+     * @param errorMessage the error message.
+     */
+    public static void newExitDialog(String errorMessage) {
+        JOptionPane.showMessageDialog(null, errorMessage, "ERROR! Exiting...",
+                JOptionPane.ERROR_MESSAGE);
+        System.err.println("Exiting from the program. Reason: " + errorMessage);
+        System.exit(1);
+    }
+
+    /**
      * Shows a confirmation dialog (yes/no).
      * @param msg the question.
      * @return true for yes, false for no.

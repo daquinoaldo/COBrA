@@ -25,6 +25,9 @@ public class AuthorPanel extends AsyncPanel {
         this.status = status;
         catalogManager = status.getCatalogManager();
 
+        // listen for catalog closed
+        catalogManager.listenCatalogClosed(() -> Utils.newExitDialog("Catalog closed."));
+
         // table container
         tableContainer = new JScrollPane();
         List<Content> contents = catalogManager.getFullContentList();

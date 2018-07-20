@@ -29,6 +29,9 @@ public class CustomerPanel extends UpgradablePanel {
         this.status = status;
         catalogManager = status.getCatalogManager();
 
+        // listen for catalog closed
+        catalogManager.listenCatalogClosed(() -> Utils.newExitDialog("Catalog closed."));
+
         // table container
         tableContainer = new JScrollPane();
         table = getTable();
