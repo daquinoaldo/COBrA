@@ -25,13 +25,23 @@ public class AuthorPanel extends AsyncPanel {
         this.status = status;
         catalogManager = status.getCatalogManager();
 
-        // listen for catalog closed
+        // get the content list
+        List<Content> contents;
+        try {
+            contents = catalogManager.getAuthorContents(status.getUserAddress());
+        } catch (OperationNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+
+        // listen events
         catalogManager.listenCatalogClosed(() -> Utils.newExitDialog("Catalog closed."));
+        for (Content content : contents)
+            catalogManager.listenPaymentAvailable(content.address,
+                    () -> Utils.newMessageDialog("Payment available for content " + content.name + "."));
 
         // table container
-        tableContainer = new JScrollPane();
-        List<Content> contents = catalogManager.getFullContentList();
         table = new AuthorContentTable(status, contents);
+        tableContainer = new JScrollPane();
         tableContainer.setViewportView(table);
 
         // buttons

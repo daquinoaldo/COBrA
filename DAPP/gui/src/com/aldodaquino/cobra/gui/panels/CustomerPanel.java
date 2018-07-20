@@ -29,7 +29,7 @@ public class CustomerPanel extends UpgradablePanel {
         this.status = status;
         catalogManager = status.getCatalogManager();
 
-        // listen for catalog closed
+        // listen for events
         catalogManager.listenCatalogClosed(() -> Utils.newExitDialog("Catalog closed."));
         catalogManager.listenNewContentAvailable((name, address) ->
                 Utils.newMessageDialog("New content available: " + name + "."));
