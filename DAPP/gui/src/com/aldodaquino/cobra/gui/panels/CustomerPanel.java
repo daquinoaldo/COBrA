@@ -13,6 +13,7 @@ import static com.aldodaquino.cobra.gui.constants.Dimensions.LATERAL_BAR_PADDING
 
 public class CustomerPanel extends UpgradablePanel {
 
+    private final Status status;
     private final CatalogManager catalogManager;
 
     private final JScrollPane tableContainer;
@@ -25,7 +26,8 @@ public class CustomerPanel extends UpgradablePanel {
     private boolean showViews = false;
 
     public CustomerPanel(Status status) {
-        this.catalogManager = status.getCatalogManager();
+        this.status = status;
+        catalogManager = status.getCatalogManager();
 
         // table container
         tableContainer = new JScrollPane();
@@ -41,8 +43,8 @@ public class CustomerPanel extends UpgradablePanel {
             showViews = !showViews;
             update();
         });
-        chartWidget = new ChartWidget(catalogManager);
-        JPanel newContentWidget = new NewContentsWidget(catalogManager);
+        chartWidget = new ChartWidget(status);
+        JPanel newContentWidget = new NewContentsWidget(status);
 
         lateralBar = new JPanel(new GridBagLayout()) {
             // prevent widely resize with window
@@ -89,14 +91,14 @@ public class CustomerPanel extends UpgradablePanel {
 
             // update charts
             lateralBar.remove(chartWidget);
-            chartWidget = new ChartWidget(catalogManager);
+            chartWidget = new ChartWidget(status);
             lateralBar.add(chartWidget, chartWidgetPosition);
         });
     }
 
     private Component getTable() {
-        return showViews ? new ViewsContentTable(catalogManager, catalogManager.getContentListWithViews())
-                : new ContentList(catalogManager, catalogManager.getContentList());
+        return showViews ? new ViewsContentTable(status, catalogManager.getContentListWithViews())
+                : new ContentList(status, catalogManager.getContentList());
     }
 
     private void buyPremium() {

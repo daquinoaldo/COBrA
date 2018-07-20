@@ -33,6 +33,13 @@
     </dependencies>
 
     <build>
+        <!-- Add resources -->
+        <resources>
+            <resource>
+                <directory>res</directory>
+            </resource>
+        </resources>
+
         <!-- Change default sources path -->
         <sourceDirectory>src</sourceDirectory>
 

@@ -14,6 +14,7 @@
         <module>gui</module>
         <module>contracts</module>
         <module>test</module>
+        <module>connections</module>
     </modules>
 
     <properties>

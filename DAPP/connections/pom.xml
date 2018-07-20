@@ -9,22 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>author-server</artifactId>
-
-    <dependencies>
-        <!-- contract module dependent -->
-        <dependency>
-            <groupId>com.aldodaquino.cobra</groupId>
-            <artifactId>contracts</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <!-- connections module dependent -->
-        <dependency>
-            <groupId>com.aldodaquino.cobra</groupId>
-            <artifactId>connections</artifactId>
-            <version>1.0</version>
-        </dependency>
-    </dependencies>
+    <artifactId>connections</artifactId>
 
     <build>
         <!-- Change default sources path -->
@@ -40,7 +25,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.aldodaquino.cobra.authorserver.Main</mainClass>
+                            <mainClass>com.aldodaquino.cobra.connections.Main</mainClass>
                         </manifest>
                     </archive>
                     <!-- JAR output directory -->
@@ -54,7 +39,7 @@
                     <!-- Generate manifest.mf with main class -->
                     <archive>
                         <manifest>
-                            <mainClass>com.aldodaquino.cobra.authorserver.Main</mainClass>
+                            <mainClass>com.aldodaquino.cobra.connections.Main</mainClass>
                         </manifest>
                     </archive>
                     <!-- JAR output directory -->

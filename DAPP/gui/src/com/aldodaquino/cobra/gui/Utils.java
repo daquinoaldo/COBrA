@@ -4,6 +4,7 @@ import com.aldodaquino.cobra.gui.constants.Images;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
 /**
  * Utilities for the gui
@@ -70,40 +71,33 @@ public class Utils {
         label.setFont(new Font(label.getFont().getName(), Font.PLAIN, fontSize));
     }
 
-
-
-    /*
-     * Call the setEnabled function for each component in a container. Used by the Login and Register Panels
-     * @param container for which components are to be enabled
-     * @param enable true to enable, false to disable
+    /**
+     * Show the file selection dialog for file choosing and saving.
+     * @return a File.
      */
-    /*public static void enableComponents(Container container, boolean enable) {
-        Component[] components = container.getComponents();
-        for (Component component : components) {
-            component.setEnabled(enable);
-            if (component instanceof Container) {
-                enableComponents((Container) component, enable);
-            }
-        }
-    }
-    
     public static File openFileDialog() {
         return fileDialog(true, null);
     }
-    public static File saveFileDialog(Strings defaultName) {
-        return fileDialog(false, defaultName);
-    }*/
 
-    /*
-     * Show the file selection dialog for file choosing and saving
-     * @param isOpenDialog if true pick a file, if false choose where to save the incoming file
-     * @param filename should be null if isOpenDialog, otherwise specify the original filename of the incoming file
-     * @return a File
+    /**
+     * Show the file selection dialog for file choosing and saving.
+     * @param defaultName specify the original filename of the incoming file.
+     * @return a File.
      */
-    /*private static File fileDialog(boolean isOpenDialog, Strings filename) {
+    public static File saveFileDialog(String defaultName) {
+        return fileDialog(false, defaultName);
+    }
+
+    /**
+     * Show the file selection dialog for file choosing and saving.
+     * @param isOpenDialog if true pick a file, if false choose where to save the incoming file.
+     * @param filename should be null if isOpenDialog, otherwise specify the original filename of the incoming file.
+     * @return a File.
+     */
+    private static File fileDialog(boolean isOpenDialog, String filename) {
         File selected = null;
         boolean aFileIsSelected = false;
-    
+
         JFileChooser chooser = null;
         LookAndFeel previousLF = UIManager.getLookAndFeel();
         try {
@@ -114,18 +108,18 @@ public class Utils {
                 ClassNotFoundException e) {
             e.printStackTrace();
         }
-    
+
         if (chooser == null) chooser = new JFileChooser();
         if (filename != null) chooser.setSelectedFile(new File(filename));
-        
+
         do {
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             int returnStatus = isOpenDialog ? chooser.showOpenDialog(null) : chooser.showSaveDialog(null);
-            
+
             if (returnStatus == JFileChooser.APPROVE_OPTION)
                 selected = chooser.getSelectedFile();
             else continue;
-    
+
             if (!isOpenDialog && selected.exists()) {
                 aFileIsSelected = newConfirmDialog("The file will be overwritten. Are you sure?");
             } else if (!isOpenDialog && selected.exists() && !selected.canWrite()) {
@@ -135,10 +129,10 @@ public class Utils {
             } else {
                 aFileIsSelected = true;
             }
-            
+
         } while (!aFileIsSelected);
-        
+
         return selected;
-    }*/
+    }
 
 }

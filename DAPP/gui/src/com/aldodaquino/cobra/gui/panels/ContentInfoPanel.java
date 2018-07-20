@@ -1,5 +1,9 @@
 package com.aldodaquino.cobra.gui.panels;
 
+import com.aldodaquino.cobra.connections.API;
+import com.aldodaquino.cobra.connections.FileExchange;
+import com.aldodaquino.cobra.connections.HttpHelper;
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
@@ -8,11 +12,15 @@ import com.aldodaquino.cobra.gui.components.UpgradablePanel;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
+import com.aldodaquino.cobra.main.ContentManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.aldodaquino.cobra.gui.components.UpgradablePanel.newGBC;
 import static com.aldodaquino.cobra.gui.constants.Dimensions.INFO_PANEL_PADDING;
@@ -21,21 +29,25 @@ public class ContentInfoPanel extends AsyncPanel {
 
     private static final String WINDOW_TITLE = "About the author";
 
+    private final Status status;
     private final CatalogManager catalogManager;
     private final Content content;
+    private final ContentManager contentManager;
 
-    private ContentInfoPanel(CatalogManager catalogManager, String address) {
-        this.catalogManager = catalogManager;
+    private ContentInfoPanel(Status status, String address) {
+        this.status = status;
+        catalogManager = status.getCatalogManager();
         content = catalogManager.getContentInfo(address);
+        contentManager = new ContentManager(status.credentials, address);
 
         // prepare content
         JLabel mainLabel = new JLabel(content.name);
         Utils.setFontSize(mainLabel, mainLabel.getFont().getSize() * 2);
         JLabel addressLabel = new JLabel("Address: " + content.address);
         JPanel authorLabel = prepareLink("Author: ", content.author,
-                new AuthorInfoPanel(catalogManager, content.author), AuthorInfoPanel.WINDOW_TITLE);
+                new AuthorInfoPanel(status, content.author), AuthorInfoPanel.WINDOW_TITLE);
         JPanel genreLabel = prepareLink("Genre: ", content.genre,
-                new GenreInfoPanel(catalogManager, content.genre), GenreInfoPanel.WINDOW_TITLE);
+                new GenreInfoPanel(status, content.genre), GenreInfoPanel.WINDOW_TITLE);
         JLabel priceLabel = new JLabel("price: " + content.price);
         JLabel viewsLabel = new JLabel("Views: " + content.views);
         JPanel averageRatingLabel = prepareStar("Average rating: ", content.averageRating);
@@ -50,30 +62,31 @@ public class ContentInfoPanel extends AsyncPanel {
         setBorder(ComponentFactory.newBorder(INFO_PANEL_PADDING.width, INFO_PANEL_PADDING.height));
         add(mainLabel, newGBC(1, 1));
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 2));
-        add(addressLabel, newGBC(1, 3));
-        add(authorLabel, newGBC(1, 4));
-        add(genreLabel, newGBC(1, 5));
-        add(priceLabel, newGBC(1, 6));
-        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 7));
-        add(viewsLabel, newGBC(1, 8));
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 4));
+        add(addressLabel, newGBC(1, 5));
+        add(authorLabel, newGBC(1, 6));
+        add(genreLabel, newGBC(1, 7));
+        add(priceLabel, newGBC(1, 8));
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 9));
-        add(averageRatingLabel, newGBC(1, 10));
-        add(enjoyLabel, newGBC(1, 11));
-        add(priceFairnessLabel, newGBC(1, 12));
-        add(contentMeaningLabel, newGBC(1, 13));
-        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 14));
-        add(viewButton, newGBC(1, 15));
-        add(giftButton, newGBC(1, 16));
+        add(viewsLabel, newGBC(1, 10));
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 11));
+        add(averageRatingLabel, newGBC(1, 12));
+        add(enjoyLabel, newGBC(1, 13));
+        add(priceFairnessLabel, newGBC(1, 14));
+        add(contentMeaningLabel, newGBC(1, 15));
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_M), newGBC(1, 16));
+        add(viewButton, newGBC(1, 17));
+        add(giftButton, newGBC(1, 18));
 
     }
 
     /**
      * Open a new window with this panel.
-     * @param catalogManager the catalog manager in Status.
+     * @param status the Status.
      * @param address of the content.
      */
-    public static void newWindow(CatalogManager catalogManager, String address) {
-        Utils.newWindow(WINDOW_TITLE, new ContentInfoPanel(catalogManager, address), false);
+    public static void newWindow(Status status, String address) {
+        Utils.newWindow(WINDOW_TITLE, new ContentInfoPanel(status, address), false);
     }
 
     private void view() {
@@ -82,13 +95,35 @@ public class ContentInfoPanel extends AsyncPanel {
             if (!catalogManager.isPremium() && !catalogManager.hasAccess(content.address)) {
                 if(!Utils.newConfirmDialog("You don't have access to this content. Do you want to buy it for "
                         + content.price + "?")) return; // doesn't have access and doesn't want to buy the access
-                if (catalogManager.buyContent(content.address, content.price)) Utils.newMessageDialog("Content bought.");
+                if (catalogManager.buyContent(content.address, content.price))
+                    Utils.newMessageDialog("Content bought.");
                 else {
                     Utils.newErrorDialog("Cannot buy this content. You may have bought it previously.");
                     return;
                 }
             }
-            //TODO: view and consume content
+
+            // make the request
+            Map<String, String> parameters = new HashMap<>();
+            parameters.put("privateKey", status.getPrivateKey());
+            parameters.put("address", content.address);
+
+            String hostname = contentManager.getHostname();
+            int port = contentManager.getPort();
+            if (port == 0) {
+                Utils.newErrorDialog("The content has an invalid port number. Cannot contact the author's server.");
+                return;
+            }
+            String url = "http://" + hostname + ":" + port + API.ACCESS_API_PATH;
+
+            // get the response and retrieve the socket port number
+            HttpHelper.Response response = HttpHelper.makePost(url, parameters);
+            if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
+            int socketPort = Integer.parseInt(response.data.replaceAll("[^0-9]", ""));
+
+            // download the file
+            File file = Utils.saveFileDialog("content");
+            FileExchange.receiveFile(file, hostname, socketPort);
         });
     }
 

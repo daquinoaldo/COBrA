@@ -1,12 +1,10 @@
-package com.aldodaquino.cobra.gui;
+package com.aldodaquino.cobra.connections;
 
 import java.io.*;
 import java.net.*;
 import java.util.Map;
 
 public class HttpHelper {
-
-    // --Commented out by Inspection (18/07/2018, 12:27):private static CookieManager cookieManager = new CookieManager();
 
     public static Response makeGet(String url, Map<String, String> parameters) {
         return makeRequest(url + querifyParameters(parameters), "GET", "");
@@ -40,11 +38,12 @@ public class HttpHelper {
             //Get Response
             status = connection.getResponseCode();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder responseData = new StringBuilder(); // or StringBuffer if Java version 5+
+            StringBuilder responseData = new StringBuilder();
             String line;
+            String separator = "";
             while ((line = bufferedReader.readLine()) != null) {
-                responseData.append(line);
-                responseData.append('\r');
+                responseData.append(separator).append(line);
+                separator = "\n";
             }
             bufferedReader.close();
 

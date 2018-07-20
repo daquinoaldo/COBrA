@@ -1,8 +1,8 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.gui.Utils;
-import com.aldodaquino.cobra.main.CatalogManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +18,7 @@ public class InfoPanel extends JPanel {
     protected final LabelPanel biggestPriceFairnessLabel;
     protected final LabelPanel highestContentMeaningLabel;
 
-    protected InfoPanel(CatalogManager catalogManager, String mainLabelString) {
+    protected InfoPanel(Status status, String mainLabelString) {
 
         // set layout and border
         setLayout(new GridBagLayout());
@@ -27,12 +27,12 @@ public class InfoPanel extends JPanel {
         // prepare content
         JLabel mainLabel = new JLabel(mainLabelString);
         Utils.setFontSize(mainLabel, mainLabel.getFont().getSize() * 2);
-        latestLabel = new LabelPanel(catalogManager, "Latest release: ");
-        mostPopularLabel = new LabelPanel(catalogManager, "Most popular content: ");
-        highestRatedLabel = new LabelPanel(catalogManager, "Highest rated content: ");
-        mostEnjoyedLabel = new LabelPanel(catalogManager, "Most enjoyed content: ");
-        biggestPriceFairnessLabel = new LabelPanel(catalogManager, "Biggest value for money content: ");
-        highestContentMeaningLabel = new LabelPanel(catalogManager, "Highest rated for content meaning: ");
+        latestLabel = new LabelPanel(status, "Latest release: ");
+        mostPopularLabel = new LabelPanel(status, "Most popular content: ");
+        highestRatedLabel = new LabelPanel(status, "Highest rated content: ");
+        mostEnjoyedLabel = new LabelPanel(status, "Most enjoyed content: ");
+        biggestPriceFairnessLabel = new LabelPanel(status, "Biggest value for money content: ");
+        highestContentMeaningLabel = new LabelPanel(status, "Highest rated for content meaning: ");
 
         // add all to the panel
         add(mainLabel, UpgradablePanel.newGBC(1, 1));

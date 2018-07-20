@@ -11,7 +11,7 @@ public class Status {
     public static final int ROLE_AUTHOR = 1;
 
     private String privateKey;
-    private Credentials credentials;
+    public Credentials credentials;
     private CatalogManager catalogManager;
     private int role;
 
@@ -65,7 +65,7 @@ public class Status {
         this.role = role;
     }
 
-    public int getRole() {
+    int getRole() {
         return role;
     }
 }

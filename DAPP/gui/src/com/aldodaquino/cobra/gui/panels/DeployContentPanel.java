@@ -1,15 +1,18 @@
 package com.aldodaquino.cobra.gui.panels;
 
+import com.aldodaquino.cobra.connections.API;
+import com.aldodaquino.cobra.connections.FileExchange;
 import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.gui.Utils;
-
-import com.aldodaquino.cobra.gui.HttpHelper;
+import com.aldodaquino.cobra.connections.HttpHelper;
 
 import javax.swing.*;
+import java.io.File;
 import java.math.BigInteger;
+import java.nio.channels.ServerSocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +20,6 @@ import java.util.Map;
  * Login Form under the Logo in the Login Panel
  */
 class DeployContentPanel extends AsyncPanel {
-
-    private static final String DEPLOY_API_PATH = "/deploy";
 
     // fields
     private final JTextField addressField;
@@ -30,6 +31,7 @@ class DeployContentPanel extends AsyncPanel {
     private final Status status;
     private final Runnable deployCallback;
 
+    private File file;
 
     DeployContentPanel(Status status, Runnable deployCallback) {
         this.status = status;
@@ -47,6 +49,7 @@ class DeployContentPanel extends AsyncPanel {
         JLabel nameLabel = new JLabel("Name:");
         JLabel genreLabel = new JLabel("Genre:");
         JLabel priceLabel = new JLabel("Price:");
+        JLabel selectFileLabel = new JLabel("Pick the content file:");
 
         // input field
         priceField = ComponentFactory.newTextField(e -> deploy());
@@ -57,7 +60,8 @@ class DeployContentPanel extends AsyncPanel {
         addressField = ComponentFactory.newTextField(e -> portField.grabFocus());
         addressField.setText("localhost");
 
-        // send button
+        // buttons
+        JButton selectFileButton = ComponentFactory.newButton("Open", e -> file = Utils.openFileDialog());
         JButton sendButton = ComponentFactory.newButton("Deploy", e -> deploy());
 
         // add all to the panel
@@ -78,6 +82,9 @@ class DeployContentPanel extends AsyncPanel {
         add(priceLabel);
         add(priceField);
         add(ComponentFactory.newVSpacer());
+        add(selectFileLabel);
+        add(selectFileButton);
+        add(ComponentFactory.newVSpacer());
         add(sendButton);
     }
 
@@ -95,7 +102,7 @@ class DeployContentPanel extends AsyncPanel {
             String portS = portField.getText().trim();
             int port = portS.equals("") ? 8080 : Integer.parseInt(portS);
             if (port <= 0) throw new NumberFormatException();
-            url += ":" + port + DEPLOY_API_PATH;
+            url = "http://" + url + ":" + port + API.DEPLOY_API_PATH;
         } catch (NumberFormatException e) {
             Utils.newErrorDialog("Invalid port number.");
             return;
@@ -116,12 +123,29 @@ class DeployContentPanel extends AsyncPanel {
             return;
         }
 
+        // open the socket for the file
+        if (file == null) {
+            Utils.newErrorDialog("You must choose a file to be uploaded.");
+            return;
+        }
+
+        ServerSocketChannel serverSocketChannel = FileExchange.openFileSocket();
+        if (serverSocketChannel == null) {
+            Utils.newErrorDialog("Error while opening server socket.");
+            return;
+        }
+
+        int port = serverSocketChannel.socket().getLocalPort();
+        FileExchange.startFileSender(serverSocketChannel, file,
+                () -> Utils.newMessageDialog("File uploaded successfully."));
+
         // make the request
         Map<String, String> parameters = new HashMap<>();
         parameters.put("privateKey", status.getPrivateKey());
         parameters.put("name", name);
         parameters.put("genre", genre);
         parameters.put("price", price.toString());
+        parameters.put("port", Integer.toString(port));
 
         HttpHelper.Response response = HttpHelper.makePost(url, parameters);
         if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);

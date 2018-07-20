@@ -47,8 +47,18 @@ public class CatalogManager extends ContractManager {
      * @return boolean if has access, false otherwise.
      */
     public boolean hasAccess(String address) {
+        return hasAccess(address, credentials.getAddress());
+    }
+
+    /**
+     * Check if the specified user has access to a content.
+     * @param address the content address.
+     * @param user the user address.
+     * @return boolean if has access, false otherwise.
+     */
+    public boolean hasAccess(String address, String user) {
         try {
-            return catalog.hasAccess(credentials.getAddress(), address).send();
+            return catalog.hasAccess(user, address).send();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -58,6 +68,7 @@ public class CatalogManager extends ContractManager {
     /**
      * Buy a content.
      * @param address the content address.
+     * @param price the content price.
      * @return a boolean representing the operation outcome.
      */
     public boolean buyContent(String address, BigInteger price) {
@@ -73,6 +84,7 @@ public class CatalogManager extends ContractManager {
      * Gift a content to another user.
      * @param address the content address.
      * @param user the user address.
+     * @param price the content price.
      * @return a boolean representing the operation outcome.
      */
     public boolean giftContent(String address, String user, BigInteger price) {
@@ -248,7 +260,7 @@ public class CatalogManager extends ContractManager {
      */
     public Content getLatestByGenre(String genre) {
         try {
-            Tuple2<byte[], String> res = catalog.getLatestByGenre(Utils.stringToBytes(genre)).send();
+            Tuple2<byte[], String> res = catalog.getLatestByGenre(Utils.stringToBytes32(genre)).send();
             return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
@@ -292,7 +304,7 @@ public class CatalogManager extends ContractManager {
      */
     public Content getMostPopularByGenre(String genre) {
         try {
-            Tuple2<byte[], String> res = catalog.getMostPopularByGenre(Utils.stringToBytes(genre)).send();
+            Tuple2<byte[], String> res = catalog.getMostPopularByGenre(Utils.stringToBytes32(genre)).send();
             return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
@@ -321,7 +333,7 @@ public class CatalogManager extends ContractManager {
      */
     public Content getMostRated(String category) {
         try {
-            Tuple2<byte[], String> res = catalog.getMostRated(Utils.stringToBytes(category)).send();
+            Tuple2<byte[], String> res = catalog.getMostRated(Utils.stringToBytes32(category)).send();
             return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
@@ -336,8 +348,8 @@ public class CatalogManager extends ContractManager {
      */
     public Content getMostRatedByGenre(String genre, String category) {
         try {
-            Tuple2<byte[], String> res = catalog.getMostRatedByGenre(Utils.stringToBytes(genre),
-                    Utils.stringToBytes(category)).send();
+            Tuple2<byte[], String> res = catalog.getMostRatedByGenre(Utils.stringToBytes32(genre),
+                    Utils.stringToBytes32(category)).send();
             return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();
@@ -352,7 +364,7 @@ public class CatalogManager extends ContractManager {
      */
     public Content getMostRatedByAuthor(String author, String category) {
         try {
-            Tuple2<byte[], String> res = catalog.getMostRatedByAuthor(author, Utils.stringToBytes(category)).send();
+            Tuple2<byte[], String> res = catalog.getMostRatedByAuthor(author, Utils.stringToBytes32(category)).send();
             return new Content(res.getValue2(), res.getValue1());
         } catch (Exception e) {
             e.printStackTrace();

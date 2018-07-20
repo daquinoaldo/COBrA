@@ -1,7 +1,7 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.panels.ContentInfoPanel;
-import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
@@ -23,7 +23,7 @@ public class ViewsContentTable extends JTable {
         return rows;
     }
 
-    public ViewsContentTable(CatalogManager catalogManager, List<Content> contents) {
+    public ViewsContentTable(Status status, List<Content> contents) {
         super(prepareRows(contents), colNames);
 
         // double-click listener
@@ -32,7 +32,7 @@ public class ViewsContentTable extends JTable {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() < 2) return;
                 int row = rowAtPoint(new Point(e.getX(), e.getY()));
-                ContentInfoPanel.newWindow(catalogManager, contents.get(row).address);
+                ContentInfoPanel.newWindow(status, contents.get(row).address);
             }
         });
     }

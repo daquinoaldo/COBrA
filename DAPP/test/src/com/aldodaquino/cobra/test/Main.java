@@ -1,12 +1,18 @@
 package com.aldodaquino.cobra.test;
 
 import com.aldodaquino.cobra.authorserver.CliHelper;
-import com.aldodaquino.cobra.gui.HttpHelper;
+import com.aldodaquino.cobra.connections.API;
+import com.aldodaquino.cobra.connections.FileExchange;
+import com.aldodaquino.cobra.connections.HttpHelper;
+import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import org.web3j.crypto.Credentials;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.channels.ServerSocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -25,11 +31,20 @@ public class Main {
 
     private static final int NUMBER_OF_CONTENTS = 15;
     private static final String[] genres = {"Comedy", "Romance", "Thriller"};
+    private static URI FILENAME;
+
+    static {
+        try {
+            FILENAME = Main.class.getResource("/test_file.png").toURI();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
 
     // Change this value with your private keys.
-    private static final String CATALOG_OWNER_DEFAULT_KEY = "41f5d7ac65a52ad3cddf8cfe9450bf8d4a0c7b518ceb8abc578a568826e88fce";
-    private static final String[] AUTHOR_DEFAULT_KEYS = {"6502bce55581e00721b3fd6fd10e8b4858063ee890eb8bafaa93cb78e1492a0f",
-            "0d97274de8f4d4f07ccbe100771ed72c1d9962124fff76ad223ba77a2faba861"};
+    private static final String CATALOG_OWNER_DEFAULT_KEY = "be35bfe5c861f3478feccc3dd647f5a27791260a41e8e77bdf5d156f95200525";
+    private static final String[] AUTHOR_DEFAULT_KEYS = {"5a17260c7c368910b242bda4138df4e5390700b59524f148f7ee038fa429e69c",
+            "9717a1dbb7710336f4d5d753f4b9b8359083779830f317641f17e1ba52f13a06"};
     //TODO reset
     //private static final String CATALOG_OWNER_DEFAULT_KEY = "";
     //private static final String[] AUTHOR_DEFAULT_KEYS = {""};
@@ -78,7 +93,8 @@ public class Main {
             new Thread(() -> {
                 try {
                     com.aldodaquino.cobra.authorserver.Main.main(
-                            new String[]{"-k", authorKey, "-c", catalogAddress, "-p", Integer.toString(port[0]++)});
+                            new String[]{"-k", authorKey, "-c", catalogAddress, "-n", "localhost",
+                                    "-p", Integer.toString(port[0]++)});
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -128,9 +144,20 @@ public class Main {
         return ThreadLocalRandom.current().nextInt(0, lessThan);
     }
 
-    private static void deploy(int port, String authorKey, String name, String genre, String price) {
-        // get input data
-        String url = "http://localhost:" + port + "/deploy";
+    private static void deploy(int serverPort, String authorKey, String name, String genre, String price) {
+        // assemble the url
+        String url = "http://localhost:" + serverPort + API.DEPLOY_API_PATH;
+
+        // prepare the file
+        ServerSocketChannel serverSocketChannel = FileExchange.openFileSocket();
+        if (serverSocketChannel == null) {
+            Utils.newErrorDialog("Error while opening server socket.");
+            return;
+        }
+
+        int port = serverSocketChannel.socket().getLocalPort();
+        FileExchange.startFileSender(serverSocketChannel, new File(FILENAME),
+                () -> System.out.println("File uploaded successfully."));
 
         // make the request
         Map<String, String> parameters = new HashMap<>();
@@ -138,6 +165,7 @@ public class Main {
         parameters.put("name", name);
         parameters.put("genre", genre);
         parameters.put("price", price);
+        parameters.put("port", Integer.toString(port));
 
         System.out.println("Deploying a content..." +
                 "\n    Url: " + url +

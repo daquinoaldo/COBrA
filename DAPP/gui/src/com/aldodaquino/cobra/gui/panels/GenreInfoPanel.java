@@ -1,5 +1,6 @@
 package com.aldodaquino.cobra.gui.panels;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.InfoPanel;
 import com.aldodaquino.cobra.main.CatalogManager;
@@ -8,8 +9,9 @@ public class GenreInfoPanel extends InfoPanel {
 
     public static final String WINDOW_TITLE = "About the author";
 
-    public GenreInfoPanel(CatalogManager catalogManager, String genre) {
-        super(catalogManager, genre);
+    public GenreInfoPanel(Status status, String genre) {
+        super(status, genre);
+        CatalogManager catalogManager = status.getCatalogManager();
 
         new Thread(() -> latestLabel.update(catalogManager.getLatestByGenre(genre))).start();
         new Thread(() -> mostPopularLabel.update(catalogManager.getMostPopularByGenre(genre))).start();
@@ -23,11 +25,11 @@ public class GenreInfoPanel extends InfoPanel {
 
     /**
      * Open a new window with this panel.
-     * @param catalogManager the catalog manager in Status.
+     * @param status the Status.
      * @param genre of the content.
      */
-    public static void newWindow(CatalogManager catalogManager, String genre) {
-        Utils.newWindow(WINDOW_TITLE, new GenreInfoPanel(catalogManager, genre), false);
+    public static void newWindow(Status status, String genre) {
+        Utils.newWindow(WINDOW_TITLE, new GenreInfoPanel(status, genre), false);
     }
 
 }

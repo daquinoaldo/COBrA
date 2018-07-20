@@ -17,7 +17,7 @@ public class Content {
 
     Content(String address, byte[] name) {
         this.address = address;
-        this.name = Utils.bytesToString(name);
+        this.name = Utils.bytes32ToString(name);
 
         this.views = null;
         this.author = null;
@@ -31,7 +31,7 @@ public class Content {
 
     Content(String address, byte[] name, BigInteger views) {
         this.address = address;
-        this.name = Utils.bytesToString(name);
+        this.name = Utils.bytes32ToString(name);
         this.views = views;
 
         this.author = null;
@@ -46,9 +46,9 @@ public class Content {
     Content(String address, byte[] name, String author, byte[] genre, BigInteger price, BigInteger views,
             BigInteger averageRating, BigInteger enjoy, BigInteger priceFairness, BigInteger contentMeaning) {
         this.address = address;
-        this.name = Utils.bytesToString(name);
+        this.name = Utils.bytes32ToString(name);
         this.author = author;
-        this.genre = Utils.bytesToString(genre);
+        this.genre = Utils.bytes32ToString(genre);
         this.price = price;
         this.views = views;
         this.averageRating = averageRating.intValue();

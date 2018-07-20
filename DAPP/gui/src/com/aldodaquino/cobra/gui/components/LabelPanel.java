@@ -1,8 +1,8 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.constants.Images;
 import com.aldodaquino.cobra.gui.panels.ContentInfoPanel;
-import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
@@ -15,10 +15,10 @@ public class LabelPanel extends UpgradablePanel {
     private final JLabel loader = new JLabel(new ImageIcon(Images.loading.getImage()), JLabel.CENTER);
     private final GridBagConstraints replacingPosition = newGBC(2, 1);
 
-    private final CatalogManager catalogManager;
+    private final Status status;
 
-    LabelPanel(CatalogManager catalogManager, String label) {
-        this.catalogManager = catalogManager;
+    LabelPanel(Status status, String label) {
+        this.status = status;
         add(new JLabel(label), newGBC(1, 1));
         add(loader, replacingPosition);
     }
@@ -30,7 +30,7 @@ public class LabelPanel extends UpgradablePanel {
         if (content != null) link.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                ContentInfoPanel.newWindow(catalogManager, content.address);
+                ContentInfoPanel.newWindow(status, content.address);
             }
             @Override
             public void mouseEntered(MouseEvent e) {

@@ -16,15 +16,17 @@ contract BaseContentManagementContract {
     address public owner;
     bytes32 public name;
     bytes32 public genre;
-    uint public price = 0; // is assumed that the content can be free, and so the price is 0.
+    uint public price = 0; // is assumed that the content can be free,
+    //and so the price is 0.
     bool private published = false;
     CatalogContract private catalogContract;
 
 
     /* EVENTS */
+    event FallbackFunctionCall(string message, bytes data);
     event ContentPublished();
     event ContentDeleted();
-    event ContentConsumed(address user);
+    event contentConsumed(address user);
 
 
     /* MODIFIERS */
@@ -64,19 +66,21 @@ contract BaseContentManagementContract {
         selfdestruct(owner);
     }
 
-    /** Used by the customers to consume this content after requesting the access.
+    /** Used by the customers to consume this content after requesting the
+     * access.
      * @return the content.
      */
     function consumeContent() public returns(bytes) {
         require(published);
         require(catalogContract.hasAccess(msg.sender, this));
         catalogContract.consumeContent(msg.sender);
-        emit ContentConsumed(msg.sender);
+        emit contentConsumed(msg.sender);
     }
 
     /** Used by the author to publish the content.
      * @param c the address of the catalog in which publish the content.
-     * The author must specify name and content of this contract before calling this function.
+     * The author must specify the name of this content before calling this
+     * function.
      * Can be called only one time.
      */
     function publish(address c) public onlyOwner {

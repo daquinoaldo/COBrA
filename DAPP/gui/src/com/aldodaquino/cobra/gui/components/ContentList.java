@@ -1,7 +1,7 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.panels.ContentInfoPanel;
-import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 
 import javax.swing.*;
@@ -18,7 +18,7 @@ public class ContentList extends JList<String> {
         return rows;
     }
 
-    public ContentList(CatalogManager catalogManager, List<Content> contents) {
+    public ContentList(Status status, List<Content> contents) {
         super(prepareRows(contents));
 
         // double-click listener
@@ -26,7 +26,7 @@ public class ContentList extends JList<String> {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() < 2) return;
                 int index = locationToIndex(e.getPoint());
-                ContentInfoPanel.newWindow(catalogManager, contents.get(index).address);
+                ContentInfoPanel.newWindow(status, contents.get(index).address);
             }
         });
     }

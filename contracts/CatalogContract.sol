@@ -15,7 +15,7 @@ contract CatalogContract {
     //uint public contentCost = 0.01 ether;   // ~ 4€ - deprecated: now the price is chosen by the author
     uint public premiumCost = 0.1 ether;    // ~ 40€
     uint public premiumTime = 172800;       // ~ 1 month
-    uint public payAfter = 10;  // views
+    uint public payAfter = 1; // views //TODO: reset to 10
 
     bytes32 private enjoyS = "enjoy";
     bytes32 private valueForMoneyS = "value for money";
@@ -222,6 +222,7 @@ contract CatalogContract {
             contentMeaningRate = c.contentMeaningSum / c.contentMeaningNum;
         uint average_rate = (enjoyRate + priceFairnessRate +
         contentMeaningRate) / 3;
+        if (average_rate == 0) average_rate = 5;    // if no one have voted just cast to max
         uint amount = c.price * uncollectedViews * average_rate / 5;
         return amount;
     }

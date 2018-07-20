@@ -1,11 +1,13 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.main.CatalogManager;
 
 public class ChartWidget extends InfoPanel {
 
-    public ChartWidget(CatalogManager catalogManager) {
-        super(catalogManager, "Charts");
+    public ChartWidget(Status status) {
+        super(status, "Charts");
+        CatalogManager catalogManager = status.getCatalogManager();
 
         latestLabel.update(catalogManager.getLatest());
         mostPopularLabel.update(catalogManager.getMostPopular());

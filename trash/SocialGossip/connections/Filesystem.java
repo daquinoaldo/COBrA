@@ -1,4 +1,4 @@
-package connections;
+package com.aldodaquino.cobra.authorserver;
 
 import gui.Utils;
 

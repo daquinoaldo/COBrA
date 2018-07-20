@@ -1,5 +1,6 @@
 package com.aldodaquino.cobra.gui.components;
 
+import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
@@ -9,11 +10,13 @@ import java.util.List;
 
 public class NewContentsWidget extends JPanel {
 
+    private final Status status;
     private final CatalogManager catalogManager;
     private final JSpinner numberSpinner;
 
-    public NewContentsWidget(CatalogManager catalogManager) {
-        this.catalogManager = catalogManager;
+    public NewContentsWidget(Status status) {
+        this.status = status;
+        catalogManager = status.getCatalogManager();
 
         JLabel label1 = new JLabel("Get");
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(10, 0, 100, 1);
@@ -29,7 +32,7 @@ public class NewContentsWidget extends JPanel {
 
     private void getNewContentList() {
         List<Content> contents = catalogManager.getNewContentList((int) numberSpinner.getValue());
-        JList contentList = new ContentList(catalogManager, contents);
+        JList contentList = new ContentList(status, contents);
         Utils.newWindow("New content list", contentList, false);
     }
 

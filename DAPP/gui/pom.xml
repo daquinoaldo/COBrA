@@ -11,11 +11,17 @@
 
     <artifactId>gui</artifactId>
 
-    <!-- contract module dependent -->
     <dependencies>
+        <!-- contract module dependent -->
         <dependency>
             <groupId>com.aldodaquino.cobra</groupId>
             <artifactId>contracts</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <!-- connections module dependent -->
+        <dependency>
+            <groupId>com.aldodaquino.cobra</groupId>
+            <artifactId>connections</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>
