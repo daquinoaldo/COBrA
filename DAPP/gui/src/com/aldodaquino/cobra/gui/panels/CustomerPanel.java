@@ -34,6 +34,8 @@ public class CustomerPanel extends UpgradablePanel {
         catalogManager.listenNewContentAvailable((name, address) ->
                 Utils.newMessageDialog("New content available: " + name + "."));
         catalogManager.listenNewContentAvailable(this::update);
+        catalogManager.listenFeedbackAvailable((address, name) ->
+                Utils.newWindow("Vote content", new VotingPanel(address, name, catalogManager), false));
 
         // table container
         tableContainer = new JScrollPane();
@@ -109,7 +111,9 @@ public class CustomerPanel extends UpgradablePanel {
 
     private void buyPremium() {
         doAsync(() -> {
-            if (catalogManager.buyPremium()) Utils.newMessageDialog("Premium bought.");
+            if (catalogManager.buyPremium())
+                // show pop-up only when the event is fired
+                catalogManager.listenBecomesPremium(() -> Utils.newMessageDialog("Premium bought."));
             else Utils.newErrorDialog("UNKNOWN ERROR: cannot buy a premium subscription.");
         });
         userInfo.updateStatus();
@@ -118,7 +122,8 @@ public class CustomerPanel extends UpgradablePanel {
     private void giftPremium() {
         JPanel pickUserPanel = new PickUserPanel((String user) ->
                 doAsync(() -> {
-                    if (catalogManager.giftPremium(user)) Utils.newMessageDialog("Premium gifted.");
+                    if (catalogManager.giftPremium(user))
+                        catalogManager.listenBecomesPremium(user, () ->Utils.newMessageDialog("Premium gifted."));
                     else Utils.newErrorDialog("UNKNOWN ERROR: cannot gift a premium subscription.");
                 }));
         Utils.newWindow("Gift premium", pickUserPanel, false);

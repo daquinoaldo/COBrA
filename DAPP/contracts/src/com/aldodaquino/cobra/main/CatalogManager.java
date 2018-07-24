@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.RunnableFuture;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class CatalogManager extends ContractManager {
 
@@ -21,10 +19,10 @@ public class CatalogManager extends ContractManager {
     // event callbacks
     private final List<BiConsumer<String, String>> newContentAvailableBiConsumers = new ArrayList<>();
     private final List<Runnable> newContentAvailableRunnables = new ArrayList<>();
-    private final List<Consumer<String>> accessGrantedConsumers = new ArrayList<>();
-    private final List<Runnable> becomesPremiumRunnables = new ArrayList<>();
-    private final List<Consumer<String>> feedbackAvailableConsumer = new ArrayList<>();
-    private final Map<String, List<Runnable>> paymentAvailableMap = new HashMap<>();
+    private final Map<String, List<BiConsumer<String, String>>> accessGrantedMap = new HashMap<>();
+    private final Map<String, List<Runnable>> becomesPremiumMap = new HashMap<>();
+    private final List<BiConsumer<String, String>> feedbackAvailableBiConsumer = new ArrayList<>();
+    private final Map<String, List<BiConsumer<String, String>>> paymentAvailableMap = new HashMap<>();
     private final List<Runnable> catalogClosedRunnables = new ArrayList<>();
 
     /*
@@ -50,31 +48,54 @@ public class CatalogManager extends ContractManager {
 
         catalog.grantedAccessEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
                 .subscribe(e -> {
-                    if (e.user.equals(credentials.getAddress()))
-                        for (Consumer<String> consumer : accessGrantedConsumers)
-                            consumer.accept(e.content);
+                    List<BiConsumer<String, String>> biConsumers = accessGrantedMap.get(e.user);
+                    if (biConsumers != null) {
+                        String name = "";
+                        try {
+                            name = Utils.bytes32ToString(catalog.getContentInfo(e.content).send().getValue1());
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                        for (BiConsumer<String, String> biConsumer : biConsumers)
+                            biConsumer.accept(e.content, name);
+                    }
                 });
 
         catalog.becomesPremiumEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
                 .subscribe(e -> {
-                    if (e.user.equals(credentials.getAddress()))
-                        for (Runnable runnable : becomesPremiumRunnables)
+                    List<Runnable> runnables = becomesPremiumMap.get(e.user);
+                    if (runnables != null)
+                        for (Runnable runnable : runnables)
                             runnable.run();
                 });
 
         catalog.feedbackAvailableEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
                 .subscribe(e -> {
-                    if (e.user.equals(credentials.getAddress()))
-                        for (Consumer<String> consumer : feedbackAvailableConsumer)
-                            consumer.accept(e.content);
+                    if (e.user.equals(credentials.getAddress())) {
+                        String name = "";
+                        try {
+                            name = Utils.bytes32ToString(catalog.getContentInfo(e.content).send().getValue1());
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                        for (BiConsumer<String, String> biConsumer : feedbackAvailableBiConsumer)
+                            biConsumer.accept(e.content, name);
+                    }
                 });
 
         catalog.paymentAvailableEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
                 .subscribe(e -> {
-                    List<Runnable> runnables = paymentAvailableMap.get(e.content);
-                    if (runnables != null)
-                        for (Runnable runnable : runnables)
-                            runnable.run();
+                    List<BiConsumer<String, String>> biConsumers = paymentAvailableMap.get(e.content);
+                    if (biConsumers != null) {
+                        String name = "";
+                        try {
+                            name = Utils.bytes32ToString(catalog.getContentInfo(e.content).send().getValue1());
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                        for (BiConsumer<String, String> biConsumer : biConsumers)
+                            biConsumer.accept(e.content, name);
+                    }
                 });
 
         catalog.catalogClosedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
@@ -118,10 +139,20 @@ public class CatalogManager extends ContractManager {
 
     /**
      * Subscribe a callback for access granted events for this user.
-     * @param callback a Consumer of content address.
+     * @param callback a BiConsumer of content address and content name.
      */
-    public void listenAccessGranted(Consumer<String> callback) {
-        accessGrantedConsumers.add(callback);
+    public void listenAccessGranted(BiConsumer<String, String> callback) {
+        listenAccessGranted(credentials.getAddress(), callback);
+    }
+
+    /**
+     * Subscribe a callback for access granted events for the specified user.
+     * @param user the user for which be registered.
+     * @param callback a BiConsumer of content address and content name.
+     */
+    public void listenAccessGranted(String user, BiConsumer<String, String> callback) {
+        accessGrantedMap.putIfAbsent(user, new ArrayList<>());
+        accessGrantedMap.get(user).add(callback);
     }
 
     /**
@@ -129,23 +160,33 @@ public class CatalogManager extends ContractManager {
      * @param callback a Runnable.
      */
     public void listenBecomesPremium(Runnable callback) {
-        becomesPremiumRunnables.add(callback);
+        listenBecomesPremium(credentials.getAddress(), callback);
+    }
+
+    /**
+     * Subscribe a callback for becomes premium events for this user.
+     * @param user the user for which be registered.
+     * @param callback a Runnable.
+     */
+    public void listenBecomesPremium(String user, Runnable callback) {
+        becomesPremiumMap.putIfAbsent(user, new ArrayList<>());
+        becomesPremiumMap.get(user).add(callback);
     }
 
     /**
      * Subscribe a callback for feedback available events for this user.
-     * @param callback a Consumer of content address.
+     * @param callback a BiConsumer of content address and content name.
      */
-    public void listenFeedbackAvailable(Consumer<String> callback) {
-        feedbackAvailableConsumer.add(callback);
+    public void listenFeedbackAvailable(BiConsumer<String, String> callback) {
+        feedbackAvailableBiConsumer.add(callback);
     }
 
     /**
      * Subscribe a callback for payment available events for this user.
      * @param content the content of which listen to.
-     * @param callback a Runnable.
+     * @param callback a BiConsumer of content address and content name.
      */
-    public void listenPaymentAvailable(String content, Runnable callback) {
+    public void listenPaymentAvailable(String content, BiConsumer<String, String> callback) {
         paymentAvailableMap.putIfAbsent(content, new ArrayList<>());
         paymentAvailableMap.get(content).add(callback);
     }
@@ -254,6 +295,26 @@ public class CatalogManager extends ContractManager {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Set rating for a content.
+     * @param content the content address.
+     * @param enjoy the rating for the enjoy category.
+     * @param valueForMoney the rating for the value for money category.
+     * @param contentMeaning the rating for the content meaning category.
+     */
+    public void vote(String content, int enjoy, int valueForMoney, int contentMeaning) {
+        try {
+            byte[] enjoyS = catalog.ratingCategories(new BigInteger("0")).send();
+            byte[] valueForMoneyS = catalog.ratingCategories(new BigInteger("1")).send();
+            byte[] contentMeaningS = catalog.ratingCategories(new BigInteger("2")).send();
+            catalog.leaveFeedback(content, enjoyS, new BigInteger(Integer.toString(enjoy)));
+            catalog.leaveFeedback(content, valueForMoneyS, new BigInteger(Integer.toString(valueForMoney)));
+            catalog.leaveFeedback(content, contentMeaningS, new BigInteger(Integer.toString(contentMeaning)));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

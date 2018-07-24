@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.nio.channels.ServerSocketChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Login Form under the Logo in the Login Panel
@@ -29,11 +30,11 @@ class DeployContentPanel extends AsyncPanel {
     private final JTextField priceField;
 
     private final Status status;
-    private final Runnable deployCallback;
+    private final Consumer<String> deployCallback;
 
     private File file;
 
-    DeployContentPanel(Status status, Runnable deployCallback) {
+    DeployContentPanel(Status status, Consumer<String> deployCallback) {
         this.status = status;
         this.deployCallback = deployCallback;
 
@@ -148,10 +149,13 @@ class DeployContentPanel extends AsyncPanel {
         parameters.put("port", Integer.toString(port));
 
         HttpHelper.Response response = HttpHelper.makePost(url, parameters);
-        if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
+        if (response.code != 200) {
+            Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
+            return;
+        }
 
         // close the widow
-        deployCallback.run();
+        deployCallback.accept(response.data);
         window.dispose();
     }
 }

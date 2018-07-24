@@ -96,41 +96,45 @@ public class ContentInfoPanel extends AsyncPanel {
                 if(!Utils.newConfirmDialog("You don't have access to this content. Do you want to buy it for "
                         + content.price + "?")) return; // doesn't have access and doesn't want to buy the access
                 if (catalogManager.buyContent(content.address, content.price))
-                    Utils.newMessageDialog("Content bought.");
-                else {
-                    Utils.newErrorDialog("Cannot buy this content. You may have bought it previously.");
-                    return;
-                }
-            }
-
-            // make the request
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("privateKey", status.getPrivateKey());
-            parameters.put("address", content.address);
-
-            String hostname = contentManager.getHostname();
-            int port = contentManager.getPort();
-            if (port == 0) {
-                Utils.newErrorDialog("The content has an invalid port number. Cannot contact the author's server.");
-                return;
-            }
-            String url = "http://" + hostname + ":" + port + API.ACCESS_API_PATH;
-
-            // get the response and retrieve the socket port number
-            HttpHelper.Response response = HttpHelper.makePost(url, parameters);
-            if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
-            int socketPort = Integer.parseInt(response.data.replaceAll("[^0-9]", ""));
-
-            // download the file
-            File file = Utils.saveFileDialog("content");
-            FileExchange.receiveFile(file, hostname, socketPort);
+                    catalogManager.listenAccessGranted((addr, name) -> {
+                        Utils.newMessageDialog("Content bought.");
+                        retrieveContent();
+                    });
+                else Utils.newErrorDialog("Cannot buy this content. You may have bought it previously.");
+            } else retrieveContent();
         });
+    }
+
+    private void retrieveContent() {
+        // make the request
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("privateKey", status.getPrivateKey());
+        parameters.put("address", content.address);
+
+        String hostname = contentManager.getHostname();
+        int port = contentManager.getPort();
+        if (port == 0) {
+            Utils.newErrorDialog("The content has an invalid port number. Cannot contact the author's server.");
+            return;
+        }
+        String url = "http://" + hostname + ":" + port + API.ACCESS_API_PATH;
+
+        // get the response and retrieve the socket port number
+        HttpHelper.Response response = HttpHelper.makePost(url, parameters);
+        if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
+        int socketPort = Integer.parseInt(response.data.replaceAll("[^0-9]", ""));
+
+        // download the file
+        File file = Utils.saveFileDialog("content");
+        FileExchange.receiveFile(file, hostname, socketPort);
     }
 
     private void gift() {
         JPanel pickUserPanel = new PickUserPanel((String user) ->
                 doAsync(() -> {
-                    if (catalogManager.giftContent(content.address, user, content.price)) Utils.newMessageDialog("Content gifted.");
+                    if (catalogManager.giftContent(content.address, user, content.price))
+                        catalogManager.listenAccessGranted(user, (address, name) ->
+                                Utils.newMessageDialog("Content " + name + " gifted to " + user + "."));
                     else Utils.newErrorDialog("Cannot gift this content. The user may have already bought it.");
                 }));
         Utils.newWindow("Gift content", pickUserPanel, false);

@@ -2,12 +2,17 @@ package com.aldodaquino.cobra.main;
 
 import com.aldodaquino.cobra.contracts.DAPPContentManagementContract;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContentManager extends ContractManager {
 
-    private final DAPPContentManagementContract contentManager;
+    private final DAPPContentManagementContract content;
+
+    private final List<Runnable> contentPublishedRunnables = new ArrayList<>();
 
     /**
      * Deploy and manage a new content manager contract.
@@ -17,13 +22,19 @@ public class ContentManager extends ContractManager {
                           String hostname, int port)
             throws Exception {
         super(credentials);
-        contentManager = (DAPPContentManagementContract) deploy(DAPPContentManagementContract.class);
-        contentManager.setName(Utils.stringToBytes32(name)).send();
-        contentManager.setGenre(Utils.stringToBytes32(genre)).send();
-        contentManager.setPrice(price).send();
-        contentManager.setHostname(Utils.stringToBytes32(hostname)).send();
-        contentManager.setPort(new BigInteger(Integer.toString(port))).send();
-        contentManager.publish(catalogAddress).send();
+        content = (DAPPContentManagementContract) deploy(DAPPContentManagementContract.class);
+        content.setName(Utils.stringToBytes32(name)).send();
+        content.setGenre(Utils.stringToBytes32(genre)).send();
+        content.setPrice(price).send();
+        content.setHostname(Utils.stringToBytes32(hostname)).send();
+        content.setPort(new BigInteger(Integer.toString(port))).send();
+        content.publish(catalogAddress).send();
+
+        content.contentPublishedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(e -> {
+                    for (Runnable runnable : contentPublishedRunnables)
+                        runnable.run();
+                });
     }
 
     /**
@@ -33,7 +44,15 @@ public class ContentManager extends ContractManager {
      */
     public ContentManager(Credentials credentials, String contractAddress) {
         super(credentials);
-        contentManager = (DAPPContentManagementContract) load(DAPPContentManagementContract.class, contractAddress);
+        content = (DAPPContentManagementContract) load(DAPPContentManagementContract.class, contractAddress);
+    }
+
+    /**
+     * Subscribe a callback for content published events.
+     * @param callback a Runnable.
+     */
+    public void listenContentPublished(Runnable callback) {
+        contentPublishedRunnables.add(callback);
     }
 
     /**
@@ -43,7 +62,7 @@ public class ContentManager extends ContractManager {
      */
     public boolean consumeContent() {
         try {
-            return contentManager.consumeContent().send().isStatusOK();
+            return content.consumeContent().send().isStatusOK();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -56,7 +75,7 @@ public class ContentManager extends ContractManager {
      */
     public String getHostname() {
         try {
-            return Utils.bytes32ToString(contentManager.hostname().send());
+            return Utils.bytes32ToString(content.hostname().send());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -69,7 +88,7 @@ public class ContentManager extends ContractManager {
      */
     public int getPort() {
         try {
-            return contentManager.port().send().intValue();
+            return content.port().send().intValue();
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

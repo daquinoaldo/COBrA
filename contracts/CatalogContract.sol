@@ -41,8 +41,8 @@ contract CatalogContract {
         // the meaning it would like to have)
         uint enjoySum;
         uint enjoyNum;
-        uint priceFairnessSum;
-        uint priceFairnessNum;
+        uint valueForMoneySum;
+        uint valueForMoneyNum;
         uint contentMeaningSum;
         uint contentMeaningNum;
     }
@@ -193,8 +193,8 @@ contract CatalogContract {
             contents[c].enjoyNum++;
         }
         if (y == "value for money") {
-            contents[c].priceFairnessSum += r;
-            contents[c].priceFairnessNum++;
+            contents[c].valueForMoneySum += r;
+            contents[c].valueForMoneyNum++;
         }
         if (y == "content") {
             contents[c].contentMeaningSum += r;
@@ -217,8 +217,8 @@ contract CatalogContract {
         uint priceFairnessRate = 0;
         uint contentMeaningRate = 0;
         if (c.enjoyNum != 0) enjoyRate = c.enjoySum / c.enjoyNum;
-        if (c.priceFairnessNum != 0)
-            priceFairnessRate = c.priceFairnessSum / c.priceFairnessNum;
+        if (c.valueForMoneyNum != 0)
+            priceFairnessRate = c.valueForMoneySum / c.valueForMoneyNum;
         if (c.contentMeaningNum != 0)
             contentMeaningRate = c.contentMeaningSum / c.contentMeaningNum;
         uint average_rate = (enjoyRate + priceFairnessRate +
@@ -380,8 +380,8 @@ contract CatalogContract {
             content memory c = contents[contentList[i]];
             if (c.enjoyNum != 0)
                 enjoy[i] = c.enjoySum / c.enjoyNum;
-            if (c.priceFairnessNum != 0)
-                priceFairness[i] = c.priceFairnessSum / c.priceFairnessNum;
+            if (c.valueForMoneyNum != 0)
+                priceFairness[i] = c.valueForMoneySum / c.valueForMoneyNum;
             if (c.contentMeaningNum != 0)
                 contentMeaning[i] = c.contentMeaningSum / c.contentMeaningNum;
             averageRating[i] =
@@ -420,8 +420,8 @@ contract CatalogContract {
         uint contentMeaning = 0;
         if (c.enjoyNum != 0)
             enjoy = c.enjoySum / c.enjoyNum;
-        if (c.priceFairnessNum != 0)
-            priceFairness = c.priceFairnessSum / c.priceFairnessNum;
+        if (c.valueForMoneyNum != 0)
+            priceFairness = c.valueForMoneySum / c.valueForMoneyNum;
         if (c.contentMeaningNum != 0)
             contentMeaning = c.contentMeaningSum / c.contentMeaningNum;
         total = (enjoy + priceFairness + contentMeaning) / 3;
@@ -595,8 +595,8 @@ contract CatalogContract {
                 rate += c.enjoySum / c.enjoyNum;
             }
             if ((y[0] == 0 || y == "value for money")
-            && c.priceFairnessNum != 0) {
-                rate += c.priceFairnessSum / c.priceFairnessNum;
+            && c.valueForMoneyNum != 0) {
+                rate += c.valueForMoneySum / c.valueForMoneyNum;
             }
             if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
                 rate += c.contentMeaningSum / c.contentMeaningNum;
@@ -634,8 +634,8 @@ contract CatalogContract {
                     rate += c.enjoySum / c.enjoyNum;
                 }
                 if ((y[0] == 0 || y == "value for money")
-                && c.priceFairnessNum != 0) {
-                    rate += c.priceFairnessSum / c.priceFairnessNum;
+                && c.valueForMoneyNum != 0) {
+                    rate += c.valueForMoneySum / c.valueForMoneyNum;
                 }
                 if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
                     rate += c.contentMeaningSum / c.contentMeaningNum;
@@ -675,8 +675,8 @@ contract CatalogContract {
                     rate += c.enjoySum / c.enjoyNum;
                 }
                 if ((y[0] == 0 || y == "value for money")
-                && c.priceFairnessNum != 0) {
-                    rate += c.priceFairnessSum / c.priceFairnessNum;
+                && c.valueForMoneyNum != 0) {
+                    rate += c.valueForMoneySum / c.valueForMoneyNum;
                 }
                 if ((y[0] == 0 || y == "content") && c.contentMeaningNum != 0) {
                     rate += c.contentMeaningSum / c.contentMeaningNum;

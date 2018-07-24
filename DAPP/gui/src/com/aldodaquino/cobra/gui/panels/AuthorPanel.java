@@ -7,6 +7,7 @@ import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 import com.aldodaquino.cobra.gui.Status;
+import com.aldodaquino.cobra.main.ContentManager;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -37,7 +38,7 @@ public class AuthorPanel extends AsyncPanel {
         catalogManager.listenCatalogClosed(() -> Utils.newExitDialog("Catalog closed."));
         for (Content content : contents)
             catalogManager.listenPaymentAvailable(content.address,
-                    () -> Utils.newMessageDialog("Payment available for content " + content.name + "."));
+                    (addr, name) -> Utils.newMessageDialog("Payment available for content " + name + "."));
 
         // table container
         table = new AuthorContentTable(status, contents);
@@ -61,8 +62,18 @@ public class AuthorPanel extends AsyncPanel {
     }
 
     private void deployContent() {
-        JPanel deployContentPanel = new DeployContentPanel(status, this::updateTable);
+        JPanel deployContentPanel = new DeployContentPanel(status, this::onDeployed);
         Utils.newWindow("Deploy new content", deployContentPanel, false);
+    }
+
+    private void onDeployed(String address) {
+        // when deployed listen for payment available on this content
+        ContentManager contentManager = new ContentManager(status.credentials, address);
+        contentManager.listenContentPublished(() -> {
+            catalogManager.listenPaymentAvailable(address, (addr, name) ->
+                    Utils.newMessageDialog("Payment available for content " + name + "."));
+            updateTable();
+        });
     }
 
     private void updateTable() {
