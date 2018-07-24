@@ -8,8 +8,10 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.Map;
 
 import com.aldodaquino.cobra.connections.FileExchange;
+import com.aldodaquino.cobra.connections.HttpHelper;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.ContentManager;
+import com.aldodaquino.cobra.main.Status;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -22,14 +24,6 @@ public class Main {
 
     private static final int DEFAULT_PORT = 8080;
     private static final String CONTENT_FILE_PATH = "author_content_files/";
-
-    static class Status {
-        String privateKey;
-        Credentials credentials;
-        CatalogManager catalogManager;
-        String hostname;
-        int port;
-    }
 
     /**
      * Main method.
@@ -53,7 +47,7 @@ public class Main {
             System.exit(0);
         }
 
-        Status status = new Main.Status();
+        Status status = new Status();
 
         status.privateKey = cliHelper.getValue("private-key");
         if (status.privateKey == null || status.privateKey.length() == 0) {
@@ -94,8 +88,8 @@ public class Main {
         System.out.println("Server running on port " + status.port + ".\n");
 
         // set handlers
-        server.createContext("/deploy", HttpServerHelper.newHandler(Main::deploy, status));
-        server.createContext("/access", HttpServerHelper.newHandler(Main::access, status));
+        server.createContext("/deploy", HttpHelper.newHandler(Main::deploy, status));
+        server.createContext("/access", HttpHelper.newHandler(Main::access, status));
 
         // start server
         server.setExecutor(null); // creates a default executor
@@ -114,17 +108,17 @@ public class Main {
      */
     private static void deploy(HttpExchange request, Status status) {
         // get parameters
-        Map<String, String> parameters = HttpServerHelper.parsePOST(request);
+        Map<String, String> parameters = HttpHelper.parsePOST(request);
 
         if (!status.privateKey.equals(parameters.get("privateKey"))) {
-            HttpServerHelper.sendResponse(request, "Only the author server owner can perform this action." +
+            HttpHelper.sendResponse(request, "Only the author server owner can perform this action." +
                     "You must login with the same private key of the server.", 403);
             return;
         }
 
         String name = parameters.get("name");
         if (name == null) {
-            HttpServerHelper.sendResponse(request, "ERROR: name not specified.", 400);
+            HttpHelper.sendResponse(request, "ERROR: name not specified.", 400);
             return;
         }
 
@@ -136,7 +130,7 @@ public class Main {
             price = new BigInteger(priceS.length() != 0 ? priceS : "0");
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            HttpServerHelper.sendResponse(request, "ERROR: Invalid price.\n" + e.getMessage(), 400);
+            HttpHelper.sendResponse(request, "ERROR: Invalid price.\n" + e.getMessage(), 400);
             return;
         }
 
@@ -148,7 +142,7 @@ public class Main {
             port = Integer.parseInt(portS);
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            HttpServerHelper.sendResponse(request, "ERROR: Invalid port number.\n" + e.getMessage(), 400);
+            HttpHelper.sendResponse(request, "ERROR: Invalid port number.\n" + e.getMessage(), 400);
             return;
         }
 
@@ -160,7 +154,7 @@ public class Main {
             address = contentManager.getAddress();
         } catch (Exception e) {
             e.printStackTrace();
-            HttpServerHelper.sendResponse(request, e.getMessage(), 400);
+            HttpHelper.sendResponse(request, e.getMessage(), 400);
             return;
         }
 
@@ -171,7 +165,7 @@ public class Main {
         FileExchange.receiveFile(file, hostname, port);
 
         // send the response
-        HttpServerHelper.sendResponse(request, address);
+        HttpHelper.sendResponse(request, address);
     }
 
     /**
@@ -184,31 +178,31 @@ public class Main {
      */
     private static void access(HttpExchange request, Status status) {
         // get parameters
-        Map<String, String> parameters = HttpServerHelper.parsePOST(request);
+        Map<String, String> parameters = HttpHelper.parsePOST(request);
 
         String address = parameters.get("address");
         if (address == null) {
-            HttpServerHelper.sendResponse(request, "ERROR: content address not specified.", 400);
+            HttpHelper.sendResponse(request, "ERROR: content address not specified.", 400);
             return;
         }
 
         String userPrivateKey = parameters.get("privateKey");
         if (userPrivateKey == null) {
-            HttpServerHelper.sendResponse(request, "ERROR: user private key not specified.", 400);
+            HttpHelper.sendResponse(request, "ERROR: user private key not specified.", 400);
             return;
         }
         Credentials credentials = Credentials.create(userPrivateKey);
         String user = credentials.getAddress();
 
         if (!status.catalogManager.hasAccess(address, user)) {
-            HttpServerHelper.sendResponse(request, "ERROR: you don't have access to this content.", 400);
+            HttpHelper.sendResponse(request, "ERROR: you don't have access to this content.", 400);
             return;
         }
 
         // open the socket for the file
         ServerSocketChannel serverSocketChannel = FileExchange.openFileSocket();
         if (serverSocketChannel == null) {
-            HttpServerHelper.sendResponse(request, "ERROR: cannot open the server socket.", 500);
+            HttpHelper.sendResponse(request, "ERROR: cannot open the server socket.", 500);
             return;
         }
 
@@ -219,12 +213,12 @@ public class Main {
         // consume the content
         ContentManager contentManager = new ContentManager(credentials, address);
         if (!contentManager.consumeContent()) {
-            HttpServerHelper.sendResponse(request, "ERROR: cannot consume content.", 500);
+            HttpHelper.sendResponse(request, "ERROR: cannot consume content.", 500);
             return;
         }
 
         // communicate the port number
-        HttpServerHelper.sendResponse(request, Integer.toString(port));
+        HttpHelper.sendResponse(request, Integer.toString(port));
     }
 
 }

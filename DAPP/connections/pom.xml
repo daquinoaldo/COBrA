@@ -11,6 +11,15 @@
 
     <artifactId>connections</artifactId>
 
+    <dependencies>
+        <!-- contract module dependent -->
+        <dependency>
+            <groupId>com.aldodaquino.cobra</groupId>
+            <artifactId>contracts</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <!-- Change default sources path -->
         <sourceDirectory>src</sourceDirectory>
