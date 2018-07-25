@@ -45,7 +45,15 @@ public class HttpHelper {
     public static Map<String, String> parseGET(HttpExchange request) {
         String query = request.getRequestURI().getRawQuery();
         if (query == null || query.length() == 0) throw new IllegalArgumentException("Invalid query: null.");
+        return parseQuery(query);
+    }
 
+    /**
+     * Parse a query and return a Map<key, value>.
+     * @param query the String representing the query.
+     * @return Map<String, String> containing the parameters.
+     */
+    public static Map<String, String> parseQuery(String query) {
         // HashMap to be filled with all parameters in the query
         Map<String, String> parameters = new HashMap<>();
 
@@ -81,7 +89,15 @@ public class HttpHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return parseJson(json);
+    }
 
+    /**
+     * Parse a JSON and return a Map<key, value>.
+     * @param json the String representing the stringified JSON.
+     * @return Map<String, String> containing the parameters.
+     */
+    public static Map<String, String> parseJson(String json) {
         // parse the JSON body.
         if (json == null || json.length() == 0) throw new IllegalArgumentException("Invalid query: null.");
 
@@ -92,7 +108,7 @@ public class HttpHelper {
         json = json.replace("{", "").replace("}", "").replaceAll("\"", "");
 
         // Split the query in pairs key=value
-        String pairs[] = json.split("[;]");
+        String pairs[] = json.split("[,]");
         // Split each pair in key and value and put them in the Map
         for (String pair : pairs) {
             String param[] = pair.split("[:]");
@@ -187,7 +203,7 @@ public class HttpHelper {
         }
     }
 
-    private static String jsonifyParameters(Map<String, String> parameters) {
+    public static String jsonifyParameters(Map<String, String> parameters) {
         if (parameters == null) return "";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{");
@@ -195,13 +211,13 @@ public class HttpHelper {
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
             stringBuilder.append(separator)
                     .append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
-            separator = ";";
+            separator = ",";
         }
         stringBuilder.append("}");
         return stringBuilder.toString();
     }
 
-    private static String querifyParameters(Map<String, String> parameters) {
+    public static String querifyParameters(Map<String, String> parameters) {
         if (parameters == null || parameters.size() == 0) return "";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("?");

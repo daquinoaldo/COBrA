@@ -147,6 +147,7 @@ class DeployContentPanel extends AsyncPanel {
         parameters.put("genre", genre);
         parameters.put("price", price.toString());
         parameters.put("port", Integer.toString(port));
+        parameters.put("filename", file.getName());
 
         HttpHelper.Response response = HttpHelper.makePost(url, parameters);
         if (response.code != 200) {

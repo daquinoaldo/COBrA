@@ -122,10 +122,12 @@ public class ContentInfoPanel extends AsyncPanel {
         // get the response and retrieve the socket port number
         HttpHelper.Response response = HttpHelper.makePost(url, parameters);
         if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
-        int socketPort = Integer.parseInt(response.data.replaceAll("[^0-9]", ""));
+        Map<String, String> map = HttpHelper.parseJson(response.data);
+        int socketPort = Integer.parseInt(map.get("port"));
+        String filename = map.get("filename");
 
         // download the file
-        File file = Utils.saveFileDialog("content");
+        File file = Utils.saveFileDialog(filename);
         FileExchange.receiveFile(file, hostname, socketPort);
     }
 

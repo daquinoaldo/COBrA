@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.aldodaquino.cobra.connections.FileExchange;
@@ -146,6 +147,12 @@ public class Main {
             return;
         }
 
+        String filename = parameters.get("filename");
+        if (filename == null) {
+            HttpHelper.sendResponse(request, "ERROR: filename not specified.", 400);
+            return;
+        }
+
         // deploy the content
         String address;
         try {
@@ -159,7 +166,7 @@ public class Main {
         }
 
         // download the file
-        File file = new File(CONTENT_FILE_PATH + address);
+        File file = new File(CONTENT_FILE_PATH + address + filename);
         //noinspection ResultOfMethodCallIgnored
         file.getParentFile().mkdirs();
         FileExchange.receiveFile(file, hostname, port);
@@ -206,8 +213,26 @@ public class Main {
             return;
         }
 
+        // pick the file
+        File[] files = new File(CONTENT_FILE_PATH).listFiles();
+        if (files == null) {
+            HttpHelper.sendResponse(request, "ERROR: there is no file for this content.", 500);
+            return;
+        }
+        File file = null;
+        for (File f : files)
+            if (f.isFile() && f.getName().contains(address)) {
+                file = f;
+                break;
+            }
+        if (file == null) {
+            HttpHelper.sendResponse(request, "ERROR: there is no file for this content.", 500);
+            return;
+        }
+        String filename = file.getName().replace(address, "");
+
         int port = serverSocketChannel.socket().getLocalPort();
-        FileExchange.startFileSender(serverSocketChannel, new File(CONTENT_FILE_PATH + address),
+        FileExchange.startFileSender(serverSocketChannel, file,
                 () -> System.out.println("User " + user + " has received all the content " + address + "."));
 
         // consume the content
@@ -217,8 +242,11 @@ public class Main {
             return;
         }
 
-        // communicate the port number
-        HttpHelper.sendResponse(request, Integer.toString(port));
+        // communicate the port number and the filename
+        Map<String, String> response = new HashMap<>();
+        response.put("port", Integer.toString(port));
+        response.put("filename", filename);
+        HttpHelper.sendResponse(request, HttpHelper.jsonifyParameters(response));
     }
 
 }
