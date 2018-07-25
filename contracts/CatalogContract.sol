@@ -49,8 +49,8 @@ contract CatalogContract {
 
     struct author {
         bool alreadyFound;
-        uint views;
-        uint uncollectedViews;
+        uint amount;
+        uint ratio;
     }
 
     // map a user into his subscription expiration time
@@ -104,44 +104,72 @@ contract CatalogContract {
 
     /** Suicide function, can be called only by the owner */
     function _suicide() public onlyOwner {
-        /*for (uint i = 0; i < contentList.length; i++) {
-            BaseContentManagementContract cc =
-            BaseContentManagementContract(contentList[i]);
-            if (!authors[cc.owner()].alreadyFound) {
-                authors[cc.owner()].alreadyFound = true;
-                authorsList.push(cc.owner());
+        uint totalRatio = 0;
+        for (uint i = 0; i < contentList.length; i++) {
+            content memory cc = contents[contentList[i]];
+            // save the author in the list if not exist
+            if (!authors[cc.author].alreadyFound) {
+                authors[cc.author].alreadyFound = true;
+                authorsList.push(cc.author);
             }
+            // calculate the payout rate for this author
+            uint enjoyRate = 0;
+            uint priceFairnessRate = 0;
+            uint contentMeaningRate = 0;
+            if (cc.enjoyNum != 0) enjoyRate = cc.enjoySum / cc.enjoyNum;
+            if (cc.valueForMoneyNum != 0)
+                priceFairnessRate = cc.valueForMoneySum / cc.valueForMoneyNum;
+            if (cc.contentMeaningNum != 0) contentMeaningRate =
+            cc.contentMeaningSum / cc.contentMeaningNum;
+            uint average_rate = (enjoyRate + priceFairnessRate +
+            contentMeaningRate) / 3;
+            if (average_rate == 0)
+                average_rate = 5;    // if no one have voted just cast to max
+            // add the payout for the uncollected views to yhe author amount
+            uint amount = cc.uncollectedViews * cc.price * average_rate / 5;
+            authors[cc.author].amount += amount;
+            // remove the amount from the balance (later we will pay this
+            // amount, so we cannot count it in the balance)
+            balance -= amount;
+            // We calculate the rating in percentage (uint => no decimals => we
+            // need precision). Then we multiply this rate for the price of the
+            // content and the number of views. Then we sum it all together.
+            // What we obtain is a number that grows linearly basing on the
+            // number of content of this author, the price of this contents, the
+            // view count and the rating, so that who do more and better
+            // receives more.
+            uint ratio = cc.views * cc.price * 100 * average_rate * 25;
+            // 25 = 100 / 5 where 100 is the percentage and 5 is the maximum rate.
+            authors[cc.author].ratio += ratio;
+            // We keep track also of the total ratio off all the authors.
+            totalRatio += ratio;
+            // Reset the number of views and uncollected views of this content.
+            // We don't need it anymore. This help to prevent reentrancy.
+            contents[contentList[i]].views = 0;
+            contents[contentList[i]].uncollectedViews = 0;
             // Murder all the contents in the catalog: this will free up space
             // in the blockchain and create negative gas to consume less in this
             // process: all this transfers cost a lot.
             BaseContentManagementContract(contentList[i]).murder();
         }
-        // Distribute the balance to the authors according with their views
-        // count
-        uint totalViews = 0;
-        uint totalUncollectedViews = 0;
-        // Calculate totals of views and uncollectedViews of all the authors
-        for (i = 0; i < authorsList.length; i++) {
-            author memory a = authors[authorsList[i]];
-            totalViews += a.views;
-            totalUncollectedViews += a.uncollectedViews;
-        }
-        // subtract from the balance the amount that has to be payed for the
-        // uncollected views to the authors
-        if (totalViews != 0) {
-            balance -= totalUncollectedViews * contentCost;
+        if (totalRatio != 0) {  // avoid division by 0
+            // Distribute the balance to the authors according with their ratio.
+            // We calculate the ratio between totalRatio and a.ratio, then
+            // multiply this value for the balance. This gave us how many part
+            // of the balance belongs to the author. We add it to the author
+            // amount.
             for (i = 0; i < authorsList.length; i++) {
-                a = authors[authorsList[i]];
-                // for each author pay the uncollected views
-                uint256 amountFromUncollectedViews =
-                a.uncollectedViews * contentCost;
-                // distribute the remaining balance to the authors according
-                // with their views count
-                uint256 amountFromPremium = balance * a.views / totalViews;
-                uint256 amount = amountFromUncollectedViews + amountFromPremium;
-                if (amount != 0) authorsList[i].transfer(amount);
+                author memory a = authors[authorsList[i]];
+                amount = a.ratio * balance / totalRatio;
+                uint toBeTransferred = a.amount = amount;
+                balance -= amount;
+                // reset the author to prevent reentrancy
+                authors[authorsList[i]].amount = 0;
+                authors[authorsList[i]].ratio = 0;
+                // transfer the amount to the owner
+                if (toBeTransferred != 0) authorsList[i].transfer(toBeTransferred);
             }
-        }TODO: review! */
+        }
         // emit an event
         emit CatalogClosed();
         // Transfer weis in excess to the owner
@@ -206,10 +234,11 @@ contract CatalogContract {
     /** Used to know the reached payout of a content.
      * @param x the content.
      * @return the reached payout
-     * or 0 if the content does not have received enought views.
+     * or 0 if the content does not have received enough views.
      * Gas: the author (who receives money) pays.
      */
-    function payoutAvailable(address x) public view returns(uint) {
+    function payoutAvailable(address x) public view
+    returns(uint) {
         content memory c = contents[x];
         uint uncollectedViews = c.uncollectedViews;
         if (uncollectedViews < payAfter) return 0;
@@ -223,7 +252,8 @@ contract CatalogContract {
             contentMeaningRate = c.contentMeaningSum / c.contentMeaningNum;
         uint average_rate = (enjoyRate + priceFairnessRate +
         contentMeaningRate) / 3;
-        if (average_rate == 0) average_rate = 5;    // if no one have voted just cast to max
+        if (average_rate == 0)
+            average_rate = 5;    // if no one have voted just cast to max
         uint amount = c.price * uncollectedViews * average_rate / 5;
         return amount;
     }
@@ -431,7 +461,8 @@ contract CatalogContract {
     /** Returns the list of n newest contents.
      * @param n the number of item that you want in the list.
      * @return (string[], address[]) names and addresses ordered from the
-     * newest: each content in names is associated with its address in addresses.
+     * newest: each content in names is associated with its address in
+     * addresses.
      * Gas: no one pay.
      * Burden: O(x) ~ O(1).
      */
