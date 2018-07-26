@@ -45,12 +45,13 @@ public class Main {
     }
 
     // Change this value with your private keys.
-    private static final String CATALOG_OWNER_DEFAULT_KEY = "be35bfe5c861f3478feccc3dd647f5a27791260a41e8e77bdf5d156f95200525";
-    private static final String[] AUTHOR_DEFAULT_KEYS = {"5a17260c7c368910b242bda4138df4e5390700b59524f148f7ee038fa429e69c",
-            "9717a1dbb7710336f4d5d753f4b9b8359083779830f317641f17e1ba52f13a06"};
-    //TODO reset
-    //private static final String CATALOG_OWNER_DEFAULT_KEY = "";
-    //private static final String[] AUTHOR_DEFAULT_KEYS = {""};
+    @SuppressWarnings("SpellCheckingInspection")
+    private static final String CATALOG_OWNER_DEFAULT_KEY =
+            "73bb2d6a2fb0776eaa90f299b18ced9a490cbfbf07bb1df88cb019e3ea2f75c8";
+    @SuppressWarnings("SpellCheckingInspection")
+    private static final String[] AUTHOR_DEFAULT_KEYS =
+            {"48fb33ee64f893e159ad374206b2f17e60206606ebaf9f09ebc6ab7359e95055",
+            "df50467e8c890cd6539be6a19212ecf2528a7e04f4cf1ba320d1f06079978630"};
 
     /**
      * Starts the tests.
