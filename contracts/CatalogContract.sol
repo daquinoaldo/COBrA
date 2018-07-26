@@ -15,7 +15,7 @@ contract CatalogContract {
     //uint public contentCost = 0.01 ether;   // ~ 4€ - deprecated: now the price is chosen by the author
     uint public premiumCost = 0.1 ether;    // ~ 40€
     uint public premiumTime = 172800;       // ~ 1 month
-    uint public payAfter = 1; // views //TODO: reset to 10
+    uint public payAfter = 2; // views - IMPORTANT NOTE: should be 10, but is set to 2 for testing.
 
     bytes32 private enjoyS = "enjoy";
     bytes32 private valueForMoneyS = "value for money";
