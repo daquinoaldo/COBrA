@@ -5,10 +5,20 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import java.awt.*;
 
+/**
+ * A JPanel that listen for ancestor changes. If it is added to an ancestor it saves it a protected variable window.
+ * Include a doAsync method that runs the Runnable in another Thread and set the glass panel of the window in a loading
+ * state to prevent actions from the user.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class AsyncPanel extends JPanel {
 
     protected JFrame window;
 
+    /**
+     * Constructor.
+     */
     protected AsyncPanel() {
 
         addAncestorListener(new AncestorListener() {

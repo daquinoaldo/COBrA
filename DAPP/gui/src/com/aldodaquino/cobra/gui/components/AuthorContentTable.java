@@ -12,6 +12,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+/**
+ * A JTable for the {@link com.aldodaquino.cobra.gui.panels.AuthorPanel}.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class AuthorContentTable extends JTable {
 
     private static final String[] colNames = {"Address", "Name", "Author", "Genre", "Views", "Enjoy", "Price fairness",
@@ -34,6 +39,11 @@ public class AuthorContentTable extends JTable {
         return rows;
     }
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     * @param contents a List of Content objects.
+     */
     public AuthorContentTable(Status status, List<Content> contents) {
         super(prepareRows(contents), colNames);
 

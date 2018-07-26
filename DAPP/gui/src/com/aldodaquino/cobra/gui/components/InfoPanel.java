@@ -9,6 +9,12 @@ import java.awt.*;
 
 import static com.aldodaquino.cobra.gui.constants.Dimensions.INFO_PANEL_PADDING;
 
+/**
+ * Info panel, superclass of {@link com.aldodaquino.cobra.gui.panels.AuthorInfoPanel},
+ * {@link com.aldodaquino.cobra.gui.panels.GenreInfoPanel} and {@link ChartWidget}.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class InfoPanel extends JPanel {
 
     protected final LabelPanel latestLabel;
@@ -18,6 +24,11 @@ public class InfoPanel extends JPanel {
     protected final LabelPanel biggestPriceFairnessLabel;
     protected final LabelPanel highestContentMeaningLabel;
 
+    /**
+     * Constructor. Can be invoked only by its children.
+     * @param status the Status object.
+     * @param mainLabelString the String to be putted in the top of the panel, with a bigger font.
+     */
     protected InfoPanel(Status status, String mainLabelString) {
 
         // set layout and border

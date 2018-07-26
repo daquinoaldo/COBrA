@@ -23,9 +23,9 @@ import java.util.concurrent.ThreadLocalRandom;
  *  - starts an author-server on the default port 8080;
  *  - deploy some contents;
  *  - start two instances of the GUI, one for the Customer and one for the Author.
- *  You have to login with the rights private key on the GUIs.
- *  @author Aldo D'Aquino.
- *  @version 1.0.
+ * You have to login with the rights private key on the GUIs.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class Main {
 

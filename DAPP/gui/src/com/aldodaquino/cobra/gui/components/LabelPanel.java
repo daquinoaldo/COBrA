@@ -10,6 +10,11 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Label JPanel, contains a fixed label and an updatable value. The initial value is a loader spinner.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class LabelPanel extends UpgradablePanel {
 
     private final JLabel loader = new JLabel(new ImageIcon(Images.loading.getImage()), JLabel.CENTER);
@@ -17,12 +22,21 @@ public class LabelPanel extends UpgradablePanel {
 
     private final Status status;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     * @param label the label for the value.
+     */
     LabelPanel(Status status, String label) {
         this.status = status;
         add(new JLabel(label), newGBC(1, 1));
         add(loader, replacingPosition);
     }
 
+    /**
+     * Set the content name as value of the panel in a link style.
+     * @param content the Content object.
+     */
     public void update(Content content) {
         JLabel link = new JLabel(content == null ? ""
                 : "<html><a href=\"about:" + content.address + "\">" + content.name + "</a>");

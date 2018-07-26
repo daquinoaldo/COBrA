@@ -7,7 +7,9 @@ import java.awt.*;
 import java.io.File;
 
 /**
- * Utilities for the gui
+ * Utilities for the GUI.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class Utils {
 
@@ -45,7 +47,8 @@ public class Utils {
     public static void newErrorDialog(String msg) {
         newDialog("Error", msg, JOptionPane.WARNING_MESSAGE);
     }
-    
+
+    // auxiliary function
     private static void newDialog(String title, String msg, int type) {
         Thread t = new Thread(() -> JOptionPane.showMessageDialog(null, msg, title, type));
         t.start();
@@ -99,12 +102,7 @@ public class Utils {
         return fileDialog(false, defaultName);
     }
 
-    /**
-     * Show the file selection dialog for file choosing and saving.
-     * @param isOpenDialog if true pick a file, if false choose where to save the incoming file.
-     * @param filename should be null if isOpenDialog, otherwise specify the original filename of the incoming file.
-     * @return a File.
-     */
+    // auxiliary function
     private static File fileDialog(boolean isOpenDialog, String filename) {
         File selected = null;
         boolean aFileIsSelected = false;

@@ -18,7 +18,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * Panel to deploy a new content.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 class DeployContentPanel extends AsyncPanel {
 
@@ -34,6 +36,11 @@ class DeployContentPanel extends AsyncPanel {
 
     private File file;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     * @param deployCallback a Consumer of content address, called after that the content has been deployed.
+     */
     DeployContentPanel(Status status, Consumer<String> deployCallback) {
         this.status = status;
         this.deployCallback = deployCallback;
@@ -53,7 +60,7 @@ class DeployContentPanel extends AsyncPanel {
         JLabel selectFileLabel = new JLabel("Pick the content file:");
 
         // input field
-        priceField = ComponentFactory.newTextField(e -> deploy());
+        priceField = ComponentFactory.newTextField(e -> {});
         genreField = ComponentFactory.newTextField(e -> priceField.grabFocus());
         nameField = ComponentFactory.newTextField(e -> genreField.grabFocus());
         portField = ComponentFactory.newTextField(e -> nameField.grabFocus());
@@ -70,27 +77,28 @@ class DeployContentPanel extends AsyncPanel {
         add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_L));
         add(addressLabel);
         add(addressField);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(portLabel);
         add(portField);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(nameLabel);
         add(nameField);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(genreLabel);
         add(genreField);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(priceLabel);
         add(priceField);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(selectFileLabel);
         add(selectFileButton);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(sendButton);
     }
 
     /**
-     * Submit form action. Called when the deploy button is clicked or enter key is pressed from the private key field.
+     * Submit form action.
+     * Called when the deploy button is clicked.
      */
     private void deploy() {
         // get input data

@@ -9,13 +9,19 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Application Logo for the Login and Registration Panels
+ * Application Logo for the {@link com.aldodaquino.cobra.gui.panels.StarterPanel}.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class Logo extends JPanel {
-    
+
+    /**
+     * Constructor.
+     */
     public Logo() {
         // icon
-        Image icon = Images.logo.getImage().getScaledInstance(Dimensions.LOGO_SIZE, Dimensions.LOGO_SIZE, Image.SCALE_SMOOTH);
+        Image icon = Images.logo.getImage()
+                .getScaledInstance(Dimensions.LOGO_SIZE, Dimensions.LOGO_SIZE, Image.SCALE_SMOOTH);
         JLabel iconLabel = new JLabel(new ImageIcon(icon), JLabel.CENTER);
 
         // title

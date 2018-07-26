@@ -2,6 +2,11 @@ package com.aldodaquino.cobra.gui.constants;
 
 import java.awt.*;
 
+/**
+ * Dimensions constant for the Graphic Interface.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class Dimensions {
 
     // icons size

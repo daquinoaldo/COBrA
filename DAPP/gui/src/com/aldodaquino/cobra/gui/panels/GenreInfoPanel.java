@@ -5,11 +5,22 @@ import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.InfoPanel;
 import com.aldodaquino.cobra.main.CatalogManager;
 
+/**
+ * Shows the genre charts in the catalog.
+ * @see InfoPanel the parent class.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class GenreInfoPanel extends InfoPanel {
 
-    public static final String WINDOW_TITLE = "About the author";
+    static final String WINDOW_TITLE = "About the author";
 
-    public GenreInfoPanel(Status status, String genre) {
+    /**
+     * Constructor.
+     * @param status the Status object.
+     * @param genre the genre.
+     */
+    GenreInfoPanel(Status status, String genre) {
         super(status, genre);
         CatalogManager catalogManager = status.getCatalogManager();
 

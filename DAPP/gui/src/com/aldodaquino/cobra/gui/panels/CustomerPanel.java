@@ -11,6 +11,11 @@ import java.awt.*;
 
 import static com.aldodaquino.cobra.gui.constants.Dimensions.LATERAL_BAR_PADDING;
 
+/**
+ * The customer panel, a main panel showed after the starter panel if the user have chosen the customer role.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class CustomerPanel extends UpgradablePanel {
 
     private final Status status;
@@ -25,6 +30,10 @@ public class CustomerPanel extends UpgradablePanel {
 
     private boolean showViews = false;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     */
     public CustomerPanel(Status status) {
         this.status = status;
         catalogManager = status.getCatalogManager();

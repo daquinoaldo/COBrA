@@ -1,19 +1,26 @@
 package com.aldodaquino.cobra.gui.components;
 
 import com.aldodaquino.cobra.gui.Utils;
+import com.aldodaquino.cobra.gui.constants.Dimensions;
 
 import javax.swing.*;
 import java.util.function.Consumer;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * Login Form under the Logo in the Starter Panel.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class LoginForm extends JPanel {
-    // private key field: on enter login
+
     private final JTextField privateKeyInput;
-    // the callback to call if the input data are correct
     private final Consumer<String> loginCallback;
-    
+
+    /**
+     * Constructor.
+     * @param loginCallback a String Consumer called if the login button is clicked or enter is pressed and the private
+     *                      key is valid.
+     */
     public LoginForm(Consumer<String> loginCallback) {
         this.loginCallback = loginCallback;
 
@@ -32,12 +39,13 @@ public class LoginForm extends JPanel {
         // add all to the panel
         add(privateKeyLabel);
         add(privateKeyInput);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(sendButton);
     }
 
     /**
-     * Submit form action. Called when the login button is clicked or enter key is pressed from the private key field.
+     * Submit form action.
+     * Called when the login button is clicked or enter key is pressed from the private key field.
      */
     private void login() {
         // get input data

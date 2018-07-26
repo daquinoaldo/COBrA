@@ -5,7 +5,11 @@ import com.aldodaquino.cobra.gui.constants.Dimensions;
 import javax.swing.*;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * The last of the Panels shows in the {@link com.aldodaquino.cobra.gui.panels.StarterPanel}.
+ * Asks the user if want to see the {@link com.aldodaquino.cobra.gui.panels.CustomerPanel} or the
+ * {@link com.aldodaquino.cobra.gui.panels.AuthorPanel}.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class RoleForm extends JPanel {
 

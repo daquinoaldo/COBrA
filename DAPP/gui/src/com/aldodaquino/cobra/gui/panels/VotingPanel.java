@@ -9,10 +9,18 @@ import com.aldodaquino.cobra.main.CatalogManager;
 import javax.swing.*;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * A panel to ask the user to vote a content consumed recently.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 class VotingPanel extends AsyncPanel {
 
+    /**
+     * Constructor.
+     * @param contentName the content name.
+     * @param contentAddress the content address.
+     * @param catalogManager the CatalogManager loaded or deployed by the user.
+     */
     VotingPanel(String contentName, String contentAddress, CatalogManager catalogManager) {
 
         // prepare components

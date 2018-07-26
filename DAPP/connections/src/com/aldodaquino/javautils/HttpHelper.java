@@ -13,7 +13,7 @@ import java.util.Map;
  * Contains method that help to make http request.
  * Works with JSON body for POST request and query-style GET parameters.
  * @author Aldo D'Aquino.
- * @version 1.0.
+ * @version 1.1.
  */
 public class HttpHelper {
 

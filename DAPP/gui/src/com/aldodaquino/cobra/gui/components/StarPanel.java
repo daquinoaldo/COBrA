@@ -12,10 +12,9 @@ import java.util.List;
 import javax.swing.*;
 
 /**
- * The star rater panel. 
- *
- * @author noblemaster
- * @since August 30, 2010
+ * Shows rating or ask the user to vote.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class StarPanel extends UpgradablePanel {
 
@@ -60,10 +59,6 @@ public class StarPanel extends UpgradablePanel {
         return rating;
     }
 
-    /**
-    * Sets the rating.
-    * @param rating in the interval [0, 5]. 0 means no rating.
-    */
     private void setRating(int rating) {
         if (rating < 0 || rating > STARS_NUMBER)
             throw new IllegalArgumentException("The rating must appertain at the interval [0, " + STARS_NUMBER + "].");

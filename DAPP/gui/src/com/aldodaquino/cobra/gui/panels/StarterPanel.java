@@ -12,6 +12,12 @@ import java.util.function.Consumer;
 
 import static com.aldodaquino.cobra.gui.constants.Dimensions.STARTER_PANEL_PADDING;
 
+/**
+ * The starter panel. Main panel showed when the app starts.
+ * Manage the user login and require all the data to start the app.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class StarterPanel extends UpgradablePanel {
 
     private final Status status = new Status();
@@ -24,6 +30,11 @@ public class StarterPanel extends UpgradablePanel {
 
     private final GridBagConstraints replacingPosition;
 
+    /**
+     * Constructor.
+     * @param whenDone a consumer of Status object called when all the requested fields in the status object are
+     *                 completed.
+     */
     public StarterPanel(Consumer<Status> whenDone) {
         this.whenDone = whenDone;
 

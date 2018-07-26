@@ -8,12 +8,22 @@ import com.aldodaquino.cobra.main.Content;
 import javax.swing.*;
 import java.util.List;
 
+/**
+ * A widget inserted in the {@link com.aldodaquino.cobra.gui.panels.CustomerPanel} under the {@link ChartWidget}.
+ * Allows to select how many content the user want in the new content list and shows a window with this content.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class NewContentsWidget extends JPanel {
 
     private final Status status;
     private final CatalogManager catalogManager;
     private final JSpinner numberSpinner;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     */
     public NewContentsWidget(Status status) {
         this.status = status;
         catalogManager = status.getCatalogManager();

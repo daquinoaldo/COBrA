@@ -3,18 +3,26 @@ package com.aldodaquino.cobra.gui.panels;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.Utils;
+import com.aldodaquino.cobra.gui.constants.Dimensions;
 
 import javax.swing.*;
 import java.util.function.Consumer;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * Asks the user for another user address.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 class PickUserPanel extends AsyncPanel {
     private final JTextField addressField;
     // the callback to call if the input data are correct
     private final Consumer<String> giftCallback;
 
+    /**
+     * Constructor.
+     * @param giftCallback a Consumer of user address, invoked when the button is clicked or enter is pressed if the
+     *                     address has a valid format.
+     */
     PickUserPanel(Consumer<String> giftCallback) {
         this.giftCallback = giftCallback;
 
@@ -33,12 +41,13 @@ class PickUserPanel extends AsyncPanel {
         // add all to the panel
         add(addressLabel);
         add(addressField);
-        add(ComponentFactory.newVSpacer());
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         add(giftButton);
     }
 
     /**
-     * Submit form action. Called when the gift button is clicked or enter key is pressed from the private key field.
+     * Submit form action.
+     * Called when the gift button is clicked or enter key is pressed from the address field.
      */
     private void gift() {
         // get input data

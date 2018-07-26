@@ -2,13 +2,16 @@ package com.aldodaquino.cobra.gui.components;
 
 import com.aldodaquino.cobra.gui.constants.Colors;
 import com.aldodaquino.cobra.gui.Status;
+import com.aldodaquino.cobra.gui.constants.Dimensions;
 
 import javax.naming.OperationNotSupportedException;
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * Shows the catalog to which the user is connected and the user address and premium status.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class UserInfo extends UpgradablePanel {
 
@@ -23,6 +26,10 @@ public class UserInfo extends UpgradablePanel {
     private JLabel premiumLabel;
     private final GridBagConstraints premiumPosition;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     */
     public UserInfo(Status status) {
         this.status = status;
 
@@ -43,12 +50,15 @@ public class UserInfo extends UpgradablePanel {
         // add to the panel
         add(catalog, UpgradablePanel.newGBC(1, 1));
         add(catalogAddressLabel, catalogAddressPosition);
-        add(ComponentFactory.newVSpacer(), UpgradablePanel.newGBC(1, 3));
+        add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S), UpgradablePanel.newGBC(1, 3));
         add(accountLabel, UpgradablePanel.newGBC(1, 4));
         add(accountAddressLabel, accountAddressPosition);
         add(premiumLabel, premiumPosition);
     }
 
+    /**
+     * Update its fields according with the latest information available in status.
+     */
     public void updateStatus() {
         JLabel newCatalogAddressLabel = newCatalogAddressLabel();
         replaceComponent(catalogAddressLabel, newCatalogAddressLabel, catalogAddressPosition);

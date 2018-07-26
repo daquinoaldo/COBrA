@@ -14,6 +14,11 @@ import java.util.List;
 import javax.naming.OperationNotSupportedException;
 import javax.swing.*;
 
+/**
+ * The author panel, a main panel showed after the starter panel if the user have chosen the author role.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class AuthorPanel extends AsyncPanel {
 
     private final Status status;
@@ -22,6 +27,10 @@ public class AuthorPanel extends AsyncPanel {
     private final JScrollPane tableContainer;
     private JTable table;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     */
     public AuthorPanel(Status status) {
         this.status = status;
         catalogManager = status.getCatalogManager();

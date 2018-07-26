@@ -12,7 +12,7 @@ import java.nio.file.StandardOpenOption;
  * Utility for exchanging file.
  * Contains method to receive data from a Socket and save it to a File and to read a file and write data to the socket.
  * @author Aldo D'Aquino.
- * @version 1.0.
+ * @version 1.2.
  */
 public class FileExchange {
 

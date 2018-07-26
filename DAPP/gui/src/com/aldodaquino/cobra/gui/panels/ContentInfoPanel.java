@@ -25,6 +25,11 @@ import java.util.Map;
 import static com.aldodaquino.cobra.gui.components.UpgradablePanel.newGBC;
 import static com.aldodaquino.cobra.gui.constants.Dimensions.INFO_PANEL_PADDING;
 
+/**
+ * Shows info about a content. Allows also to buy and consume the content or gift it to another user.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class ContentInfoPanel extends AsyncPanel {
 
     private static final String WINDOW_TITLE = "About the author";
@@ -34,6 +39,11 @@ public class ContentInfoPanel extends AsyncPanel {
     private final Content content;
     private final ContentManager contentManager;
 
+    /**
+     * Constructor.
+     * @param status the Status object.
+     * @param address the content address.
+     */
     private ContentInfoPanel(Status status, String address) {
         this.status = status;
         catalogManager = status.getCatalogManager();

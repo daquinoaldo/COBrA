@@ -5,11 +5,22 @@ import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.InfoPanel;
 import com.aldodaquino.cobra.main.CatalogManager;
 
+/**
+ * Shows the author charts in the catalog.
+ * @see InfoPanel the parent class.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class AuthorInfoPanel extends InfoPanel {
 
-    public static final String WINDOW_TITLE = "About the author";
+    static final String WINDOW_TITLE = "About the author";
 
-    public AuthorInfoPanel(Status status, String author) {
+    /**
+     * Constructor.
+     * @param status the Status object.
+     * @param author the author address.
+     */
+    AuthorInfoPanel(Status status, String author) {
         super(status, author);
         CatalogManager catalogManager = status.getCatalogManager();
 

@@ -8,12 +8,18 @@ import com.aldodaquino.cobra.gui.panels.StarterPanel;
 import javax.swing.*;
 
 /**
- * The GUI Main. Starts the GUI with the login panel.
+ * The GUI Main. Starts the GUI with the {@link StarterPanel}.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class Main {
 
     private static JFrame window;
 
+    /**
+     * Main method.
+     * @param args an empty array, no parameters are required.
+     */
     public static void main(String[] args) {
 
         // Create the starter panel

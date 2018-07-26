@@ -7,14 +7,22 @@ import javax.swing.*;
 import java.util.function.Consumer;
 
 /**
- * Login Form under the Logo in the Login Panel
+ * A JPanel used in the {@link StarPanel}. Ask the user which catalog to connect to.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class CatalogForm extends JPanel {
-    // catalogManager address field
+
     private final JTextField catalogAddressField;
-    // the callback to call if the input data are correct
+
     private final Consumer<String> connectCallback;
 
+    /**
+     * Constructor.
+     * @param connectCallback a callback to be invoked when the deploy button is clicked or the form is submitted and
+     *                        the catalog address is correct.
+     * @param deployCallback a callback invoked when the deploy button is clicked.
+     */
     public CatalogForm(Consumer<String> connectCallback, Runnable deployCallback) {
         this.connectCallback = connectCallback;
 
@@ -33,15 +41,15 @@ public class CatalogForm extends JPanel {
 
         // titled border panel for catalogManager connection
         JPanel connectPanel = ComponentFactory.newTitledBorderPanel("Existent catalogManager");
-        connectPanel.add(ComponentFactory.newVSpacer());
+        connectPanel.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         connectPanel.add(catalogAddressLabel);
         connectPanel.add(catalogAddressField);
-        connectPanel.add(ComponentFactory.newVSpacer());
+        connectPanel.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         connectPanel.add(connectButton);
 
         // titled border panel for catalogManager connection
         JPanel deployPanel = ComponentFactory.newTitledBorderPanel("New catalogManager");
-        deployPanel.add(ComponentFactory.newVSpacer());
+        deployPanel.add(ComponentFactory.newVSpacer(Dimensions.V_SPACER_S));
         deployPanel.add(deployButton);
 
         // add all to the panel
@@ -50,9 +58,6 @@ public class CatalogForm extends JPanel {
         add(deployPanel);
     }
 
-    /**
-     * Submit form action. Called when the connect button is clicked or enter key is pressed from the address field.
-     */
     private void connect() {
         // get input data
         String address = catalogAddressField.getText().trim();
