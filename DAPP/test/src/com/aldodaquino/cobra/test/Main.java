@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Main {
 
-    private static final boolean START_GUIS = false;
+    private static final boolean START_GUIS = true;
 
     private static final int NUMBER_OF_CONTENTS = 15;
     private static final String[] genres = {"Comedy", "Romance", "Thriller"};
