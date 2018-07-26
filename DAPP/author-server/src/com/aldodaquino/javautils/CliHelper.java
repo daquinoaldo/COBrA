@@ -1,9 +1,14 @@
-package com.aldodaquino.cobra.authorserver;
+package com.aldodaquino.javautils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+/**
+ * Help parsing the args[]. You can add the option you want retrieve and this class will parse it automatically.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class CliHelper {
 
     private final ArrayList<CliOption> cliOptions = new ArrayList<>();
@@ -102,7 +107,7 @@ public class CliHelper {
      * -h --help       shows help
      * @return String of the message.
      */
-    String getHelpMessage() {
+    public String getHelpMessage() {
         // create a sorted collection with all the objects
         ArrayList<CliObject> cliObjects = new ArrayList<>();
         cliObjects.addAll(cliOptions);
@@ -129,7 +134,7 @@ public class CliHelper {
      * @param opt the short or long code of the option that you want (i.e. "o");
      * @return String of the message.
      */
-    String getMissingOptionMessage(String opt) {
+    public String getMissingOptionMessage(String opt) {
         StringBuilder stringBuilder = new StringBuilder();
         Stream.concat(cliOptions.stream(),cliFlags.stream()).forEachOrdered(cliObject -> {
             if (cliObject.isEqual(opt))

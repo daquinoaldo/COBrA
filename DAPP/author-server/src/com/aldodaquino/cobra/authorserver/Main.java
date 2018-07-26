@@ -8,18 +8,24 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.aldodaquino.cobra.connections.FileExchange;
-import com.aldodaquino.cobra.connections.HttpHelper;
+import com.aldodaquino.cobra.connections.Status;
+import com.aldodaquino.javautils.FileExchange;
+import com.aldodaquino.cobra.connections.CobraHttpHelper;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.ContentManager;
-import com.aldodaquino.cobra.main.Status;
+import com.aldodaquino.javautils.CliHelper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 import org.web3j.crypto.Credentials;
 
 /**
- * HTTP Server for the REST Main
+ * The Main class of the author server. The author server remains always online to listen access request. The author can
+ * use its server to deploy his content on the blockchain and publish it on the catalog. This server serves content also
+ * when the author has closed his client.
+ * Includes two functions that handle the two urls /deploy (to deploy a content) and /access to access a content.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
  */
 public class Main {
 
@@ -89,8 +95,8 @@ public class Main {
         System.out.println("Server running on port " + status.port + ".\n");
 
         // set handlers
-        server.createContext("/deploy", HttpHelper.newHandler(Main::deploy, status));
-        server.createContext("/access", HttpHelper.newHandler(Main::access, status));
+        server.createContext("/deploy", CobraHttpHelper.newHandler(Main::deploy, status));
+        server.createContext("/access", CobraHttpHelper.newHandler(Main::access, status));
 
         // start server
         server.setExecutor(null); // creates a default executor
@@ -109,17 +115,17 @@ public class Main {
      */
     private static void deploy(HttpExchange request, Status status) {
         // get parameters
-        Map<String, String> parameters = HttpHelper.parsePOST(request);
+        Map<String, String> parameters = CobraHttpHelper.parsePOST(request);
 
         if (!status.privateKey.equals(parameters.get("privateKey"))) {
-            HttpHelper.sendResponse(request, "Only the author server owner can perform this action." +
+            CobraHttpHelper.sendResponse(request, "Only the author server owner can perform this action." +
                     "You must login with the same private key of the server.", 403);
             return;
         }
 
         String name = parameters.get("name");
         if (name == null) {
-            HttpHelper.sendResponse(request, "ERROR: name not specified.", 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: name not specified.", 400);
             return;
         }
 
@@ -131,7 +137,7 @@ public class Main {
             price = new BigInteger(priceS.length() != 0 ? priceS : "0");
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            HttpHelper.sendResponse(request, "ERROR: Invalid price.\n" + e.getMessage(), 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: Invalid price.\n" + e.getMessage(), 400);
             return;
         }
 
@@ -143,13 +149,13 @@ public class Main {
             port = Integer.parseInt(portS);
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            HttpHelper.sendResponse(request, "ERROR: Invalid port number.\n" + e.getMessage(), 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: Invalid port number.\n" + e.getMessage(), 400);
             return;
         }
 
         String filename = parameters.get("filename");
         if (filename == null) {
-            HttpHelper.sendResponse(request, "ERROR: filename not specified.", 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: filename not specified.", 400);
             return;
         }
 
@@ -161,7 +167,7 @@ public class Main {
             address = contentManager.getAddress();
         } catch (Exception e) {
             e.printStackTrace();
-            HttpHelper.sendResponse(request, e.getMessage(), 400);
+            CobraHttpHelper.sendResponse(request, e.getMessage(), 400);
             return;
         }
 
@@ -172,7 +178,7 @@ public class Main {
         FileExchange.receiveFile(file, hostname, port);
 
         // send the response
-        HttpHelper.sendResponse(request, address);
+        CobraHttpHelper.sendResponse(request, address);
     }
 
     /**
@@ -185,38 +191,38 @@ public class Main {
      */
     private static void access(HttpExchange request, Status status) {
         // get parameters
-        Map<String, String> parameters = HttpHelper.parsePOST(request);
+        Map<String, String> parameters = CobraHttpHelper.parsePOST(request);
 
         String address = parameters.get("address");
         if (address == null) {
-            HttpHelper.sendResponse(request, "ERROR: content address not specified.", 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: content address not specified.", 400);
             return;
         }
 
         String userPrivateKey = parameters.get("privateKey");
         if (userPrivateKey == null) {
-            HttpHelper.sendResponse(request, "ERROR: user private key not specified.", 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: user private key not specified.", 400);
             return;
         }
         Credentials credentials = Credentials.create(userPrivateKey);
         String user = credentials.getAddress();
 
         if (!status.catalogManager.hasAccess(address, user)) {
-            HttpHelper.sendResponse(request, "ERROR: you don't have access to this content.", 400);
+            CobraHttpHelper.sendResponse(request, "ERROR: you don't have access to this content.", 400);
             return;
         }
 
         // open the socket for the file
         ServerSocketChannel serverSocketChannel = FileExchange.openFileSocket();
         if (serverSocketChannel == null) {
-            HttpHelper.sendResponse(request, "ERROR: cannot open the server socket.", 500);
+            CobraHttpHelper.sendResponse(request, "ERROR: cannot open the server socket.", 500);
             return;
         }
 
         // pick the file
         File[] files = new File(CONTENT_FILE_PATH).listFiles();
         if (files == null) {
-            HttpHelper.sendResponse(request, "ERROR: there is no file for this content.", 500);
+            CobraHttpHelper.sendResponse(request, "ERROR: there is no file for this content.", 500);
             return;
         }
         File file = null;
@@ -226,7 +232,7 @@ public class Main {
                 break;
             }
         if (file == null) {
-            HttpHelper.sendResponse(request, "ERROR: there is no file for this content.", 500);
+            CobraHttpHelper.sendResponse(request, "ERROR: there is no file for this content.", 500);
             return;
         }
         String filename = file.getName().replace(address, "");
@@ -238,7 +244,7 @@ public class Main {
         // consume the content
         ContentManager contentManager = new ContentManager(credentials, address);
         if (!contentManager.consumeContent()) {
-            HttpHelper.sendResponse(request, "ERROR: cannot consume content.", 500);
+            CobraHttpHelper.sendResponse(request, "ERROR: cannot consume content.", 500);
             return;
         }
 
@@ -246,7 +252,7 @@ public class Main {
         Map<String, String> response = new HashMap<>();
         response.put("port", Integer.toString(port));
         response.put("filename", filename);
-        HttpHelper.sendResponse(request, HttpHelper.jsonifyParameters(response));
+        CobraHttpHelper.sendResponse(request, CobraHttpHelper.jsonifyParameters(response));
     }
 
 }

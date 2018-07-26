@@ -10,6 +10,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 
+/**
+ * An higher level Contract Manager.
+ * Contains basic methods of all the contracts, such as the deploy, load and suicide function, but also the get owner
+ * and get address functions.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 class ContractManager {
 
     private Web3j web3;

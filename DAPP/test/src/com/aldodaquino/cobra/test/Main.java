@@ -1,9 +1,9 @@
 package com.aldodaquino.cobra.test;
 
-import com.aldodaquino.cobra.authorserver.CliHelper;
+import com.aldodaquino.javautils.CliHelper;
+import com.aldodaquino.javautils.FileExchange;
 import com.aldodaquino.cobra.connections.API;
-import com.aldodaquino.cobra.connections.FileExchange;
-import com.aldodaquino.cobra.connections.HttpHelper;
+import com.aldodaquino.cobra.connections.CobraHttpHelper;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.main.CatalogManager;
 import org.web3j.crypto.Credentials;
@@ -24,6 +24,8 @@ import java.util.concurrent.ThreadLocalRandom;
  *  - deploy some contents;
  *  - start two instances of the GUI, one for the Customer and one for the Author.
  *  You have to login with the rights private key on the GUIs.
+ *  @author Aldo D'Aquino.
+ *  @version 1.0.
  */
 public class Main {
 
@@ -33,6 +35,7 @@ public class Main {
     private static final String[] genres = {"Comedy", "Romance", "Thriller"};
     private static URI FILENAME;
 
+    // static constructor
     static {
         try {
             FILENAME = Main.class.getResource("/test_file.png").toURI();
@@ -140,6 +143,8 @@ public class Main {
 
     }
 
+    /* Auxiliary functions */
+
     private static int rand(int lessThan) {
         return ThreadLocalRandom.current().nextInt(0, lessThan);
     }
@@ -174,7 +179,7 @@ public class Main {
                 "\n    Genre: " + genre +
                 "\n    Price: " + price);
 
-        HttpHelper.Response response = HttpHelper.makePost(url, parameters);
+        CobraHttpHelper.Response response = CobraHttpHelper.makePost(url, parameters);
         if (response.code != 200) System.err.println("Something went wrong. Response" + response.toString());
         else System.out.println("Deployed successfully.\n");
     }

@@ -1,8 +1,7 @@
 package com.aldodaquino.cobra.gui.panels;
 
 import com.aldodaquino.cobra.connections.API;
-import com.aldodaquino.cobra.connections.FileExchange;
-import com.aldodaquino.cobra.connections.HttpHelper;
+import com.aldodaquino.cobra.connections.CobraHttpHelper;
 import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.Utils;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
@@ -13,6 +12,7 @@ import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.main.CatalogManager;
 import com.aldodaquino.cobra.main.Content;
 import com.aldodaquino.cobra.main.ContentManager;
+import com.aldodaquino.javautils.FileExchange;
 
 import javax.swing.*;
 import java.awt.*;
@@ -120,9 +120,9 @@ public class ContentInfoPanel extends AsyncPanel {
         String url = "http://" + hostname + ":" + port + API.ACCESS_API_PATH;
 
         // get the response and retrieve the socket port number
-        HttpHelper.Response response = HttpHelper.makePost(url, parameters);
+        CobraHttpHelper.Response response = CobraHttpHelper.makePost(url, parameters);
         if (response.code != 200) Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
-        Map<String, String> map = HttpHelper.parseJson(response.data);
+        Map<String, String> map = CobraHttpHelper.parseJson(response.data);
         int socketPort = Integer.parseInt(map.get("port"));
         String filename = map.get("filename");
 

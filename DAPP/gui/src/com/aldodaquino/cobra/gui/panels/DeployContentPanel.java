@@ -1,13 +1,13 @@
 package com.aldodaquino.cobra.gui.panels;
 
 import com.aldodaquino.cobra.connections.API;
-import com.aldodaquino.cobra.connections.FileExchange;
 import com.aldodaquino.cobra.gui.Status;
 import com.aldodaquino.cobra.gui.components.AsyncPanel;
 import com.aldodaquino.cobra.gui.components.ComponentFactory;
 import com.aldodaquino.cobra.gui.constants.Dimensions;
 import com.aldodaquino.cobra.gui.Utils;
-import com.aldodaquino.cobra.connections.HttpHelper;
+import com.aldodaquino.cobra.connections.CobraHttpHelper;
+import com.aldodaquino.javautils.FileExchange;
 
 import javax.swing.*;
 import java.io.File;
@@ -149,7 +149,7 @@ class DeployContentPanel extends AsyncPanel {
         parameters.put("port", Integer.toString(port));
         parameters.put("filename", file.getName());
 
-        HttpHelper.Response response = HttpHelper.makePost(url, parameters);
+        CobraHttpHelper.Response response = CobraHttpHelper.makePost(url, parameters);
         if (response.code != 200) {
             Utils.newErrorDialog("HTTP ERROR " + response.code + ": " + response.data);
             return;

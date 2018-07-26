@@ -1,41 +1,23 @@
-package com.aldodaquino.cobra.connections;
+package com.aldodaquino.javautils;
 
-import com.aldodaquino.cobra.main.Status;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
+/**
+ * Contains method that help to make http request.
+ * Works with JSON body for POST request and query-style GET parameters.
+ * @author Aldo D'Aquino.
+ * @version 1.0.
+ */
 public class HttpHelper {
 
     /* SERVER SIDE */
-    private static class HttpRequestHandler implements HttpHandler {
-        final BiConsumer<HttpExchange, Status> consumer;
-        final Status status;
-        HttpRequestHandler(BiConsumer<HttpExchange, Status> consumer, Status status) {
-            this.consumer = consumer;
-            this.status = status;
-        }
-        @Override
-        public void handle(HttpExchange request) {
-            consumer.accept(request, status);
-        }
-    }
-
-    /**
-     * Return new HttpHandler
-     * @param consumer a function to be called when a new request arrive.
-     *                 The consumer has to accept the HttpExchange request and the Status.
-     * @param status to be passed to the consumer.
-     * @return HttpHandler, the handler.
-     */
-    public static HttpHandler newHandler(BiConsumer<HttpExchange, Status> consumer, Status status) {
-        return new HttpRequestHandler(consumer, status);
-    }
 
     /**
      * Parse a GET request and return a Map<key, value>.
@@ -151,14 +133,27 @@ public class HttpHelper {
 
     /* CLIENT SIDE */
 
+    /**
+     * Make a GET request on the specified url.
+     * @param url the url to be called.
+     * @param parameters a map containing all the parameters that you want to be passed when the url is called.
+     * @return a {@link Response} object.
+     */
     public static Response makeGet(String url, Map<String, String> parameters) {
         return makeRequest(url + querifyParameters(parameters), "GET", "");
     }
 
+    /**
+     * Make a POST request on the specified url.
+     * @param url the url to be called.
+     * @param parameters a map containing all the parameters that you want to be passed in the body.
+     * @return a {@link Response} object.
+     */
     public static Response makePost(String url, Map<String, String> parameters) {
         return makeRequest(url, "POST", jsonifyParameters(parameters));
     }
 
+    // internal function
     private static Response makeRequest(String url, String method, String parameters) {
         HttpURLConnection connection = null;
         int status = -1;
@@ -203,6 +198,11 @@ public class HttpHelper {
         }
     }
 
+    /**
+     * Return a stringified JSON with the passed parameters.
+     * @param parameters a Map<String, String> containing the parameters.
+     * @return the stringified JSON.
+     */
     public static String jsonifyParameters(Map<String, String> parameters) {
         if (parameters == null) return "";
         StringBuilder stringBuilder = new StringBuilder();
@@ -217,6 +217,11 @@ public class HttpHelper {
         return stringBuilder.toString();
     }
 
+    /**
+     * Return a string containing the parameters in the query format, ready to be appended to an url for a GET request.
+     * @param parameters a Map<String, String> containing the parameters.
+     * @return the String in the url format.
+     */
     public static String querifyParameters(Map<String, String> parameters) {
         if (parameters == null || parameters.size() == 0) return "";
         StringBuilder stringBuilder = new StringBuilder();
@@ -230,6 +235,12 @@ public class HttpHelper {
         return stringBuilder.toString();
     }
 
+    /**
+     * Response class returned by the makeGet and makePost method.
+     * Contains two field: the response code and the data String of the response.
+     * @author Aldo D'Aquino.
+     * @version 1.0.
+     */
     public static class Response {
         public final int code;
         public final String data;
@@ -237,6 +248,11 @@ public class HttpHelper {
             this.code = code;
             this.data = data;
         }
+
+        /**
+         * Returns this object as a stringified JSON.
+         * @return a String representing the stringified JSON.
+         */
         @Override
         public String toString() {
             return "{\"code\":\"" + code + "\",\"data\":\"" + data + "\"}";
