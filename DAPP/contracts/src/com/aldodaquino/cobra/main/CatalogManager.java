@@ -390,15 +390,6 @@ public class CatalogManager extends ContractManager {
     }
 
     /**
-     * Returns a list of all contents in the Catalog with all the data available.
-     * @return a list of Content objects.
-     */
-    public List<Content> getFullContentList() {
-        ContentList contentList = new ContentList();
-        return contentList.getFilteredContentList(null, null);
-    }
-
-    /**
      * Return the list of all the content of a given author.
      * @param author the authors address.
      * @return a list of Content objects.
