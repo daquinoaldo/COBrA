@@ -1,0 +1,10 @@
+com.aldodaquino.cobra.authorserver
+com.aldodaquino.cobra.connections
+com.aldodaquino.cobra.contracts
+com.aldodaquino.cobra.gui
+com.aldodaquino.cobra.gui.components
+com.aldodaquino.cobra.gui.constants
+com.aldodaquino.cobra.gui.panels
+com.aldodaquino.cobra.main
+com.aldodaquino.cobra.test
+com.aldodaquino.javautils
