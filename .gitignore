@@ -15,15 +15,7 @@ DAPP/contracts/src/com/aldodaquino/cobra/contracts
 # temporary files
 author_content_files
 
-# Microsoft Word
+# docs
 *.docx
-
-# LaTeX
-_minted-*/
-*.aux
-*.log
-*.out
-
-# other tools
 pdfdoclet-*
-docs/printable_code/generate.sh
+printable_code
