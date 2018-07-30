@@ -8,7 +8,6 @@
 # Compiled output
 out
 target
-jar
 
 # java compiled contracts
 DAPP/contracts/src/com/aldodaquino/cobra/contracts
@@ -19,5 +18,11 @@ author_content_files
 # Microsoft Word
 *.docx
 
-# code2pdf
-.code2pdf
+# LaTeX
+_minted-main/
+*.aux
+*.log
+*.out
+
+# other tools
+pdfdoclet*
