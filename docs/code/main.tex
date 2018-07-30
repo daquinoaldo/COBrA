@@ -1,0 +1,115 @@
+\documentclass{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{import}
+\usepackage{minted}
+
+\makeatletter
+\DeclareRobustCommand{\filename}[1]{
+    \begingroup
+        \def\textendash{-}
+        \filename@parse{#1}
+        \edef\filename@base{\detokenize\expandafter{\filename@base}}
+        \texttt{\filename@base.\filename@ext}
+    \endgroup
+}
+\makeatother
+
+\newcommand{\addsrcfile}[1]{
+    \filename{#1}
+    \inputminted [
+        linenos=true,
+        numberblanklines=true,
+        showspaces=false,
+        breaklines=true
+    ]{java}
+    {#1}
+    \bigskip \bigskip
+}
+
+\title{\Huge COBrA DAPP\large Source code}
+\author{Aldo D'Aquino}
+\date{12/01/2018}
+
+\begin{document}
+\maketitle
+\newpage
+\newgeometry{left=2cm,right=2cm,top=1.5cm,bottom=1.5cm}
+
+\section{DAPP}
+
+\subsection{DAPP/author-server}
+\addsrcfile{../../DAPP/author-server/src/com/aldodaquino/cobra/authorserver/Main.java}
+\newpage
+
+\subsection{DAPP/connections}
+\addsrcfile{../../DAPP/connections/src/com/aldodaquino/cobra/connections/API.java}
+\addsrcfile{../../DAPP/connections/src/com/aldodaquino/cobra/connections/CobraHttpHelper.java}
+\addsrcfile{../../DAPP/connections/src/com/aldodaquino/cobra/connections/Status.java}
+\newpage
+
+\subsection{DAPP/contracts}
+\addsrcfile{../../DAPP/contracts/src/com/aldodaquino/cobra/main/CatalogManager.java}
+\addsrcfile{../../DAPP/contracts/src/com/aldodaquino/cobra/main/Content.java}
+\addsrcfile{../../DAPP/contracts/src/com/aldodaquino/cobra/main/ContentManager.java}
+\addsrcfile{../../DAPP/contracts/src/com/aldodaquino/cobra/main/ContractManager.java}
+\addsrcfile{../../DAPP/contracts/src/com/aldodaquino/cobra/main/Utils.java}
+\newpage
+
+\subsection{DAPP/gui}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/Main.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/Status.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/Utils.java}
+\newpage
+
+\subsubsection{DAPP/gui/components}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/AsyncPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/AuthorContentTable.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/CatalogForm.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/ChartWidget.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/ComponentFactory.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/ContentList.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/InfoPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/LabelPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/LoginForm.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/Logo.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/NewContentsWidget.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/RoleForm.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/StarPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/UpgradablePanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/UserInfo.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/components/ViewsContentTable.java}
+\newpage
+
+\subsubsection{DAPP/gui/constants}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/constants/Colors.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/constants/Dimensions.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/constants/Images.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/constants/Strings.java}
+\newpage
+
+\subsubsection{DAPP/gui/panels}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/AuthorInfoPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/AuthorPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/ContentInfoPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/CustomerPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/DeployContentPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/GenreInfoPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/PickUserPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/StarterPanel.java}
+\addsrcfile{../../DAPP/gui/src/com/aldodaquino/cobra/gui/panels/VotingPanel.java}
+\newpage
+
+\subsection{DAPP/test (not required)}
+\addsrcfile{../../DAPP/test/src/com/aldodaquino/cobra/test/Main.java}
+\newpage
+
+\subsection{javautils}
+\addsrcfile{../../DAPP/author-server/src/com/aldodaquino/javautils/CliHelper.java}
+\addsrcfile{../../DAPP/connections/src/com/aldodaquino/javautils/FileExchange.java}
+\addsrcfile{../../DAPP/connections/src/com/aldodaquino/javautils/HttpHelper.java}
+
+\restoregeometry
+\end{document}
