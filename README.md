@@ -1,8 +1,9 @@
 # COBrA
 An Ethereum blockchain university project.
 
-Check the assignments for [COBrA](docs/assignment/COBrA_Assignment.pdf) and [COBrA DAPP](docs/assignment/COBrA_DAPP_Assignment.pdf) and the
-[COBrA DAPP Relationship](docs/COBrA_DAPP_Relationship.pdf) for more information.
+For more information heck the assignments for [COBrA](docs/assignment/COBrA_Assignment.pdf) and
+[COBrA DAPP](docs/assignment/COBrA_DAPP_Assignment.pdf) and the
+[COBrA DAPP Relationship](docs/relationship/COBrA_DAPP_Relationship.pdf).
 
 ## Requirements
 - [Ethereum (geth)](https://geth.ethereum.org/downloads/)
