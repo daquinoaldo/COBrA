@@ -21,8 +21,8 @@ public class CliHelper {
      * @param longOpt like "--verbose".
      * @param hasValue true if the option must have a value (i.e. -o value),
      *                 false if is an option without value (i.e. --help).
-     * @throws IllegalArgumentException if the {@param shortOpt} or the {@param longOpt} already exists in another
-     * option.
+     * @param description the description of the option to be shown in the help message.
+     * @throws IllegalArgumentException if the shortOpt or the longOpt already exists in another option.
      */
     public void addOption(String shortOpt, String longOpt, boolean hasValue, String description) {
         if (!hasValue) addFlag(shortOpt, longOpt, description);

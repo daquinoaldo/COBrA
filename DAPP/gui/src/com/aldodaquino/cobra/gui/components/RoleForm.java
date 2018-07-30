@@ -17,6 +17,7 @@ public class RoleForm extends JPanel {
      * Constructor.
      * @param browseCallback callback for the "Browser contents" button.
      * @param manageCallback callback for the "Manage my contents" button.
+     * @param disconnectCallback callback for the "Disconnect" button.
      * @param deleteCallback callback for the "Delete catalogManager" contents button. If null the button is not shown.
      */
     public RoleForm(Runnable browseCallback, Runnable manageCallback, Runnable disconnectCallback,

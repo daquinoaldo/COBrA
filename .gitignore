@@ -15,3 +15,9 @@ DAPP/contracts/src/com/aldodaquino/cobra/contracts
 
 # temporary files
 author_content_files
+
+# Microsoft Word
+*.docx
+
+# code2pdf
+.code2pdf

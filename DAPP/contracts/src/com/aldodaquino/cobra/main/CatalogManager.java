@@ -331,6 +331,7 @@ public class CatalogManager extends ContractManager {
 
     /**
      * Returns all the info and ratings of a content.
+     * @param address the content address.
      * @return a list of Content objects.
      */
     public Content getContentInfo(String address) {
@@ -402,7 +403,7 @@ public class CatalogManager extends ContractManager {
     /**
      * Return the n latest releases.
      * @param n the number of item that you want in the list.
-     * @return List<Content> with the latest n contents.
+     * @return List of Content objects with the latest n contents.
      */
     public List<Content> getNewContentList(int n) {
         try {
@@ -509,6 +510,7 @@ public class CatalogManager extends ContractManager {
 
     /**
      * Return the highest rated content.
+     * @param category the category name for which you want to know the rating.
      * @return Content.
      */
     public Content getMostRated(String category) {
@@ -524,6 +526,7 @@ public class CatalogManager extends ContractManager {
     /**
      * Return the highest rated content for a genre.
      * @param genre the chosen genre.
+     * @param category the category name for which you want to know the rating.
      * @return Content.
      */
     public Content getMostRatedByGenre(String genre, String category) {
@@ -540,6 +543,7 @@ public class CatalogManager extends ContractManager {
     /**
      * Return the highest rated content of an author.
      * @param author the author address.
+     * @param category the category name for which you want to know the rating.
      * @return Content.
      */
     public Content getMostRatedByAuthor(String author, String category) {

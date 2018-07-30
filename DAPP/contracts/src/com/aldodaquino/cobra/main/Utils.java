@@ -1,6 +1,10 @@
 package com.aldodaquino.cobra.main;
 
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Ethereum;
+import org.web3j.protocol.core.methods.response.EthBlock;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -15,19 +19,24 @@ import java.util.Arrays;
  */
 class Utils {
 
+    private static final String BLOCK_GAS_LIMIT = "5000000";
+
     /**
      * Return the average gas price.
      * @param web3 a web3j instance.
      * @return a BigInteger of the gas price, 0 in case of error.
      */
     static BigInteger getGasPrice(Web3j web3) {
+        BigInteger gasPrice;
         try {
-            return web3.ethGasPrice().send().getGasPrice();
+            gasPrice = web3.ethGasPrice().send().getGasPrice();
         } catch (IOException e) {
             System.err.println("Cannot get the gas limit.");
             e.printStackTrace();
-            return new BigInteger("0");
+            gasPrice = BigInteger.ZERO;
         }
+        System.out.println("Gas price: " + gasPrice);
+        return gasPrice;
     }
 
     /**
@@ -36,13 +45,36 @@ class Utils {
      * @return a BigInteger of the gas limit, 0 in case of error.
      */
     static BigInteger getGasLimit(Web3j web3) {
+        BigInteger gasLimit;
         try {
-            return web3.ethGetBlockByHash("latest", true).send().getBlock().getGasLimit();
+            EthBlock.Block block =
+                    web3.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, true).send().getBlock();
+            if (block != null) {
+                System.out.println("Latest block number: " + block.getNumber());
+                gasLimit = block.getGasLimit();
+            }
+            else gasLimit = new BigInteger(BLOCK_GAS_LIMIT);
         } catch (IOException e) {
             System.err.println("Cannot get the gas limit.");
             e.printStackTrace();
-            return new BigInteger("0");
+            gasLimit = BigInteger.ZERO;
         }
+        System.out.println("Block gas limit: " + gasLimit);
+        return gasLimit;
+    }
+
+    static BigInteger getBalance(Web3j web3, String address) {
+        BigInteger balance;
+        try {
+             balance = web3.ethGetBalance(address, DefaultBlockParameterName.LATEST).send()
+                     .getBalance();
+        } catch (IOException e) {
+            System.err.println("Cannot get the account balance.");
+            e.printStackTrace();
+            balance = BigInteger.ZERO;
+        }
+        System.out.println("Account balance: " + balance);
+        return balance;
     }
 
     /**

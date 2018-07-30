@@ -58,7 +58,7 @@ public class Main {
      * @param args a String[], optionally containing 2 options:
      *             -p --private-key    Catalog owner private key.
      *             -a --author         Author's private key.
-     *             If {@param args} is null or an option is missing the default option will be used.
+     *             If args is null or an option is missing the default option will be used.
      */
     public static void main(String[] args) {
 

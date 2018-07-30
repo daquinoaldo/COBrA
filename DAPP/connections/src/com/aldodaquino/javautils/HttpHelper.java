@@ -20,9 +20,10 @@ public class HttpHelper {
     /* SERVER SIDE */
 
     /**
-     * Parse a GET request and return a Map<key, value>.
+     * Parse a GET request and return a Map with keys equals to parameters name and values equals to the parameters
+     * values.
      * @param request the HttpExchange request received by the handler.
-     * @return Map<String, String> containing the parameters.
+     * @return Map where both keys and values are strings containing the parameters.
      */
     public static Map<String, String> parseGET(HttpExchange request) {
         String query = request.getRequestURI().getRawQuery();
@@ -31,9 +32,9 @@ public class HttpHelper {
     }
 
     /**
-     * Parse a query and return a Map<key, value>.
+     * Parse a query and return a Map with keys equals to parameters name and values equals to the parameters values.
      * @param query the String representing the query.
-     * @return Map<String, String> containing the parameters.
+     * @return Map where both keys and values are strings containing the parameters.
      */
     public static Map<String, String> parseQuery(String query) {
         // HashMap to be filled with all parameters in the query
@@ -59,9 +60,10 @@ public class HttpHelper {
     }
 
     /**
-     * Parse a POST request and return a Map<key, value>.
+     * Parse a POST request and return a Map with keys equals to parameters name and values equals to the parameters
+     * values.
      * @param request the HttpExchange request received by the handler.
-     * @return Map<String, String> containing the parameters.
+     * @return Map where both keys and values are strings containing the parameters.
      */
     public static Map<String, String> parsePOST(HttpExchange request) {
         String json = null;
@@ -75,9 +77,9 @@ public class HttpHelper {
     }
 
     /**
-     * Parse a JSON and return a Map<key, value>.
+     * Parse a JSON and return a Map with keys equals to parameters name and values equals to the parameters values.
      * @param json the String representing the stringified JSON.
-     * @return Map<String, String> containing the parameters.
+     * @return Map where both keys and values are strings containing the parameters.
      */
     public static Map<String, String> parseJson(String json) {
         // parse the JSON body.
@@ -200,7 +202,7 @@ public class HttpHelper {
 
     /**
      * Return a stringified JSON with the passed parameters.
-     * @param parameters a Map<String, String> containing the parameters.
+     * @param parameters a Map where both keys and values are strings containing the parameters.
      * @return the stringified JSON.
      */
     public static String jsonifyParameters(Map<String, String> parameters) {
@@ -219,7 +221,7 @@ public class HttpHelper {
 
     /**
      * Return a string containing the parameters in the query format, ready to be appended to an url for a GET request.
-     * @param parameters a Map<String, String> containing the parameters.
+     * @param parameters a Map where both keys and values are strings containing the parameters.
      * @return the String in the url format.
      */
     public static String querifyParameters(Map<String, String> parameters) {

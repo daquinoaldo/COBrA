@@ -99,6 +99,7 @@ public class FileExchange {
      * Read a File using NIO channels. Send the file to a socket.
      * @param file File object, the file to be read.
      * @param outChannel Socket where the file will be sent.
+     * @throws IOException if the file not exists or is not readable.
      */
     public static void readFile(File file, SocketChannel outChannel) throws IOException {
         FileChannel inChannel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
@@ -117,6 +118,7 @@ public class FileExchange {
      * Read the specified Socket using NIO, and save the data to File.
      * @param inChannel Socket from where data will be read.
      * @param file File object, destination of the data.
+     * @throws IOException if the file not exists or is not writeable.
      */
     public static void writeFile(SocketChannel inChannel, File file) throws IOException {
         FileChannel outChannel = FileChannel.open(file.toPath(),

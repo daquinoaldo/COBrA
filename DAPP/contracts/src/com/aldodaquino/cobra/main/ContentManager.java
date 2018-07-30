@@ -24,6 +24,13 @@ public class ContentManager extends ContractManager {
     /**
      * Deploy and manage a new content manager contract.
      * @param credentials your account credentials.
+     * @param catalogAddress the address of the catalog.
+     * @param name the name you want to assign to this content.
+     * @param genre the genre you want to assign to this content.
+     * @param price the price you want to assign to this content.
+     * @param hostname the hostname of the author server.
+     * @param port the port on which is running the author server.
+     * @throws Exception if there is errors when deploying the Content contract.
      */
     public ContentManager(Credentials credentials, String catalogAddress, String name, String genre, BigInteger price,
                           String hostname, int port)

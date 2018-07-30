@@ -34,6 +34,8 @@ public class Main {
 
     /**
      * Main method.
+     * @param args a String[] passed through command line.
+     * @throws IOException if it is not possible to create the server.
      */
     public static void main(String[] args) throws IOException {
 
