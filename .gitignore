@@ -19,10 +19,11 @@ author_content_files
 *.docx
 
 # LaTeX
-_minted-main/
+_minted-*/
 *.aux
 *.log
 *.out
 
 # other tools
-pdfdoclet*
+pdfdoclet-*
+docs/printable_code/generate.sh
