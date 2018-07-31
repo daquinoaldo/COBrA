@@ -5,6 +5,8 @@ For more information heck the assignments for [COBrA](docs/assignment/COBrA_Assi
 [COBrA DAPP](docs/assignment/COBrA_DAPP_Assignment.pdf) and the
 [COBrA DAPP Relationship](docs/COBrA_DAPP_Relationship.pdf).
 
+See also the [Javadoc](https://daquinoaldo.github.io/COBrA/javadoc).
+
 ## Requirements
 - [Ethereum (geth)](https://geth.ethereum.org/downloads/)
     - Ubuntu:
