@@ -6,6 +6,7 @@ import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Contract;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -42,7 +43,11 @@ class ContractManager {
         this.credentials = credentials;
         // connect to web3
         web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-        web3 = Web3j.build(new HttpService("http://localhost:8546/"));
+        try {
+            System.out.println("Web3 protocol version: " + web3.ethProtocolVersion().send().getProtocolVersion());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // get gas information
         gasPrice = Utils.getGasPrice(web3);
         gasLimit = Utils.getGasLimit(web3);
