@@ -40,9 +40,7 @@ public class CustomerPanel extends UpgradablePanel {
 
         // listen for events
         catalogManager.listenCatalogClosed(() -> Utils.newExitDialog("Catalog closed."));
-        catalogManager.listenNewContentAvailable((name, address) ->
-                Utils.newMessageDialog("New content available: " + name + "."));
-        catalogManager.listenNewContentAvailable(this::update);
+        catalogManager.listenNewContentAvailable((name, address) -> update());
         catalogManager.listenFeedbackAvailable((address, name) ->
                 Utils.newWindow("Vote content", new VotingPanel(address, name, catalogManager), false));
 

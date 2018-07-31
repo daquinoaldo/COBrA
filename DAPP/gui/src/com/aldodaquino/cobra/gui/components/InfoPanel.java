@@ -44,6 +44,9 @@ public class InfoPanel extends JPanel {
         mostEnjoyedLabel = new LabelPanel(status, "Most enjoyed content: ");
         biggestPriceFairnessLabel = new LabelPanel(status, "Biggest value for money content: ");
         highestContentMeaningLabel = new LabelPanel(status, "Highest rated for content meaning: ");
+        JButton registerForNewContentsButton = ComponentFactory.newButton("Register/unregister for new contents",
+                e -> status.getCatalogManager().listenNewContentAvailable(mainLabelString, (address, name) ->
+                        Utils.newMessageDialog("New content available: " + name + ".")));
 
         // add all to the panel
         add(mainLabel, UpgradablePanel.newGBC(1, 1));
@@ -56,7 +59,7 @@ public class InfoPanel extends JPanel {
         add(mostEnjoyedLabel, UpgradablePanel.newGBC(1, 8));
         add(biggestPriceFairnessLabel, UpgradablePanel.newGBC(1, 9));
         add(highestContentMeaningLabel, UpgradablePanel.newGBC(1, 10));
-
+        add(registerForNewContentsButton, UpgradablePanel.newGBC(1, 11));
     }
 
 }

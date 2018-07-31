@@ -139,13 +139,17 @@ public class CatalogManager extends ContractManager {
     }
 
     /**
-     * Subscribe a callback for new content available events.
-     * @param callback a Runnable.
+     * Subscribe a callback for new content available events for a specified genre or author.
+     * @param authorOrGenre the genre or the author address for which listen to.
+     * @param callback a BiConsumer of content name and address.
      */
-    public void listenNewContentAvailable(Runnable callback) {
-        newContentAvailableRunnables.add(callback);
+    public void listenNewContentAvailable(String authorOrGenre, BiConsumer<String, String> callback) {
+        newContentAvailableBiConsumers.add((address, name) -> {
+            Content content = getContentInfo(address);
+            if (content.author.equals(authorOrGenre) || content.genre.equals(authorOrGenre))
+                callback.accept(address, name);
+        });
     }
-
     /**
      * Subscribe a callback for access granted events for this user.
      * @param callback a BiConsumer of content address and content name.
