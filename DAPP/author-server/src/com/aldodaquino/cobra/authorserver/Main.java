@@ -109,11 +109,12 @@ public class Main {
     /**
      * Handler for the /deploy url.
      * @param request a POST request with JSON encoded data containing:
-     *                privateKey of the author;
-     *                name of the content;
-     *                genre of the content (can be null);
-     *                price of the content (if null is set to 0);
+     *                privateKey of the author,
+     *                name of the content,
+     *                genre of the content (can be null),
+     *                price of the content (if null is set to 0),
      *                port on which is running the server socket that uploads the file.
+     * @param status the server {@link Status object}.
      */
     private static void deploy(HttpExchange request, Status status) {
         // get parameters
@@ -188,10 +189,11 @@ public class Main {
     /**
      * Handler for the /access url.
      * @param request a POST request with JSON encoded data containing:
-     *                privateKey of the author
-     *                name of the content
-     *                genre of the content (can be null)
-     *                price of the content (if null is set to 0)
+     *                privateKey of the author,
+     *                name of the content,
+     *                genre of the content (can be null),
+     *                price of the content (if null is set to 0).
+     * @param status the server {@link Status object}.
      */
     private static void access(HttpExchange request, Status status) {
         // get parameters

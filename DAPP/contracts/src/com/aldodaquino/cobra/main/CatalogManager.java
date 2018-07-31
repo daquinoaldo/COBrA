@@ -621,6 +621,8 @@ public class CatalogManager extends ContractManager {
          * The list is not filtered if where is null.
          * @param filterBy a list of this class that can be addresses, names, authors, genres, prices or views.
          * @param filterValue the value that filterBy must have.
+         * @param <T> the type of the elements in one of this List: addresses, names, authors, genres, prices or views.
+         *           It can be String, BigInteger or byte[].
          * @return a list of Content objects.
          */
         <T> List<Content> getFilteredContentList(List<T> filterBy, T filterValue) {
