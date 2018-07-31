@@ -127,6 +127,7 @@ public class Main {
 
         String name = parameters.get("name");
         if (name == null) {
+            System.err.println("ERROR: name not specified");
             CobraHttpHelper.sendResponse(request, "ERROR: name not specified.", 400);
             return;
         }
@@ -157,6 +158,7 @@ public class Main {
 
         String filename = parameters.get("filename");
         if (filename == null) {
+            System.err.println("ERROR: filename not specified");
             CobraHttpHelper.sendResponse(request, "ERROR: filename not specified.", 400);
             return;
         }
