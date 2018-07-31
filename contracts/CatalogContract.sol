@@ -292,7 +292,9 @@ contract CatalogContract {
      */
     function consumeContent(address u) public exists(msg.sender) {
         // Premium users can consume contents for free and are not considered
-        // in the count of views
+        // in the count of views and rating. This is required by the
+        // assignment, but also ensure that authors cannot downvote other
+        // authors contents without paying.
         if (isPremium(u)) return;
         // Only contents can call this function, so the content to be delete
         // is the msg.sender
