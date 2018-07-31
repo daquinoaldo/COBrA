@@ -25,7 +25,6 @@ public class CatalogManager extends ContractManager {
 
     // event callbacks
     private final List<BiConsumer<String, String>> newContentAvailableBiConsumers = new ArrayList<>();
-    private final List<Runnable> newContentAvailableRunnables = new ArrayList<>();
     private final Map<String, List<BiConsumer<String, String>>> accessGrantedMap = new HashMap<>();
     private final Map<String, List<Runnable>> becomesPremiumMap = new HashMap<>();
     private final List<BiConsumer<String, String>> feedbackAvailableBiConsumer = new ArrayList<>();
@@ -63,8 +62,6 @@ public class CatalogManager extends ContractManager {
                 .subscribe(e -> {
                     for (BiConsumer<String, String> biConsumer : newContentAvailableBiConsumers)
                         biConsumer.accept(Utils.bytes32ToString(e.name), e.addr);
-                    for (Runnable runnable : newContentAvailableRunnables)
-                        runnable.run();
                 });
 
         catalog.grantedAccessEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)

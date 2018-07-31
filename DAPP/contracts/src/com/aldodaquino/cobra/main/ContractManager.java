@@ -42,7 +42,7 @@ class ContractManager {
         this.credentials = credentials;
         // connect to web3
         web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-        // web3 = Web3j.build(new HttpService("https://ropsten.infura.io/v3/12a335f54b784b988c4d9ba9d983cd65"));
+        web3 = Web3j.build(new HttpService("http://localhost:8546/"));
         // get gas information
         gasPrice = Utils.getGasPrice(web3);
         gasLimit = Utils.getGasLimit(web3);

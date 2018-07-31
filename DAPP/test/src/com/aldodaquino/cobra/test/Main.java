@@ -47,11 +47,11 @@ public class Main {
     // Change this value with your private keys.
     @SuppressWarnings("SpellCheckingInspection")
     private static final String CATALOG_OWNER_DEFAULT_KEY =
-            "73bb2d6a2fb0776eaa90f299b18ced9a490cbfbf07bb1df88cb019e3ea2f75c8";
+            "f34cdbfb031497943b0a0248de50567d7ba1dba45309f7955dea5e57d701c060";
     @SuppressWarnings("SpellCheckingInspection")
     private static final String[] AUTHOR_DEFAULT_KEYS =
-            {"48fb33ee64f893e159ad374206b2f17e60206606ebaf9f09ebc6ab7359e95055",
-            "df50467e8c890cd6539be6a19212ecf2528a7e04f4cf1ba320d1f06079978630"};
+            {"9b6f8306cb695bb9939682f65a5e7f35679073ec4d4c99774c18361e183e65ba",
+            "3538c75c66e5e3ec35343da5726efde1682d8db51ffcb69e0f6d92e75fa8a37d"};
 
     /**
      * Starts the tests.
@@ -161,8 +161,9 @@ public class Main {
             return;
         }
 
+        File file = new File(FILENAME);
         int port = serverSocketChannel.socket().getLocalPort();
-        FileExchange.startFileSender(serverSocketChannel, new File(FILENAME),
+        FileExchange.startFileSender(serverSocketChannel, file,
                 () -> System.out.println("File uploaded successfully."));
 
         // make the request
@@ -172,6 +173,7 @@ public class Main {
         parameters.put("genre", genre);
         parameters.put("price", price);
         parameters.put("port", Integer.toString(port));
+        parameters.put("filename", file.getName());
 
         System.out.println("Deploying a content..." +
                 "\n    Url: " + url +
