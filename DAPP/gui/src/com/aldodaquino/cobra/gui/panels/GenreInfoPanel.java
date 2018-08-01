@@ -13,7 +13,7 @@ import com.aldodaquino.cobra.main.CatalogManager;
  */
 public class GenreInfoPanel extends InfoPanel {
 
-    static final String WINDOW_TITLE = "About the author";
+    static final String WINDOW_TITLE = "About the genre";
 
     /**
      * Constructor.
