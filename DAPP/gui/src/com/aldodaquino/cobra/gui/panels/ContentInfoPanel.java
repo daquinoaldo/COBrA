@@ -32,7 +32,7 @@ import static com.aldodaquino.cobra.gui.constants.Dimensions.INFO_PANEL_PADDING;
  */
 public class ContentInfoPanel extends AsyncPanel {
 
-    private static final String WINDOW_TITLE = "About the author";
+    private static final String WINDOW_TITLE = "Content info";
 
     private final Status status;
     private final CatalogManager catalogManager;
