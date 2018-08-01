@@ -46,12 +46,9 @@ public class Main {
 
     // Change this value with your private keys.
     @SuppressWarnings("SpellCheckingInspection")
-    private static final String CATALOG_OWNER_DEFAULT_KEY =
-            "f34cdbfb031497943b0a0248de50567d7ba1dba45309f7955dea5e57d701c060";
+    private static final String CATALOG_OWNER_DEFAULT_KEY = "";
     @SuppressWarnings("SpellCheckingInspection")
-    private static final String[] AUTHOR_DEFAULT_KEYS =
-            {"9b6f8306cb695bb9939682f65a5e7f35679073ec4d4c99774c18361e183e65ba",
-            "3538c75c66e5e3ec35343da5726efde1682d8db51ffcb69e0f6d92e75fa8a37d"};
+    private static final String[] AUTHOR_DEFAULT_KEYS = {};
 
     /**
      * Starts the tests.
