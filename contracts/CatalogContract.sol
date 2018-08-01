@@ -424,7 +424,7 @@ contract CatalogContract {
     }
 
     /** Returns all the information about a content.
-     * @param addr address of the content.
+     * @param x address of the content.
      * @return (bytes32, address, bytes32, uint, uint) corresponding to name,
      * author, genre, price and views of the content.
      * Gas: no one pay.
@@ -437,7 +437,7 @@ contract CatalogContract {
     }
 
     /** Returns ratings for a content.
-     * @param addr address of the content.
+     * @param x address of the content.
      * @return returns(uint, uint, uint, uint) corresponding to total, enjoy,
      * priceFairness and contentMeaning rating of the content.
      * Gas: no one pay.
