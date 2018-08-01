@@ -430,9 +430,9 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getContentInfo(address addr) public view
+    function getContentInfo(address x) public view
     returns(bytes32, address, bytes32, uint, uint) {
-        content memory c = contents[addr];
+        content memory c = contents[x];
         return (c.name, c.author, c.genre, c.price, c.views);
     }
 
