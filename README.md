@@ -3,7 +3,7 @@ An Ethereum blockchain university project.
 
 For more information heck the assignments for [COBrA](docs/assignment/COBrA_Assignment.pdf) and
 [COBrA DAPP](docs/assignment/COBrA_DAPP_Assignment.pdf) and the
-[COBrA DAPP Relationship](docs/COBrA_DAPP_Relationship.pdf).
+[COBrA DAPP Relationship](docs/report/COBrA_DAPP_Relationship.pdf).
 
 See also the [Javadoc](https://daquinoaldo.github.io/COBrA/javadoc).
 
