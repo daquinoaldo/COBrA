@@ -5,6 +5,7 @@ import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Ethereum;
 import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -20,6 +21,21 @@ import java.util.Arrays;
 class Utils {
 
     private static final String BLOCK_GAS_LIMIT = "5000000";
+
+    /**
+     * Build a Web3j protocol using the default provider.
+     * @return a Web3j instance.
+     */
+    static Web3j buildWeb3() {
+        Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
+        try {
+            System.out.println("Web3 protocol version: " + web3.ethProtocolVersion().send().getProtocolVersion());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return web3;
+    }
 
     /**
      * Return the average gas price.

@@ -42,12 +42,7 @@ class ContractManager {
         // save credentials
         this.credentials = credentials;
         // connect to web3
-        web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
-        try {
-            System.out.println("Web3 protocol version: " + web3.ethProtocolVersion().send().getProtocolVersion());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        web3 = Utils.buildWeb3();
         // get gas information
         gasPrice = Utils.getGasPrice(web3);
         gasLimit = Utils.getGasLimit(web3);
