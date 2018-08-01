@@ -443,9 +443,9 @@ contract CatalogContract {
      * Gas: no one pay.
      * Burden: O(n).
      */
-    function getContentRatings(address addr) public view
+    function getContentRatings(address x) public view
     returns(uint, uint, uint, uint) {
-        content memory c = contents[addr];
+        content memory c = contents[x];
         uint total = 0;
         uint enjoy = 0;
         uint priceFairness = 0;
