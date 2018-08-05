@@ -28,6 +28,8 @@ class Utils {
         Web3j web3 = Web3j.build(new HttpService());    // defaults to http://localhost:8545/
         try {
             System.out.println("Web3 protocol version: " + web3.ethProtocolVersion().send().getProtocolVersion());
+            System.out.println("Web3 client version: " + web3.web3ClientVersion().send().getWeb3ClientVersion());
+            System.out.println("Web3 network version: " + web3.netVersion().send().getNetVersion());
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

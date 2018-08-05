@@ -46,9 +46,13 @@ public class Main {
 
     // Change this value with your private keys.
     @SuppressWarnings("SpellCheckingInspection")
-    private static final String CATALOG_OWNER_DEFAULT_KEY = "";
+    private static final String CATALOG_OWNER_DEFAULT_KEY =
+            "73bb2d6a2fb0776eaa90f299b18ced9a490cbfbf07bb1df88cb019e3ea2f75c8";
     @SuppressWarnings("SpellCheckingInspection")
-    private static final String[] AUTHOR_DEFAULT_KEYS = {};
+    private static final String[] AUTHOR_DEFAULT_KEYS = {
+            "48fb33ee64f893e159ad374206b2f17e60206606ebaf9f09ebc6ab7359e95055",
+            "df50467e8c890cd6539be6a19212ecf2528a7e04f4cf1ba320d1f06079978630"
+    };
 
     /**
      * Starts the tests.
@@ -72,6 +76,11 @@ public class Main {
         String[] authorKeysOpt = cliHelper.getValues("author");
         String[] authorKeys = authorKeysOpt.length > 0 ? authorKeysOpt : AUTHOR_DEFAULT_KEYS;
 
+        // Print an information message
+        System.out.println("\nNow will be deployed a catalog and " + NUMBER_OF_CONTENTS + " contents. " +
+                "It will take a while.");
+        if (START_GUIS) System.out.println("When finished two GUIs will be opened.");
+        System.out.println("\n\n");
 
         // Create credentials for catalog owner's private key
         Credentials catalogOwnerCredentials = Credentials.create(catalogOwnerKey);
